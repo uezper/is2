@@ -1,0 +1,51 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html class="full" lang="en" ng-app="loginApp">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- TODO Minimize! -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/angular.js' %}"></script>
+    <script src="{% static 'js/angular-cookies.js' %}"></script>
+    <script src="{% static 'js/login.js' %}"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js" ></script> -->
+  </head>
+
+  <body class="no-bg-color">
+    <title>Sirentos - Login</title>
+
+    <div class="container-fluid">
+      <div class="row">
+	<!-- Fix for diferent sizes -->
+	<div class="col-lg-4 col-lg-offset-4 col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4">
+	  <div class="well" id="form-container">
+	    
+	    <form id="loginForm" ng-controller="loginForm"> {% csrf_token %}
+	      <div class="form-group">
+		<label>Usuario</label>
+		<input type="username" class="form-control" placeholder="Ingresa tu nombre de usuario" ng-model="username">
+	      </div>
+	      <div class="form-group">
+		<label>Contraseña</label>
+		<input type="password" class="form-control" ng-model="password">
+	      </div>
+	      <div>
+		<button type="submit" class="btn btn-default" ng-click="submitData(item, $event)">Vamos a ello!</button>
+		{% verbatim message_block %}
+		
+		<span class="text-danger" id="message">{{message}}</span>
+		
+		{% endverbatim message_block %}
+	      </div>
+	      
+	    </form>
+	  </div>
+	</div>
+      </div>
+    </div>
+  </body>
+</html>
