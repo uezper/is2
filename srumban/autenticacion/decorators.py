@@ -1,8 +1,6 @@
-import pdb
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.contrib.auth.decorators import login_required as dj_login_required
-from autenticacion import views
+from autenticacion import urls
 
 class login_required():
     def __init__(self, redirect_url):
@@ -11,7 +9,7 @@ class login_required():
     def __call__(self, view):
         def view_wrapper(request):
             if not request.user.is_authenticated():
-                return HttpResponseRedirect( "{}?next={}".format( reverse('auth_index'), request.path_info ) )
+                return HttpResponseRedirect( "{}?next={}".format( reverse(urls.LOGIN_NAME), request.path_info ) )
             else:
                 return view(request)
         

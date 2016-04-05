@@ -28,13 +28,13 @@ loginApp.controller('loginForm', ['$scope', '$http', '$cookies', '$window', '$lo
 		      console.log('We succeded!');
 		      message = response['data']['message'];
 		      status  = response['data']['STATUS'];
-		      console.log(status);
+		      $scope.message = message;
 		      if( status == 'OK' ){
 			  defaultDestination = '/auth/app/';
+			  // TODO Get data from next
 			  //var destination = $location.search();
 			  //console.log(destination);
 			  //console.log(destination['next']);
-			  // TODO Get data from next
 			  $window.location.href = defaultDestination;
 		      }		      
 		  }, function errorCallback (response){
@@ -47,8 +47,3 @@ loginApp.controller('loginForm', ['$scope', '$http', '$cookies', '$window', '$lo
 	}
     }    
 }]);
-
-/*
-loginApp.controller('noUser', ['$scope', function($scope){
-    $scope
-}]);*/
