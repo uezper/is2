@@ -1,0 +1,10 @@
+# Ignorar cache y compilados
+__pycache__/
+*.pyc
+
+# Ignorar backups de editores
+*~
+/#*/#
+
+# Ignorar base de datos
+*.sqlite3
