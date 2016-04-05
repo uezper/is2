@@ -1,6 +1,6 @@
 var loginApp = angular.module('loginApp', ['ngCookies']);
 
-loginApp.controller('loginForm', ['$scope', '$http', '$cookies', '$window', function($scope, $http, $cookies, $window){
+loginApp.controller('loginForm', ['$scope', '$http', '$cookies', '$window', '$location', function($scope, $http, $cookies, $window, $location){
 
     // Prepare header for all AJAX Request
     $http.defaults.headers.common['X-CSRFToken'] = $cookies.get('csrftoken');
@@ -27,13 +27,16 @@ loginApp.controller('loginForm', ['$scope', '$http', '$cookies', '$window', func
 		  }).then( function successCallback(response){
 		      console.log('We succeded!');
 		      message = response['data']['message'];
-		      destination = response['data']['destination'];
-		      if( message != undefined ){
-			  $scope.message = message;
-		      }else if( destination != undefined ){
-			  $window.location.href = destination;
-		      }
-		      
+		      status  = response['data']['STATUS'];
+		      console.log(status);
+		      if( status == 'OK' ){
+			  defaultDestination = '/auth/app/';
+			  //var destination = $location.search();
+			  //console.log(destination);
+			  //console.log(destination['next']);
+			  // TODO Get data from next
+			  $window.location.href = defaultDestination;
+		      }		      
 		  }, function errorCallback (response){
 		      console.log('We fail!');
 		      console.log(response['data']);

@@ -18,8 +18,11 @@ from django.conf.urls import url
 from autenticacion import views
 
 urlpatterns = [
-    url(r'^login/$', views.login),
-    url(r'^login/authenticate_user/$', views.authenticate_user),
-    url(r'^login/deauthenticate_user/$', views.deauthenticate_user),
-    url(r'^login/app/$', views.app), # TODO Remove when app url ready!
+    url(r'^$', views.login, name='auth_index'),
+    url(r'^authenticate_user/$', views.authenticate_user, name='auth_auth'),
+    url(r'^deauthenticate_user/$', views.deauthenticate_user, name='auth_deauth'),
+    
+    url(r'^app/$', views.app, name='auth_app'), # TODO Remove when app url ready!
+    url(r'^app2/$', views.app2, name='auth_app2'),
+    url(r'^data/$', views.data, name='auth_data'),
 ]
