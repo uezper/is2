@@ -1,0 +1,19 @@
+.full {
+    background: url(../images/wallpaper2.jpg) no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.no-bg-color {
+    background-color: rgba(245, 245, 245, 0.0);
+}
+
+#form-container{
+    margin: 120px auto;
+}
+
+#message{
+    margin: 0px 0px 0px 20px;
+}
