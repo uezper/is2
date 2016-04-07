@@ -5,6 +5,8 @@ from django.contrib.auth.models import Group as djGroup
 
 class User(models.Model):
     """
+    Modelo de usuario.
+
     django.contrib.auth.User ya posee los campos:
     1. username (que termina siendo el CI/RUC)
     2. password
@@ -26,6 +28,8 @@ class User(models.Model):
 
 class Permission(models.Model):
     """
+    Modelo de Permiso.
+
     django.contrib.auth.Permission ya posee los campos:
     1. name (descripcion corta)
     2. content_type
@@ -40,6 +44,8 @@ class Permission(models.Model):
 
 class Group(models.Model):
     """
+    Modelo de Grupo.
+
     django.contrib.auth.Group ya posee los campos
     1. name (descripcion corta)
     2. permissions (many-to-many)

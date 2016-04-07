@@ -1,4 +1,13 @@
-var loginApp = angular.module('loginApp', ['ngCookies']);
+var loginApp = angular.module('loginApp', ['ngCookies'])
+
+/*
+  About dependencies:
+  0. $scope:    To interact with the form.
+  1. $http:     To build our request as ajax requests.
+  2. $cookies:  To get the 'csrftoken' in order to validate ours ajax requests.
+  3. $window:   To redirect.
+  4. $location: To get data from url in order to redirect to a previous requeste page.
+*/
 
 loginApp.controller('loginForm', ['$scope', '$http', '$cookies', '$window', '$location', function($scope, $http, $cookies, $window, $location){
 
@@ -8,12 +17,13 @@ loginApp.controller('loginForm', ['$scope', '$http', '$cookies', '$window', '$lo
 
     // Initial message
     $scope.message = '';
-
+    
     $scope.submitData = function(item, event){
 
 	var user = $scope.username;
 	var pass = $scope.password;
 
+	// If no data cases
 	if( user === '' || user === undefined ){
 	    console.log( 'No username!' );
 	    $scope.message = 'Ingrese su usuario!';
@@ -30,12 +40,13 @@ loginApp.controller('loginForm', ['$scope', '$http', '$cookies', '$window', '$lo
 		      status  = response['data']['STATUS'];
 		      $scope.message = message;
 		      if( status == 'OK' ){
-			  defaultDestination = '/auth/app/';
-			  // TODO Get data from next
-			  //var destination = $location.search();
-			  //console.log(destination);
-			  //console.log(destination['next']);
-			  $window.location.href = defaultDestination;
+			  defaultDestination = '/auth/app/'; // Default destination of redirection
+			  var destination = $location.search().next;
+			  if( destination == undefined ){
+			      $window.location.href = defaultDestination;
+			  }else{
+			      $window.location.href = destination;
+			  }
 		      }		      
 		  }, function errorCallback (response){
 		      console.log('We fail!');

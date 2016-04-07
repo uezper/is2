@@ -3,13 +3,34 @@ from django.http import HttpResponseRedirect
 from autenticacion import urls
 
 class login_required():
+    """
+    Decorador para solicitar autentificación en una vista.
+    Redirige la solicitud a la página de logeo con los parámetros para volver a la dirección
+    originalmente solicitada.
+
+    Attributes:
+        redirect_url: La dirección originalmente solicitada. Se agrega dentro de la URL.
+    """
     def __init__(self, redirect_url):
+        """
+        Inicializador. Se almacena la url solicitada.
+        """
         self.redirect_url = redirect_url
         
     def __call__(self, view):
+        """
+        Retorna una función que extiende la funcionalidad de las vistas con este decorador.
+
+        Args:
+            view: La vista donde se aplica el decorador.
+
+        Retuns:
+            Un envolvente de la vista para proteger de usuarios sin autentificación.
+        """
         def view_wrapper(request):
             if not request.user.is_authenticated():
-                return HttpResponseRedirect( "{}?next={}".format( reverse(urls.LOGIN_NAME), request.path_info ) )
+                # El hashtag (#) es necesario para poder utilizar $location.search() en el script.
+                return HttpResponseRedirect( "{}#?next={}".format( reverse(urls.LOGIN_NAME), request.path_info ) )
             else:
                 return view(request)
         
