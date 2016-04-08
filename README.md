@@ -25,3 +25,10 @@ Se puede guardar en un archivo.txt y luego ejecutar:
 ```
 $ pip install -r < archivo.txt
 ```
+
+Para crear la documentacion, luego de haber instalado las dependencias, en /docs/
+
+```
+$ make html
+```
+Los archivos generados van a /docs/build/
