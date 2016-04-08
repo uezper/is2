@@ -6,8 +6,15 @@ from django.contrib.auth.models import User
 
 from apps.autenticacion import views
 
+"""
+Test de autenticacion
+"""
+
 class AutenticationViewTests(TestCase):
 	def test_restricted_area_app(self):
+		"""
+		Accede a auth:app y espera un resultado next=/auth/app/
+		"""
 		response = self.client.get(reverse('auth:app'))
 		self.assertEqual(response.status_code, 302)
 		self.assertRedirects(response, '/auth/#?next=/auth/app/')
