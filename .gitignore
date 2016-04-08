@@ -6,5 +6,6 @@ __pycache__/
 *~
 /#*/#
 
-# Ignorar base de datos
+# Ignorar base de datos y archivos estaticos
 *.sqlite3
+*/staticfiles/*
