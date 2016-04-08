@@ -1,11 +1,19 @@
 # Ignorar cache y compilados
 __pycache__/
-srumban/docs/build/
 *.pyc
+
+# Ignorar directorio estatico
+srumban/static/
+
+# Documentacion generada
+srumban/docs/build/
+
+# Configuracion sensible
+srumban/srumban/settings/secret_config.py
 
 # Ignorar backups de editores
 *~
 /#*/#
 
-# Ignorar base de datos
+# Ignorar base de datos (desarrollo)
 *.sqlite3

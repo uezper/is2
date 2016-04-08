@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate as djAuthenticate
 from django.contrib.auth import login as djLogin
 from django.contrib.auth import logout as djLogout
-from autenticacion.decorators import login_required
+from apps.autenticacion.decorators import login_required
 #from autenticacion import urls
 
 def login(request):
