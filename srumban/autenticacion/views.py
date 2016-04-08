@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate as djAuthenticate
 from django.contrib.auth import login as djLogin
 from django.contrib.auth import logout as djLogout
 from autenticacion.decorators import login_required
-from autenticacion import urls
+#from autenticacion import urls
 
 def login(request):
     """
@@ -95,7 +95,7 @@ def deauthenticate_user(request):
     """
     #TODO On logout, redirect to login?
     djLogout(request)
-    return HttpResponseRedirect(reverse(urls.LOGIN_NAME))
+    return HttpResponseRedirect(reverse('auth_name'))
 
 @login_required('auth_app')
 def app(request):
