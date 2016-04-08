@@ -30,7 +30,7 @@ class login_required():
         def view_wrapper(request):
             if not request.user.is_authenticated():
                 # El hashtag (#) es necesario para poder utilizar $location.search() en el script.
-                return HttpResponseRedirect( "{}#?next={}".format( reverse('auth_name'), request.path_info ) )
+                return HttpResponseRedirect( "{}#?next={}".format( reverse('auth:name'), request.path_info ) )
             else:
                 return view(request)
         
