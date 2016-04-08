@@ -1,5 +1,6 @@
 # Ignorar cache y compilados
 __pycache__/
+srumban/docs/build/
 *.pyc
 
 # Ignorar backups de editores
