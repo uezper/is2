@@ -10,16 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
-import os
+import os, pdb
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-try:
-    from srumban.settings.secret_config import SECRET_KEY;
-except:
-    pass
+from srumban.settings import secret_config as sc;
+SECRET_KEY = sc.SECRET_KEY
 
+print(SECRET_KEY)
 
 # Application definition
 
@@ -109,8 +108,6 @@ USE_TZ = True
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "../static/"))
 
 STATIC_URL = '/static/'
-
-STATIC_ROOT = os.path.join(BASE_DIR,'/staticfiles/')
 
 # CONFIGURACIÓN DE LOGIN!!
 LOGIN_NAME  = 'auth_name'
