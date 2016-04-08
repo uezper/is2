@@ -26,6 +26,15 @@ Se puede guardar en un archivo.txt y luego ejecutar:
 $ pip install -r < archivo.txt
 ```
 
+### Documentacion
+
+Para crear la documentacion, luego de haber instalado las dependencias, en /docs/
+
+```
+$ make html
+```
+Los archivos generados van a /docs/build/
+
 ### Configuracion
 
 La configuracion esta dividida en 4 archivos, todos incluidos en settings/
