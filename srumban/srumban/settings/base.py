@@ -10,15 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
-import os, pdb
+import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 from srumban.settings.secret_config import *
-#SECRET_KEY = sc.SECRET_KEY
-
-print(SECRET_KEY)
 
 # Application definition
 
