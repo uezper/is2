@@ -1,5 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from srumban.settings import base as base_settings
 
 class login_required():
     """
@@ -30,7 +31,7 @@ class login_required():
             if not request.user.is_authenticated():
                 # El hashtag (#) es necesario para poder utilizar $location.search() en el script.
                 #TODO Use settings! not hardcoded strings
-                return HttpResponseRedirect( "{}#?next={}".format( reverse('auth_name'), request.path_info ) )
+                return HttpResponseRedirect( "{}#?next={}".format( reverse(base_settings.LOGIN_NAME), request.path_info ) )
             else:
                 return view(request)
         
