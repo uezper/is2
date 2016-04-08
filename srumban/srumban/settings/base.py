@@ -15,8 +15,8 @@ import os, pdb
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-from srumban.settings import secret_config as sc;
-SECRET_KEY = sc.SECRET_KEY
+from srumban.settings.secret_config import *
+#SECRET_KEY = sc.SECRET_KEY
 
 print(SECRET_KEY)
 
@@ -113,4 +113,3 @@ STATIC_URL = '/static/'
 LOGIN_NAME  = 'auth_name'
 AUTH_NAME   = 'auth_auth'
 DEAUTH_NAME = 'auth_deauth'
-

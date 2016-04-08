@@ -1,5 +1,4 @@
 from srumban.settings.base import *;
-from srumban.settings.secret_config import *;
 
 DEBUG = False
 
