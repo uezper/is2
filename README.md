@@ -53,4 +53,9 @@ SECRET_KEY = 'CLAVE SECRETA GENERADA POR DJANGO'
 DB_USER = 'TU USUARIO';
 DB_PASSWORD = 'TU PASSWORD';
 DB_DATABASE = 'EL NOMBRE DE TU BD';
+
+```
+### Test Unitarios
+Para ejecutar los tests unitarios, se debe ejecutar "./manage.py test"
+
 ```
