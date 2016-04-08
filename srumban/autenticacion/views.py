@@ -9,12 +9,36 @@ from autenticacion.decorators import login_required
 from autenticacion import urls
 
 def login(request):
+    """
+    Retorna la vista correspondiente a la página de login.
+    Args:
+        request: Los datos de la solicitud
+    Returns:
+        Un 'renderizado' del template correspondiente.
+    """
     #TODO If user already "loged in", redirect... somewhere...
-    request.session.set_test_cookie() # For cookie-based sessions
+
+    # For cookie-based sessions
+    request.session.set_test_cookie()
     return render(request, 'login')
 
 def authenticate_user(request):
-    data = {} # Container for the ajax response
+    """
+    Autentifica al par usuario:contraseña, vinculando la sesión con el usuario.
+    Utiliza AJAX para recibir y responder las solicitudes.
+
+    Args:
+        request: Solicitud AJAX con los datos del login.
+    
+    Returns:
+        Un JsonRequest con los campos 'message' y 'STATUS' cargados correspondientemente.
+        En caso de 'STATUS' = 'OK', se logeo correctamente al usuario.
+        En caso de 'STATUS' = 'ERROR', occurio un error que se describe en 'message'
+    """
+    #TODO Unify with the login view. Discriminate through request.method and request.is_ajax.
+    
+    # Container for the ajax response
+    data = {} 
         
     if request.method == 'POST' and request.is_ajax():
 
@@ -25,7 +49,7 @@ def authenticate_user(request):
                 data['STATUS'] = 'ERROR'
                 return JsonResponse(data)
 
-            # TODO User a proper form!
+            # TODO User a proper form! (When finish, remove import json)
             fromClient = json.loads(request.body.decode('utf-8'))
         
             if 'username' not in fromClient or 'password' not in fromClient:
@@ -60,28 +84,37 @@ def authenticate_user(request):
         return JsonResponse(data)
 
 def deauthenticate_user(request):
-    djLogout(request)
+    """
+    Desautentifica al usuario relacionado con la sesión de la solicitud.
+    
+    Args:
+        request: Los datos de la solicitud.
+    
+    Returns:
+        Un HttpResponseRedirect a la página de logeo.
+    """
     #TODO On logout, redirect to login?
+    djLogout(request)
     return HttpResponseRedirect(reverse(urls.LOGIN_NAME))
 
-"""
-Dummy view
-"""
 @login_required('auth_app')
 def app(request):
+    """
+    Vista temporal, para simular la aplicación.
+    """
     user = request.user
     return HttpResponse('Hi, {}! <a href={}>Logout</a>'.format(user.first_name, '/auth/deauthenticate_user/'))
 
-"""
-Dummy view
-"""
 @login_required('auth_app2')
 def app2(request):
+    """
+    Vista temporal, para simular la aplicación.
+    """
     return HttpResponse('Hi!, you\'re in a private area.')
 
-"""
-Dummy view
-"""
 def data(request):
+    """
+    Vista temporal, para simular la aplicación. Muestra los datos del usuario.
+    """
     user = request.user
     return HttpResponse('You are {}'.format(user))
