@@ -14,13 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url
-from srumban import settings
-from autenticacion import views
+from srumban.settings import base as base_settings
+from apps.autenticacion import views
 
 urlpatterns = [
-    url(r'^$', views.login, name=settings.LOGIN_NAME),
-    url(r'^authenticate_user/$', views.authenticate_user, name=settings.AUTH_NAME),
-    url(r'^deauthenticate_user/$', views.deauthenticate_user, name=settings.DEAUTH_NAME),
+    url(r'^$', views.login, name=base_settings.LOGIN_NAME),
+    url(r'^authenticate_user/$', views.authenticate_user, name=base_settings.AUTH_NAME),
+    url(r'^deauthenticate_user/$', views.deauthenticate_user, name=base_settings.DEAUTH_NAME),
     
     url(r'^app/$', views.app, name='auth_app'), # TODO Remove when app url ready!
     url(r'^app2/$', views.app2, name='auth_app2'),

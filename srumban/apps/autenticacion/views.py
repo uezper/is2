@@ -5,8 +5,8 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate as djAuthenticate
 from django.contrib.auth import login as djLogin
 from django.contrib.auth import logout as djLogout
-from srumban import settings
-from autenticacion.decorators import login_required
+from srumban.settings import base as base_settings
+from apps.autenticacion.decorators import login_required
 
 def login(request):
     """
@@ -95,8 +95,8 @@ def deauthenticate_user(request):
     """
     #TODO On logout, redirect to login?
     djLogout(request)
-    #TODO Restore to reverse(urls.LOGIN_NAME)
-    return HttpResponseRedirect(reverse(settings.LOGIN_NAME))
+    #TODO Use settings! not hardcoded string
+    return HttpResponseRedirect(reverse(base_settings.LOGIN_NAME))
 
 @login_required('auth_app')
 def app(request):
@@ -104,7 +104,7 @@ def app(request):
     Vista temporal, para simular la aplicación.
     """
     user = request.user
-    return HttpResponse('Hi, {}! <a href={}>Logout</a>'.format(user.first_name, reverse(settings.DEAUTH_NAME)))
+    return HttpResponse('Hi, {}! <a href={}>Logout</a>'.format(user.first_name, reverse(base_settings.DEAUTH_NAME)))
 
 @login_required('auth_app2')
 def app2(request):

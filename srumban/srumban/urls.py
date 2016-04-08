@@ -18,6 +18,6 @@ from django.contrib import admin
 
 #TODO Fix to a nicer url pattern
 urlpatterns = [
-    url(r'^auth/', include('autenticacion.urls')),
+    url(r'^auth/', include('apps.autenticacion.urls')),
     url(r'^admin/', admin.site.urls),
 ]
