@@ -25,3 +25,33 @@ Se puede guardar en un archivo.txt y luego ejecutar:
 ```
 $ pip install -r < archivo.txt
 ```
+
+### Configuracion
+
+La configuracion esta dividida en 4 archivos, todos incluidos en settings/
+
+```
+base.py
+dev.py
+prod.py
+secret_config.py
+```
+
+base.py: Contiene configuracion comun a los ambientes de desarrollo y produccion
+dev.py: Contiene configuracion especifica del ambiente de desarrollo
+prod.py: Contiene configuracion especifica del ambiente de produccion
+secret_config.py: Contiene configuracion sensible, datos privados y que no deberian ser publicados por lo cual no es compartida en el repositorio.
+
+Si bien el archivo `secret_config.py` no se encuentra en el repositorio, es indispensable para que la aplicacion corra. Un ejemplo de configuracion seria:
+
+```
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'CLAVE SECRETA GENERADA POR DJANGO'
+
+DB_USER = 'TU USUARIO';
+DB_PASSWORD = 'TU PASSWORD';
+DB_DATABASE = 'EL NOMBRE DE TU BD';
+```
+
+
+
