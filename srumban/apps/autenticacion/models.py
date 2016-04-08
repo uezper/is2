@@ -5,16 +5,16 @@ from django.contrib.auth.models import Group as djGroup
 
 class User(models.Model):
     """
-    Modelo de usuario.
 
-    django.contrib.auth.User ya posee los campos:
-    1. username (que termina siendo el CI/RUC)
-    2. password
-    3. first_name
-    4. last_name
-    5. email
-    6. groups (many-to-many)
-    7. permissions (many-to-many)
+    This model *extends* in some way the Django default
+    ``django.contrib.auth.models.User`` model, adding some fields.
+
+    Stores information about every user from the system.
+
+    :param id: Unique id
+    :param telefono: Phone number
+    :param direccion: Address
+
     """
     # Opcion alternativa: settings.AUTH_USER_MODEL
     user = models.OneToOneField( djUser, on_delete = models.CASCADE, verbose_name = "Usuario para Autenticacion")
@@ -28,12 +28,15 @@ class User(models.Model):
 
 class Permission(models.Model):
     """
-    Modelo de Permiso.
+        This model *extends* Django default ``django.contrib.auth.models.Permission``
+        model, adding one field.
 
-    django.contrib.auth.Permission ya posee los campos:
-    1. name (descripcion corta)
-    2. content_type
-    3. codename
+        Used to manage permissions on the system.
+
+        :param id: Unique id
+        :param permission: Default model from Django. Used with the framework
+        :param desc_larga: Long human readable name for a permission.
+
     """
     permission = models.OneToOneField( djPermission, on_delete = models.CASCADE, verbose_name = "Permiso" ) #TODO Cuidar eliminación
     desc_larga = models.TextField( "Descripcion larga" )
@@ -44,11 +47,15 @@ class Permission(models.Model):
 
 class Group(models.Model):
     """
-    Modelo de Grupo.
+    This model *extends* Django default ``django.contrib.auth.models.Group``
+    model, adding one field.
 
-    django.contrib.auth.Group ya posee los campos
-    1. name (descripcion corta)
-    2. permissions (many-to-many)
+    Used to manage roles on the system.
+
+    :param id: Unique id
+    :param group: Default model from Django. Used with the framework
+    :param desc_larga: Long human readable name for a role.
+
     """
     group = models.OneToOneField( djGroup, on_delete = models.CASCADE, verbose_name = "Grupo" ) #TODO Cuidar eliminación
     desc_larga = models.TextField( "Descripcion larga" )

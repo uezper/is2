@@ -5,8 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate as djAuthenticate
 from django.contrib.auth import login as djLogin
 from django.contrib.auth import logout as djLogout
-from srumban import settings
-from autenticacion.decorators import login_required
+from apps.autenticacion.decorators import login_required
 
 def login(request):
     """
@@ -95,8 +94,8 @@ def deauthenticate_user(request):
     """
     #TODO On logout, redirect to login?
     djLogout(request)
-    #TODO Restore to reverse(urls.LOGIN_NAME)
-    return HttpResponseRedirect(reverse(settings.LOGIN_NAME))
+    #TODO Use settings! not hardcoded string
+    return HttpResponseRedirect(reverse('auth_name'))
 
 @login_required('auth_app')
 def app(request):
