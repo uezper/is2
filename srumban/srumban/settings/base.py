@@ -110,10 +110,10 @@ STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "../static/"))
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles/')
+STATIC_ROOT = os.path.join(BASE_DIR,'/staticfiles/')
 
 # CONFIGURACIÓN DE LOGIN!!
-LOGIN_NAME  = 'auth_name' # TODO Centralize this type of data!
+LOGIN_NAME  = 'auth_name'
 AUTH_NAME   = 'auth_auth'
 DEAUTH_NAME = 'auth_deauth'
 

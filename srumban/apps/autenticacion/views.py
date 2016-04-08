@@ -104,14 +104,14 @@ def app(request):
     Vista temporal, para simular la aplicación.
     """
     user = request.user
-    return HttpResponse('Hi, {}! <a href={}>Logout</a>'.format(user.first_name, reverse(base_settings.DEAUTH_NAME)))
+    return HttpResponse('Hi, {}! <a href={}>Logout</a>. Vamos a otra parte: <a href={}>App2</a>'.format(user.first_name, reverse(base_settings.DEAUTH_NAME), reverse('auth_app2')))
 
 @login_required('auth_app2')
 def app2(request):
     """
     Vista temporal, para simular la aplicación.
     """
-    return HttpResponse('Hi!, you\'re in a private area.')
+    return HttpResponse('Hi!, you\'re in a private area. <a href={}>App1</a>'.format(reverse('auth_app')))
 
 def data(request):
     """
