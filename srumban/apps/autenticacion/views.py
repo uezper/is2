@@ -16,7 +16,9 @@ def login(request):
     Returns:
         Un 'renderizado' del template correspondiente.
     """
-    #TODO If user already "loged in", redirect... somewhere...
+
+    if (request.user.is_active):
+        return HttpResponseRedirect(reverse('auth:app'))
 
     # For cookie-based sessions
     request.session.set_test_cookie()
