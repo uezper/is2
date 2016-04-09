@@ -15,7 +15,7 @@ class AutenticationViewTests(TestCase):
 		"""
 		Accede a auth:app y espera un resultado next=/auth/app/
 		"""
-		response = self.client.get(reverse('auth:app'))
+		response = self.client.get(reverse('auth_app'))
 		self.assertEqual(response.status_code, 302)
 		self.assertRedirects(response, '/auth/#?next=/auth/app/')
 		
