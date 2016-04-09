@@ -20,29 +20,31 @@ snowballstemmer==1.2.1
 Sphinx==1.4
 ```
 
-Se puede guardar en un archivo.txt y luego ejecutar:
+Se puede guardar en un `archivo.txt` y luego ejecutar por medio de la terminal:
 
 ```
 $ pip install -r < archivo.txt
 ```
 
-### Documentacion
+De esta manera, instalar todos los requerimientos necesarios
 
-Para crear la documentacion, luego de haber instalado las dependencias. Ve a /docs/ y ejecuta:
+### Documentación
+
+Para crear la documentación, luego de haber instalado las dependencias. Ve a /docs/ y ejecuta:
 
 ```
 $ make html
 ```
 Los archivos generados van a /docs/build/
 
-### Configuracion
+### Configuración
 
-La configuracion esta dividida en 4 archivos, todos incluidos en settings/
+La configuración esta dividida en 4 archivos, todos incluidos en settings/
 
-- `base.py`: Contiene configuracion comun a los ambientes de desarrollo y produccion
-- `dev.py`: Contiene configuracion especifica del ambiente de desarrollo
-- `prod.py`: Contiene configuracion especifica del ambiente de produccion
-- `secret_config.py`: Contiene configuracion sensible, datos privados y que no deberian ser publicados por lo cual no es compartida en el repositorio.
+- `base.py`: Contiene configuración comun a los ambientes de desarrollo y produccion
+- `dev.py`: Contiene configuración especifica del ambiente de desarrollo
+- `prod.py`: Contiene configuración especifica del ambiente de produccion
+- `secret_config.py`: Contiene configuración sensible, datos privados y que no deberian ser publicados por lo cual no es compartida en el repositorio.
 
 Si bien el archivo `secret_config.py` no se encuentra en el repositorio, es fundamental para que la aplicacion corra. Un ejemplo de configuracion seria:
 
