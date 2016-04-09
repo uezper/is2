@@ -21,7 +21,7 @@ def login(request):
     """
 
     if (request.user.is_active):
-        return HttpResponseRedirect(reverse( base_settings.AUTH_APP ))
+        return HttpResponseRedirect(reverse( base_settings.APP_NAME ))
 
     # For cookie-based sessions
     request.session.set_test_cookie()
