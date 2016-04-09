@@ -1,4 +1,4 @@
-Introduction
+Introduccion
 ============
 
-Todo: Here goes a short description of the app.
+Todo: Aqui va una corta descripcion de que es y para que sirve la aplciacion

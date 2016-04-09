@@ -12,10 +12,11 @@ def login(request):
     """
     Retorna la vista correspondiente a la página de login.
 
-    Args:
-        request: Los datos de la solicitud
-    Returns:
-        Un 'renderizado' del template correspondiente.
+
+
+    :param request: Los datos de la solicitud
+
+    :returns: Un 'renderizado' del template correspondiente.
 
     """
 
@@ -31,13 +32,12 @@ def authenticate_user(request):
     Autentifica al par usuario:contraseña, vinculando la sesión con el usuario.
     Utiliza AJAX para recibir y responder las solicitudes.
 
-    Args:
-        request: Solicitud AJAX con los datos del login.
+    :param request: Solicitud AJAX con los datos del login.
     
-    Returns:
+    :returns:
         - Un JsonRequest con los campos 'message' y 'STATUS' cargados correspondientemente.
-        - En caso de 'STATUS' = 'OK', se logeo correctamente al usuario.
-        - En caso de 'STATUS' = 'ERROR', occurio un error que se describe en 'message'
+        - En caso de ``'STATUS' = 'OK'``, se logeo correctamente al usuario.
+        - En caso de ``'STATUS' = 'ERROR'``, occurio un error que se describe en ``'message'``
 
     """
     #TODO Unify with the login view. Discriminate through request.method and request.is_ajax.
@@ -92,11 +92,9 @@ def deauthenticate_user(request):
     """
     Desautentifica al usuario relacionado con la sesión de la solicitud.
     
-    Args:
-        request: Los datos de la solicitud.
+    :param request: Los datos de la solicitud.
     
-    Returns:
-        Un HttpResponseRedirect a la página de logeo.
+    :returns: Un *HttpResponseRedirect* a la página de logeo.
 
     """
     #TODO On logout, redirect to login?

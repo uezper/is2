@@ -8,8 +8,7 @@ class login_required():
     Redirige la solicitud a la página de logeo con los parámetros para volver a la dirección
     originalmente solicitada.
 
-    Attributes:
-        redirect_url: La dirección originalmente solicitada. Se agrega dentro de la URL.
+    :param redirect_url: La dirección originalmente solicitada. Se agrega dentro de la URL.
 
     """
     def __init__(self, redirect_url):
