@@ -6,14 +6,15 @@ from django.contrib.auth.models import Group as djGroup
 class User(models.Model):
     """
 
-    This model *extends* in some way the Django default
-    ``django.contrib.auth.models.User`` model, adding some fields.
+    Este modelo *extiende* (no hereda) el model por defecto de Django:
+    ``django.contrib.auth.models.User``, agregando algunos campos.
 
-    Stores information about every user from the system.
+    El model se encarga de guardar informacion de todos los usuarios del sistema
 
-    :param id: Unique id
-    :param telefono: Phone number
-    :param direccion: Address
+    :param id: Id unico
+    :param user: Model por defecto de Django. Usado con la funcion de autenticacion del framework.
+    :param telefono: Nro. de Telefono
+    :param direccion: Direccion
 
     """
     # Opcion alternativa: settings.AUTH_USER_MODEL
@@ -28,14 +29,14 @@ class User(models.Model):
 
 class Permission(models.Model):
     """
-        This model *extends* Django default ``django.contrib.auth.models.Permission``
-        model, adding one field.
+        Este modelo *extiende* (no hereda) el model por defecto de Django:
+        ``django.contrib.auth.models.Permission``, agregando un campo.
 
-        Used to manage permissions on the system.
+        El model es usado para manejar los permisos en el sistema.
 
-        :param id: Unique id
-        :param permission: Default model from Django. Used with the framework
-        :param desc_larga: Long human readable name for a permission.
+        :param id: Id unico
+        :param permission: Modelo por defecto de Django. Usado con el framework
+        :param desc_larga: Descripcion larga de un permiso (nombre legible para usuario)
 
     """
     permission = models.OneToOneField( djPermission, on_delete = models.CASCADE, verbose_name = "Permiso" ) #TODO Cuidar eliminación
@@ -47,14 +48,14 @@ class Permission(models.Model):
 
 class Group(models.Model):
     """
-    This model *extends* Django default ``django.contrib.auth.models.Group``
-    model, adding one field.
+    Este modelo *extiende* (no hereda) el model por defecto de Django:
+    ``django.contrib.auth.models.Group``, agregando un campo.
 
-    Used to manage roles on the system.
+    El model es usado para manejar los roles en el sistema.
 
-    :param id: Unique id
-    :param group: Default model from Django. Used with the framework
-    :param desc_larga: Long human readable name for a role.
+    :param id: Id unico
+    :param group: Modelo por defecto de Django. Usado con el framework
+    :param desc_larga: Descripcion larga de un rol (nombre legible para usuario)
 
     """
     group = models.OneToOneField( djGroup, on_delete = models.CASCADE, verbose_name = "Grupo" ) #TODO Cuidar eliminación

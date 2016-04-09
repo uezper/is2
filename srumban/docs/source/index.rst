@@ -1,8 +1,8 @@
 .. Scrumban documentation master file, created by
    sphinx-quickstart on Thu Apr  7 16:58:30 2016.
    
-Welcome to Scrumban's documentation!
-====================================
+Bienvenido a la documentacion de Scrumban!
+==========================================
 
 Contents:
 
@@ -15,8 +15,8 @@ Contents:
 
 
 
-Indices and tables
-==================
+Indices y tablas
+================
 
 * :ref:`genindex`
 * :ref:`modindex`
