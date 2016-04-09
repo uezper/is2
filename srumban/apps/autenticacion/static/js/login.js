@@ -1,4 +1,4 @@
-var loginApp = angular.module('loginApp', ['ngCookies'])
+var loginApp = angular.module('loginApp', ['ngCookies']);
 
 /*
   About dependencies:
