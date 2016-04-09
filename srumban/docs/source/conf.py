@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath('../../'))
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath('../../../venv/lib/python3.4/site-packages/'))
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "srumban.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "srumban.settings.base")
 django.setup()
 extensions = [
     'sphinx.ext.autodoc',

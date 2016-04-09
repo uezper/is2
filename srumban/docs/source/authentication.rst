@@ -4,6 +4,14 @@
 Authentication
 ==============
 
-.. automodule:: autenticacion.models
+.. automodule:: apps.autenticacion.models
    :members:
+
+.. automodule:: apps.autenticacion.views
+   :members:
+
+.. automodule:: apps.autenticacion.decorators
+   :members:
+
+
 

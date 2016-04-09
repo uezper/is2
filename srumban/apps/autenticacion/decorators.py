@@ -10,6 +10,7 @@ class login_required():
 
     Attributes:
         redirect_url: La dirección originalmente solicitada. Se agrega dentro de la URL.
+
     """
     def __init__(self, redirect_url):
         """

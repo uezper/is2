@@ -11,10 +11,12 @@ from apps.autenticacion.decorators import login_required
 def login(request):
     """
     Retorna la vista correspondiente a la página de login.
+
     Args:
         request: Los datos de la solicitud
     Returns:
         Un 'renderizado' del template correspondiente.
+
     """
 
     if (request.user.is_active):
@@ -33,9 +35,10 @@ def authenticate_user(request):
         request: Solicitud AJAX con los datos del login.
     
     Returns:
-        Un JsonRequest con los campos 'message' y 'STATUS' cargados correspondientemente.
-        En caso de 'STATUS' = 'OK', se logeo correctamente al usuario.
-        En caso de 'STATUS' = 'ERROR', occurio un error que se describe en 'message'
+        - Un JsonRequest con los campos 'message' y 'STATUS' cargados correspondientemente.
+        - En caso de 'STATUS' = 'OK', se logeo correctamente al usuario.
+        - En caso de 'STATUS' = 'ERROR', occurio un error que se describe en 'message'
+
     """
     #TODO Unify with the login view. Discriminate through request.method and request.is_ajax.
     
@@ -94,6 +97,7 @@ def deauthenticate_user(request):
     
     Returns:
         Un HttpResponseRedirect a la página de logeo.
+
     """
     #TODO On logout, redirect to login?
     djLogout(request)
