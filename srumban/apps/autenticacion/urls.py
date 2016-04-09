@@ -17,12 +17,24 @@ from django.conf.urls import url
 from srumban.settings import base as base_settings
 from apps.autenticacion import views
 
+#LOGIN_NAME  = 'auth_name' # TODO Centralize this type of data!
+#AUTH_NAME   = 'auth_auth'
+#DEAUTH_NAME = 'auth_deauth'
+# Con el "app_name = 'auth'", ahora se escribe
+#   auth:name
+#   auth:auth
+#   auth:deauth
+#   auth:app
+#   auth:app2
+#   auth:data
+
+app_name = 'auth'
 urlpatterns = [
-    url(r'^$', views.login, name=base_settings.LOGIN_NAME),
-    url(r'^authenticate_user/$', views.authenticate_user, name=base_settings.AUTH_NAME),
-    url(r'^deauthenticate_user/$', views.deauthenticate_user, name=base_settings.DEAUTH_NAME),
+    url(r'^$', views.login, name='name'),
+    url(r'^authenticate_user/$', views.authenticate_user, name='auth'),
+    url(r'^deauthenticate_user/$', views.deauthenticate_user, name='deauth'),
     
-    url(r'^app/$', views.app, name='auth_app'), # TODO Remove when app url ready!
-    url(r'^app2/$', views.app2, name='auth_app2'),
-    url(r'^data/$', views.data, name='auth_data'),
+    url(r'^app/$', views.app, name='app'), # TODO Remove when app url ready!
+    url(r'^app2/$', views.app2, name='app2'),
+    url(r'^data/$', views.data, name='data'),
 ]
