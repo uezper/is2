@@ -17,3 +17,4 @@ srumban/srumban/settings/secret_config.py
 
 # Ignorar base de datos (desarrollo)
 *.sqlite3
+*/staticfiles/*

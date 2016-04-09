@@ -15,11 +15,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-try:
-    from srumban.settings.secret_config import SECRET_KEY;
-except:
-    pass
-
+from srumban.settings.secret_config import *
 
 # Application definition
 
@@ -109,3 +105,14 @@ USE_TZ = True
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "../static/"))
 
 STATIC_URL = '/static/'
+
+# CONFIGURACIÓN DE LOGIN!!
+URL_NAME_FORMAT = '{}_{}'
+APP_NAME_AUTENTICACION = 'auth' #TODO NO CAMBIAR!!
+LOGIN_NAME  = URL_NAME_FORMAT.format( APP_NAME_AUTENTICACION, 'name')
+AUTH_NAME   = URL_NAME_FORMAT.format( APP_NAME_AUTENTICACION, 'auth')
+DEAUTH_NAME = URL_NAME_FORMAT.format( APP_NAME_AUTENTICACION, 'deauth')
+
+APP_NAME  = URL_NAME_FORMAT.format( APP_NAME_AUTENTICACION, 'app')
+APP2_NAME = URL_NAME_FORMAT.format( APP_NAME_AUTENTICACION, 'app2')
+DATA_NAME = URL_NAME_FORMAT.format( APP_NAME_AUTENTICACION, 'data')
