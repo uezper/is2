@@ -95,22 +95,22 @@ def deauthenticate_user(request):
     """
     #TODO On logout, redirect to login?
     djLogout(request)
-    return HttpResponseRedirect(reverse('auth:name'))
+    return HttpResponseRedirect( reverse( base_settings.LOGIN_NAME ) )
 
-@login_required('auth:app')
+@login_required( base_settings.APP_NAME )
 def app(request):
     """
     Vista temporal, para simular la aplicación.
     """
     user = request.user
-    return HttpResponse('Hi, {}! <a href={}>Logout</a>. Vamos a otra parte: <a href={}>App2</a>'.format(user.first_name, reverse(base_settings.DEAUTH_NAME), reverse('auth_app2')))
+    return HttpResponse('Hi, {}! <a href={}>Logout</a>. Vamos a otra parte: <a href={}>App2</a>'.format(user.first_name, reverse(base_settings.DEAUTH_NAME), reverse( base_settings.APP2_NAME )))
 
-@login_required('auth:app2')
+@login_required( base_settings.APP2_NAME )
 def app2(request):
     """
     Vista temporal, para simular la aplicación.
     """
-    return HttpResponse('Hi!, you\'re in a private area. <a href={}>App1</a>'.format(reverse('auth_app')))
+    return HttpResponse('Hi!, you\'re in a private area. <a href={}>App1</a>'.format(reverse( base_settings.APP_NAME )))
 
 def data(request):
     """
