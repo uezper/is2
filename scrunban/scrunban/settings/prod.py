@@ -1,4 +1,4 @@
-from srumban.settings.base import *;
+from scrunban.settings.base import *;
 
 DEBUG = False
 

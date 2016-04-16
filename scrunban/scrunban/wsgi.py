@@ -1,5 +1,5 @@
 """
-WSGI config for srumban project.
+WSGI config for scruban project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -13,6 +13,6 @@ from django.core.wsgi import get_wsgi_application
 
 os.path.dirname(os.path.abspath(__file__))
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "srumban.settings.dev")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "scrunban.settings.dev")
 
 application = get_wsgi_application()
