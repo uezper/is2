@@ -6,17 +6,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- TODO Minimize! -->
-    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap-theme.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <script src="{% static 'js/angular.js' %}"></script>
-    <script src="{% static 'js/angular-cookies.js' %}"></script>
-    <script src="{% static 'js/login.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'autenticacion/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'autenticacion/css/bootstrap-theme.css' %}">
+    <link rel="stylesheet" href="{% static 'autenticacion/css/style.css' %}">
+    <script src="{% static 'autenticacion/js/angular.js' %}"></script>
+    <script src="{% static 'autenticacion/js/angular-cookies.js' %}"></script>
+    <script src="{% static 'autenticacion/js/login.js' %}"></script>
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js" ></script> -->
   </head>
 
   <body class="no-bg-color">
-    <title>Sirentos - Login</title>
+    <title>Scrunban - Login</title>
 
     <div class="container-fluid">
       <div class="row">

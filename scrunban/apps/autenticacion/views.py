@@ -25,7 +25,7 @@ def login(request):
 
     # For cookie-based sessions
     request.session.set_test_cookie()
-    return render(request, 'login')
+    return render(request, 'autenticacion/login')
 
 def authenticate_user(request):
     """
