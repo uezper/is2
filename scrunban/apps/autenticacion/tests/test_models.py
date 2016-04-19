@@ -29,4 +29,15 @@ class AutenticacionModelsTests(TestCase):
             result = User.objects.get( data['username'] )
             self.assertNotEqual(result, None)
             result.delete()
-            
+
+        def test_user_create_delete_existing_user(self):
+                data = {
+                        'username' : 'user1_sK8FNPLKKM',
+                        'password' : 'pass'
+                }
+
+                user1 = User.objects.create( **data )
+                user2 = User.objects.create( **data )
+                self.assertNotEqual(user1, None)
+                self.assertEqual(user2, None)
+                user1.delete()

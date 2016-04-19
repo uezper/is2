@@ -4,26 +4,27 @@ from django.contrib.auth.models import User as djUser
 from django.contrib.auth.models import Permission as djPermission
 from django.contrib.auth.models import Group as djGroup
 
-import pdb
-
 class UserManager(models.Manager):
     #TODO Check in ERS for optional fields...
     #TODO Check for unique username!
     def create(self, **kwargs):
-        dj_user = djUser.objects.create( username=kwargs['username'], password=kwargs['password'] )
-        dj_user.email      = kwargs.get('email', '')
-        dj_user.first_name = kwargs.get('first_name', '')
-        dj_user.last_name  = kwargs.get('last_name', '')
-        dj_user.save()
+        if self.get(kwargs['username']) is None:
+            dj_user = djUser.objects.create( username=kwargs['username'], password=kwargs['password'] )
+            dj_user.email      = kwargs.get('email', '')
+            dj_user.first_name = kwargs.get('first_name', '')
+            dj_user.last_name  = kwargs.get('last_name', '')
+            dj_user.save()
 
-        new_user = User._default_manager.create(
-            user=dj_user,
-            telefono=kwargs.get('telefono', ''),
-            direccion=kwargs.get('direccion', '')
-        )
-        new_user.save()
+            new_user = User._default_manager.create(
+                user=dj_user,
+                telefono=kwargs.get('telefono', ''),
+                direccion=kwargs.get('direccion', '')
+            )
+            new_user.save()
 
-        return new_user
+            return new_user
+        else:
+            return None
 
     #TODO Check if no user
     #TODO Extend
@@ -57,8 +58,7 @@ class User(models.Model):
     objects = UserManager() 
 
     def __str__(self):
-        dataString = "{u.username}, first name: {u.first_name}, "\
-                 "last name: {u.last_name}, email: {u.email}"
+        dataString = "{u.username}, email: {u.email}"
         return dataString.format(u=self.user)
 
 """
