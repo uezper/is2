@@ -5,11 +5,8 @@ from django.contrib.auth.models import User as djUser
 from django.contrib.auth.models import Permission as djPermission
 from django.contrib.auth.models import Group as djGroup
 
-import pdb
-
 class UserManager(models.Manager):
     #TODO Check in ERS for optional fields...
-    #TODO Check for unique username!
     def create(self, **kwargs):
         if self.get(kwargs['username']) is None:
             dj_user = djUser.objects.create( username=kwargs['username'], password=kwargs['password'] )
@@ -29,7 +26,6 @@ class UserManager(models.Manager):
         else:
             return None
 
-    #TODO Check if no user
     #TODO Extend
     def get(self, username):
         results = [user for user in User._default_manager.all() if user.user.username == username]
@@ -37,8 +33,6 @@ class UserManager(models.Manager):
             return None
         else:
             return results[0]
-    
-
 
 class User(models.Model):
     """
@@ -64,11 +58,6 @@ class User(models.Model):
 
     # Public fields for simplicity
     objects    = UserManager()
-    """username   = user.username
-    password   = user.password
-    email      = user.email
-    first_name = user.first_name
-    last_name  = user.last_name"""
 
     def __str__(self):
         dataString = "{u.username}, email: {u.email}"
@@ -82,8 +71,8 @@ def user_delete(sender, instance, *args, **kwargs):
     djUser.objects.get(username=instance.user.username).delete()
 
 class PermissionManager(models.Manager):
+    # TODO Check for existing perm
     def create(self, **kwargs):
-        #pdb.set_trace()
         # Create "dummy content type" for a content-type-less permission
         ct, created = ContentType.objects.get_or_create(
             model=Permission._meta.model_name , app_label=Permission._meta.app_label
@@ -119,11 +108,9 @@ class Permission(models.Model):
 
     # Public fields for simplicity
     objects    = PermissionManager()
-    """codename   = permission.codename
-    name       = permission.name"""
 
     def __str__(self):
-        dataString = "<{p.codename}, name: {p.name}, desc_larga: {d}>"
+        dataString = "{p.codename}, name: {p.name}, desc_larga: {d}"
         return dataString.format(p=self.permission, d=self.desc_larga)
 
 @receiver(models.signals.post_delete, sender=Permission, dispatch_uid='permission_delete_signal')

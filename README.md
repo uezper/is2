@@ -61,3 +61,40 @@ DB_DATABASE = 'EL NOMBRE DE TU BD';
 Para ejecutar los tests unitarios, se debe ejecutar "./manage.py test"
 
 ```
+
+### Sobre modelos
+Para usuario:
+
+```python
+data = {
+'username'  : 'johndoe1990',
+'password'  : 'weak_password',
+'email'     : 'jdoe@somewhere.com',
+'first_name': 'John',
+'last_name' : 'Doe',
+'direccion' : 'Somewhere',
+'telefono'  : '1234567890'
+}
+
+user = User.objects.create( **data ) # Para crear.
+result = User.objects.get( 'johndoe1990' ) # Para obtener.
+result.delete() # Para eliminar.
+
+```
+
+Para permisos:
+
+```python
+data = {
+'codename'  : 'perm1',
+'name'      : 'Permiso 1',
+'desc_larga': 'Permiso creado para pruebas!',
+}
+
+perm = Permission.objects.create( **data ) # Para crear.
+# Falta implementar busqueda.. ^_^
+perm.delete() # Para eliminar
+
+```
+
+Notar los ```**``` en las creaciones!

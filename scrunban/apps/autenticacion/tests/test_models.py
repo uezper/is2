@@ -9,10 +9,9 @@ class AutenticacionModelsTests(TestCase):
                         'password' : 'pass'
                 }
                 
-                User.objects.create(**data)
-                result = User.objects.get( data['username'] )
-                self.assertNotEqual(result, None)
-                result.delete()
+                user = User.objects.create(**data)
+                self.assertNotEqual(user, None)
+                user.delete()
                 
         def test_user_create_delete_full(self):
             data = {
@@ -25,15 +24,14 @@ class AutenticacionModelsTests(TestCase):
                 'telefono'  : '2718281828'
             }
             
-            User.objects.create( **data )
-            result = User.objects.get( data['username'] )
-            self.assertNotEqual(result, None)
-            result.delete()
+            user = User.objects.create( **data )
+            self.assertNotEqual(user, None)
+            user.delete()
 
         def test_user_create_delete_existing_user(self):
                 data = {
-                        'username' : 'user1_sK8FNPLKKM',
-                        'password' : 'pass'
+                        'username' : 'random_sK8FNPLKKM',
+                        'password' : 'pass',
                 }
 
                 user1 = User.objects.create( **data )
@@ -41,6 +39,17 @@ class AutenticacionModelsTests(TestCase):
                 self.assertNotEqual(user1, None)
                 self.assertEqual(user2, None)
                 user1.delete()
+
+        def test_user_create_get_delete_existing_user(self):
+                data = {
+                        'username' : 'random_oLQPgfyHU4',
+                        'password' : 'pass',
+                }
+
+                user = User.objects.create( **data )
+                result = User.objects.get( data['username'] )
+                self.assertEqual(user, result)
+                user.delete()
 
         def test_permission_create_delete_minimal(self):
                 data = {
@@ -50,6 +59,15 @@ class AutenticacionModelsTests(TestCase):
 
                 perm = Permission.objects.create( **data )
                 self.assertNotEqual(perm, None)
-                #self.assertEqual(perm.codename, data['codename'])
-                #self.assertEqual(perm.name, data['name'])
+                perm.delete()
+
+        def test_permission_create_delete_full(self):
+                data = {
+                        'codename'  : 'perm1',
+                        'name'      : 'Permiso 1',
+                        'desc_larga': 'Permiso creado para pruebas!',
+                }
+
+                perm = Permission.objects.create( **data )
+                self.assertNotEqual(perm, None)
                 perm.delete()
