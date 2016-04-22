@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate as djAuthenticate
 from django.contrib.auth import login as djLogin
 from django.contrib.auth import logout as djLogout
-from srumban.settings import base as base_settings
+from scrunban.settings import base as base_settings
 from apps.autenticacion.decorators import login_required
 
 def login(request):
@@ -25,7 +25,7 @@ def login(request):
 
     # For cookie-based sessions
     request.session.set_test_cookie()
-    return render(request, 'login')
+    return render(request, 'autenticacion/login')
 
 def authenticate_user(request):
     """

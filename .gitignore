@@ -3,13 +3,13 @@ __pycache__/
 *.pyc
 
 # Ignorar directorio estatico
-srumban/static/
+scrunban/static/
 
 # Documentacion generada
-srumban/docs/build/
+scrunban/docs/build/
 
 # Configuracion sensible
-srumban/srumban/settings/secret_config.py
+scrunban/scrunban/settings/secret_config.py
 
 # Ignorar backups de editores
 *~
