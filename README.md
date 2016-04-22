@@ -60,8 +60,6 @@ DB_DATABASE = 'EL NOMBRE DE TU BD';
 ### Test Unitarios
 Para ejecutar los tests unitarios, se debe ejecutar "./manage.py test"
 
-```
-
 ### Sobre modelos
 Para usuario:
 
