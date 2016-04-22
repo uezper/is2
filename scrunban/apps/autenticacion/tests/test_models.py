@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.test.utils import setup_test_environment
-from apps.autenticacion.models import User
+from apps.autenticacion.models import User, Permission
 
 class AutenticacionModelsTests(TestCase):
         def test_user_create_delete_minimal(self):
@@ -41,3 +41,15 @@ class AutenticacionModelsTests(TestCase):
                 self.assertNotEqual(user1, None)
                 self.assertEqual(user2, None)
                 user1.delete()
+
+        def test_permission_create_delete_minimal(self):
+                data = {
+                        'codename' : 'perm1',
+                        'name'     : 'Permiso 1',
+                }
+
+                perm = Permission.objects.create( **data )
+                self.assertNotEqual(perm, None)
+                #self.assertEqual(perm.codename, data['codename'])
+                #self.assertEqual(perm.name, data['name'])
+                perm.delete()

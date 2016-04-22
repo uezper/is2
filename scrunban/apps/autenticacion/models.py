@@ -1,8 +1,11 @@
 from django.dispatch import receiver
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User as djUser
 from django.contrib.auth.models import Permission as djPermission
 from django.contrib.auth.models import Group as djGroup
+
+import pdb
 
 class UserManager(models.Manager):
     #TODO Check in ERS for optional fields...
@@ -51,11 +54,21 @@ class User(models.Model):
     :param direccion: Direccion
 
     """
+    # Private fields
     _default_manager = models.Manager()
-    user = models.OneToOneField( djUser, verbose_name = "Usuario para Autenticacion")
-    telefono = models.TextField( "Telefono" )
-    direccion =  models.TextField( "Direccion" )
-    objects = UserManager() 
+
+    # Public fields mapped to DB columns
+    user       = models.OneToOneField( djUser, verbose_name = "Usuario para Autenticacion")
+    telefono   = models.TextField( "Telefono" )
+    direccion  = models.TextField( "Direccion" )
+
+    # Public fields for simplicity
+    objects    = UserManager()
+    """username   = user.username
+    password   = user.password
+    email      = user.email
+    first_name = user.first_name
+    last_name  = user.last_name"""
 
     def __str__(self):
         dataString = "{u.username}, email: {u.email}"
@@ -67,6 +80,23 @@ Escucha al evento de eliminación de User para eliminar el django.contrib.auth.m
 @receiver(models.signals.post_delete, sender=User, dispatch_uid='user_delete_signal')
 def user_delete(sender, instance, *args, **kwargs):
     djUser.objects.get(username=instance.user.username).delete()
+
+class PermissionManager(models.Manager):
+    def create(self, **kwargs):
+        #pdb.set_trace()
+        # Create "dummy content type" for a content-type-less permission
+        ct, created = ContentType.objects.get_or_create(
+            model=Permission._meta.model_name , app_label=Permission._meta.app_label
+        )
+
+        dj_permission = djPermission.objects.create( codename = kwargs['codename'], name = kwargs['name'], content_type = ct )
+
+        new_permission = Permission._default_manager.create(
+            permission = dj_permission,
+            desc_larga = kwargs.get('desc_larga', 'Sin descripción')
+        )
+
+        return new_permission
     
 class Permission(models.Model):
     """
@@ -80,12 +110,25 @@ class Permission(models.Model):
         :param desc_larga: Descripcion larga de un permiso (nombre legible para usuario)
 
     """
+    # Private fiels
+    _default_manager = models.Manager()
+
+    # Public fields mapped to DB columns
     permission = models.OneToOneField( djPermission, on_delete = models.CASCADE, verbose_name = "Permiso" ) #TODO Cuidar eliminación
     desc_larga = models.TextField( "Descripcion larga" )
 
+    # Public fields for simplicity
+    objects    = PermissionManager()
+    """codename   = permission.codename
+    name       = permission.name"""
+
     def __str__(self):
         dataString = "<{p.codename}, name: {p.name}, desc_larga: {d}>"
-        return dataString.format(p=self.permission, d=desc_larga)
+        return dataString.format(p=self.permission, d=self.desc_larga)
+
+@receiver(models.signals.post_delete, sender=Permission, dispatch_uid='permission_delete_signal')
+def permission_delete(sender, instance, *args, **kwargs):
+    djPermission.objects.get(codename=instance.permission.codename).delete()
 
 class Group(models.Model):
     """
