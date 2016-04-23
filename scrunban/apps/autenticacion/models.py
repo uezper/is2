@@ -71,53 +71,6 @@ Escucha al evento de eliminación de User para eliminar el django.contrib.auth.m
 def user_delete(sender, instance, *args, **kwargs):
     djUser.objects.get(username=instance.user.username).delete()
 
-class PermissionManager(models.Manager):
-    # TODO Check for existing perm
-    def create(self, **kwargs):
-        # Create "dummy content type" for a content-type-less permission
-        ct, created = ContentType.objects.get_or_create(
-            model=Permission._meta.model_name , app_label=Permission._meta.app_label
-        )
-
-        dj_permission = djPermission.objects.create( codename = kwargs['codename'], name = kwargs['name'], content_type = ct )
-
-        new_permission = Permission._default_manager.create(
-            permission = dj_permission,
-            desc_larga = kwargs.get('desc_larga', 'Sin descripción')
-        )
-
-        return new_permission
-    
-class Permission(models.Model):
-    """
-        Este modelo *extiende* (no hereda) el model por defecto de Django:
-        ``django.contrib.auth.models.Permission``, agregando un campo.
-
-        El model es usado para manejar los permisos en el sistema.
-
-        :param id: Id unico
-        :param permission: Modelo por defecto de Django. Usado con el framework
-        :param desc_larga: Descripcion larga de un permiso (nombre legible para usuario)
-
-    """
-    # Private fiels
-    _default_manager = models.Manager()
-
-    # Public fields mapped to DB columns
-    permission = models.OneToOneField( djPermission, on_delete = models.CASCADE, verbose_name = "Permiso" ) #TODO Cuidar eliminación
-    desc_larga = models.TextField( "Descripcion larga" )
-
-    # Public fields for simplicity
-    objects    = PermissionManager()
-
-    def __str__(self):
-        dataString = "{p.codename}, name: {p.name}, desc_larga: {d}"
-        return dataString.format(p=self.permission, d=self.desc_larga)
-
-@receiver(models.signals.post_delete, sender=Permission, dispatch_uid='permission_delete_signal')
-def permission_delete(sender, instance, *args, **kwargs):
-    djPermission.objects.get(codename=instance.permission.codename).delete()
-
 class Group(models.Model):
     """
     Este modelo *extiende* (no hereda) el model por defecto de Django:
@@ -143,9 +96,10 @@ Dummy project class!!
 class Project(models.Model):
     name = models.TextField("Project name")
 
-    def add_user_with_permission(self, user, permission):
-        dj_user = user.user
-        dj_permission = permission.permission
-    
+    class Meta:
+        permissions = (
+            ('view_project', 'Ver detalles'),
+            )
+
     def __str__(self):
         return "{}".format(self.name)
