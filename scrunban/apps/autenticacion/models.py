@@ -9,8 +9,16 @@ from guardian.shortcuts import assign_perm
 class UserManager(models.Manager):
     #TODO Check in ERS for optional fields...
     def create(self, **kwargs):
-        if self.get(kwargs['username']) is None:
-            dj_user = djUser.objects.create( username=kwargs['username'], password=kwargs['password'] )
+        # Checking for required fields
+        required_fields = ['username', 'password']
+        for key in required_fields:
+            if key not in kwargs.keys():
+                raise KeyError('{} is required.'.format(key))
+
+        # Checking if username has already been taken
+        if self.get( kwargs['username'] ) is None:
+            dj_user = djUser.objects.create( username=kwargs['username'] )
+            dj_user.set_password(kwargs['password'])
             dj_user.email      = kwargs.get('email', '')
             dj_user.first_name = kwargs.get('first_name', '')
             dj_user.last_name  = kwargs.get('last_name', '')

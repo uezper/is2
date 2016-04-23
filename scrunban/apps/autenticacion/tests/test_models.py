@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.test.utils import setup_test_environment
-from apps.autenticacion.models import User, Permission
+
+from django.contrib.auth import authenticate
+from apps.autenticacion.models import User
 
 class AutenticacionModelsTests(TestCase):
         def test_user_create_delete_minimal(self):
@@ -51,23 +53,28 @@ class AutenticacionModelsTests(TestCase):
                 self.assertEqual(user, result)
                 user.delete()
 
-        def test_permission_create_delete_minimal(self):
-                data = {
-                        'codename' : 'perm1',
-                        'name'     : 'Permiso 1',
+        def test_user_check_params(self):
+                no_username = {
+                        'password':'test_user',
                 }
-
-                perm = Permission.objects.create( **data )
-                self.assertNotEqual(perm, None)
-                perm.delete()
-
-        def test_permission_create_delete_full(self):
-                data = {
-                        'codename'  : 'perm1',
-                        'name'      : 'Permiso 1',
-                        'desc_larga': 'Permiso creado para pruebas!',
+                no_password = {
+                        'username':'test_user',
                 }
+                
+                self.assertRaises(KeyError, User.objects.create, **no_username)
+                self.assertRaises(KeyError, User.objects.create, **no_password)
 
-                perm = Permission.objects.create( **data )
-                self.assertNotEqual(perm, None)
-                perm.delete()
+        def test_user_check_auth(self):
+                data = {
+                        'username' : 'test_user',
+                        'password' : 'test_user',
+                }
+                wrong_data = {
+                        'username' : 'test_user',
+                        'password' : 'wrong_password!',
+                }
+                
+                user = User.objects.create(**data)
+                self.assertNotEqual(authenticate(**data), None)
+                self.assertEqual(authenticate(**wrong_data), None)
+                user.delete()
