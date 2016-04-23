@@ -18,7 +18,7 @@ class UserManager(models.Manager):
 
         # Checking if username has already been taken
         if self.get( kwargs['username'] ) is None:
-            dj_user = djUser.objects.create( username=kwargs['username'] )
+            dj_user            = djUser.objects.create( username=kwargs['username'] )
             dj_user.set_password(kwargs['password'])
             dj_user.email      = kwargs.get('email', '')
             dj_user.first_name = kwargs.get('first_name', '')
@@ -26,9 +26,9 @@ class UserManager(models.Manager):
             dj_user.save()
 
             new_user = User.objects.create(
-                user=dj_user,
-                telefono=kwargs.get('telefono', ''),
-                direccion=kwargs.get('direccion', '')
+                user      = dj_user,
+                telefono  = kwargs.get('telefono', ''),
+                direccion = kwargs.get('direccion', '')
             )
             new_user.save()
 

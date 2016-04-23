@@ -74,24 +74,9 @@ data = {
 'telefono'  : '1234567890'
 }
 
-user = User.objects.create( **data ) # Para crear.
-result = User.objects.get( 'johndoe1990' ) # Para obtener.
+user = User.users.create( **data ) # Para crear.
+result = User.users.get( 'johndoe1990' ) # Para obtener. Se estará extendiendo esto...
 result.delete() # Para eliminar.
-
-```
-
-Para permisos:
-
-```python
-data = {
-'codename'  : 'perm1',
-'name'      : 'Permiso 1',
-'desc_larga': 'Permiso creado para pruebas!',
-}
-
-perm = Permission.objects.create( **data ) # Para crear.
-# Falta implementar busqueda.. ^_^
-perm.delete() # Para eliminar
 
 ```
 
