@@ -89,17 +89,25 @@ class Group(models.Model):
     def __str__(self):
         dataString = "<{g.name}, desc_larga: {d}>"
         return dataString.format(g=self.group, d=self.desc_larga)
-
+    
 """
 Dummy project class!!
 """
 class Project(models.Model):
-    name = models.TextField("Project name")
+    name = models.TextField('Project name')
+    scrum_master = User()
 
     class Meta:
+        default_permissions = () # To explicitly list permissions
         permissions = (
-            ('view_project', 'Ver detalles'),
-            )
+            ('add_project',          'Crea un projecto y asigna el "Scrum Master".'),
+            ('delete_project',       'Elimina un projecto.'),
+            ('view_project_details', 'Ver detalles del projecto.'),
+            ('view_kanbam',          'Ver Kanbam.'),
+        )
+
+    def assign_perm(self, perm, user):
+        assign_perm(perm, user.user, self)
 
     def __str__(self):
         return "{}".format(self.name)
