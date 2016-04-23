@@ -9,6 +9,7 @@ from guardian.shortcuts import assign_perm
 class UserManager(models.Manager):
     #TODO Check in ERS for optional fields...
     def create(self, **kwargs):
+        
         # Checking for required fields
         required_fields = ['username', 'password']
         for key in required_fields:
@@ -24,7 +25,7 @@ class UserManager(models.Manager):
             dj_user.last_name  = kwargs.get('last_name', '')
             dj_user.save()
 
-            new_user = User._default_manager.create(
+            new_user = User.objects.create(
                 user=dj_user,
                 telefono=kwargs.get('telefono', ''),
                 direccion=kwargs.get('direccion', '')
@@ -37,7 +38,7 @@ class UserManager(models.Manager):
 
     #TODO Extend
     def get(self, username):
-        results = [user for user in User._default_manager.all() if user.user.username == username]
+        results = [user for user in User.objects.all() if user.user.username == username]
         if len(results) == 0:
             return None
         else:
@@ -57,16 +58,14 @@ class User(models.Model):
     :param direccion: Direccion
 
     """
-    # Private fields
-    _default_manager = models.Manager()
-
     # Public fields mapped to DB columns
     user       = models.OneToOneField( djUser, verbose_name = "Usuario para Autenticacion")
     telefono   = models.TextField( "Telefono" )
     direccion  = models.TextField( "Direccion" )
 
     # Public fields for simplicity
-    objects    = UserManager()
+    objects  = models.Manager()
+    users    = UserManager()
 
     def __str__(self):
         dataString = "{u.username}, email: {u.email}"
@@ -79,7 +78,7 @@ Escucha al evento de eliminación de User para eliminar el django.contrib.auth.m
 def user_delete(sender, instance, *args, **kwargs):
     djUser.objects.get(username=instance.user.username).delete()
 
-class Group(models.Model):
+class Role(models.Model):
     """
     Este modelo *extiende* (no hereda) el model por defecto de Django:
     ``django.contrib.auth.models.Group``, agregando un campo.
@@ -95,7 +94,7 @@ class Group(models.Model):
     desc_larga = models.TextField( "Descripcion larga" )
 
     def __str__(self):
-        dataString = "<{g.name}, desc_larga: {d}>"
+        dataString = "{g.name}, desc_larga: {d}"
         return dataString.format(g=self.group, d=self.desc_larga)
     
 """
@@ -103,7 +102,6 @@ Dummy project class!!
 """
 class Project(models.Model):
     name = models.TextField('Project name')
-    scrum_master = User()
 
     class Meta:
         default_permissions = () # To explicitly list permissions
@@ -115,7 +113,16 @@ class Project(models.Model):
         )
 
     def assign_perm(self, perm, user):
+        """
+        Asigna el permiso ``perm'' sobre la instancia al usuario ``user''
+        """
         assign_perm(perm, user.user, self)
+
+    def get_perms(self, user):
+        """
+        Obtiene una lista de todos los permisos de usuario ``user'' sobre la instancia.
+        """
+        return get_perms(user.user, self)
 
     def __str__(self):
         return "{}".format(self.name)

@@ -11,7 +11,7 @@ class AutenticacionModelsTests(TestCase):
                         'password' : 'pass'
                 }
                 
-                user = User.objects.create(**data)
+                user = User.users.create(**data)
                 self.assertNotEqual(user, None)
                 user.delete()
                 
@@ -26,7 +26,7 @@ class AutenticacionModelsTests(TestCase):
                 'telefono'  : '2718281828'
             }
             
-            user = User.objects.create( **data )
+            user = User.users.create( **data )
             self.assertNotEqual(user, None)
             user.delete()
 
@@ -36,8 +36,8 @@ class AutenticacionModelsTests(TestCase):
                         'password' : 'pass',
                 }
 
-                user1 = User.objects.create( **data )
-                user2 = User.objects.create( **data )
+                user1 = User.users.create( **data )
+                user2 = User.users.create( **data )
                 self.assertNotEqual(user1, None)
                 self.assertEqual(user2, None)
                 user1.delete()
@@ -48,8 +48,8 @@ class AutenticacionModelsTests(TestCase):
                         'password' : 'pass',
                 }
 
-                user = User.objects.create( **data )
-                result = User.objects.get( data['username'] )
+                user = User.users.create( **data )
+                result = User.users.get( data['username'] )
                 self.assertEqual(user, result)
                 user.delete()
 
@@ -61,8 +61,8 @@ class AutenticacionModelsTests(TestCase):
                         'username':'test_user',
                 }
                 
-                self.assertRaises(KeyError, User.objects.create, **no_username)
-                self.assertRaises(KeyError, User.objects.create, **no_password)
+                self.assertRaises(KeyError, User.users.create, **no_username)
+                self.assertRaises(KeyError, User.users.create, **no_password)
 
         def test_user_check_auth(self):
                 data = {
@@ -74,7 +74,7 @@ class AutenticacionModelsTests(TestCase):
                         'password' : 'wrong_password!',
                 }
                 
-                user = User.objects.create(**data)
+                user = User.users.create(**data)
                 self.assertNotEqual(authenticate(**data), None)
                 self.assertEqual(authenticate(**wrong_data), None)
                 user.delete()
