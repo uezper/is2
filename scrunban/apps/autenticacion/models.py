@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User as djUser
 from django.contrib.auth.models import Permission as djPermission
 from django.contrib.auth.models import Group as djGroup
+from guardian.shortcuts import assign_perm
 
 class UserManager(models.Manager):
     #TODO Check in ERS for optional fields...
@@ -135,3 +136,16 @@ class Group(models.Model):
     def __str__(self):
         dataString = "<{g.name}, desc_larga: {d}>"
         return dataString.format(g=self.group, d=self.desc_larga)
+
+"""
+Dummy project class!!
+"""
+class Project(models.Model):
+    name = models.TextField("Project name")
+
+    def add_user_with_permission(self, user, permission):
+        dj_user = user.user
+        dj_permission = permission.permission
+    
+    def __str__(self):
+        return "{}".format(self.name)
