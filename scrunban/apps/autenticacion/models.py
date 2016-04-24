@@ -1,15 +1,21 @@
 from django.dispatch import receiver
 from django.db import models
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User as djUser
-from django.contrib.auth.models import Permission as djPermission
 from django.contrib.auth.models import Group as djGroup
-from guardian.shortcuts import assign_perm
+from guardian.shortcuts import assign_perm, get_perms
 
 class UserManager(models.Manager):
+    """
+    Clase administradora de operaciones a nivel de tabla del modelo ``User''.
+    """
     #TODO Check in ERS for optional fields...
     def create(self, **kwargs):
-        
+        # TODO Extend docstring for kwargs
+        """
+        Crea un usuario.
+
+        :returns: En caso de haberse creado, el nuevo usuario. Sino ``None''
+        """
         # Checking for required fields
         required_fields = ['username', 'password']
         for key in required_fields:
@@ -17,18 +23,18 @@ class UserManager(models.Manager):
                 raise KeyError('{} is required.'.format(key))
 
         # Checking if username has already been taken
-        if self.get( kwargs['username'] ) is None:
-            dj_user            = djUser.objects.create( username=kwargs['username'] )
+        if self.get(kwargs['username']) is None:
+            dj_user = djUser.objects.create(username=kwargs['username'])
             dj_user.set_password(kwargs['password'])
-            dj_user.email      = kwargs.get('email', '')
+            dj_user.email = kwargs.get('email', '')
             dj_user.first_name = kwargs.get('first_name', '')
-            dj_user.last_name  = kwargs.get('last_name', '')
+            dj_user.last_name = kwargs.get('last_name', '')
             dj_user.save()
 
             new_user = User.objects.create(
-                user      = dj_user,
-                telefono  = kwargs.get('telefono', ''),
-                direccion = kwargs.get('direccion', '')
+                user=dj_user,
+                telefono=kwargs.get('telefono', ''),
+                direccion=kwargs.get('direccion', '')
             )
             new_user.save()
 
@@ -59,24 +65,24 @@ class User(models.Model):
 
     """
     # Public fields mapped to DB columns
-    user       = models.OneToOneField( djUser, verbose_name = "Usuario para Autenticacion")
-    telefono   = models.TextField( "Telefono" )
-    direccion  = models.TextField( "Direccion" )
+    user = models.OneToOneField(djUser, verbose_name="Usuario para Autenticacion")
+    telefono = models.TextField("Telefono")
+    direccion = models.TextField("Direccion")
 
     # Public fields for simplicity
-    objects  = models.Manager()
-    users    = UserManager()
+    objects = models.Manager()
+    users = UserManager()
 
     def __str__(self):
-        dataString = "{u.username}, email: {u.email}"
-        return dataString.format(u=self.user)
+        username = self.user.get_username()
+        return "{}".format(username)
 
-"""
-Escucha al evento de eliminación de User para eliminar el django.contrib.auth.models.User asociado.
-"""
 @receiver(models.signals.post_delete, sender=User, dispatch_uid='user_delete_signal')
 def user_delete(sender, instance, *args, **kwargs):
-    djUser.objects.get(username=instance.user.username).delete()
+    """
+    Escucha al evento de eliminación de User para eliminar el User de Django asociado.
+    """
+    instance.user.delete()
 
 class Role(models.Model):
     """
@@ -90,37 +96,51 @@ class Role(models.Model):
     :param desc_larga: Descripcion larga de un rol (nombre legible para usuario)
 
     """
-    group = models.OneToOneField( djGroup, on_delete = models.CASCADE, verbose_name = "Grupo" ) #TODO Cuidar eliminación
-    desc_larga = models.TextField( "Descripcion larga" )
+    # TODO Cuidar eliminacion
+    group = models.OneToOneField(djGroup, on_delete=models.CASCADE, verbose_name="Grupo")
+    desc_larga = models.TextField("Descripcion larga")
+
+    # TODO Add unit test
+    def add_user(self, user):
+        user.user.groups.add(self.group)
+
+    # TODO Add unit test
+    def remove_user(self, user):
+        user.user.groups.remove(self.group)
 
     def __str__(self):
-        dataString = "{g.name}, desc_larga: {d}"
-        return dataString.format(g=self.group, d=self.desc_larga)
-    
-"""
-Dummy project class!!
-"""
+        return "{g.name}, desc_larga: {d}".format(g=self.group, d=self.desc_larga)
+
 class Project(models.Model):
+    """
+    Dummy project class!!
+    """
     name = models.TextField('Project name')
 
     class Meta:
         default_permissions = () # To explicitly list permissions
         permissions = (
-            ('add_project',          'Crea un projecto y asigna el "Scrum Master".'),
-            ('delete_project',       'Elimina un projecto.'),
+            ('add_project', 'Crea un projecto y asigna el "Scrum Master".'),
+            ('delete_project', 'Elimina un projecto.'),
             ('view_project_details', 'Ver detalles del projecto.'),
-            ('view_kanbam',          'Ver Kanbam.'),
+            ('view_kanbam', 'Ver Kanbam.'),
         )
 
     def assign_perm(self, perm, user):
         """
         Asigna el permiso ``perm'' sobre la instancia al usuario ``user''
+
+        :param perm: Cadena que identifica el permiso. Ver clase interna Meta de Project.
+        :param user: Instancia de User del usuario a quien asignamos el permiso.
         """
         assign_perm(perm, user.user, self)
 
     def get_perms(self, user):
         """
         Obtiene una lista de todos los permisos de usuario ``user'' sobre la instancia.
+
+        :param user: Instancia de User de quien obtenemos la lista de permisos.
+        :returns: La lista de permisos asignados a user sobre la actual instancia.
         """
         return get_perms(user.user, self)
 
