@@ -15,7 +15,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-from srumban.settings.secret_config import *
+from scrunban.settings.secret_config import *
 
 # Application definition
 
@@ -46,7 +46,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'srumban.urls'
+ROOT_URLCONF = 'scrunban.urls'
 
 TEMPLATES = [
     {
@@ -64,7 +64,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'srumban.wsgi.application'
+WSGI_APPLICATION = 'scrunban.wsgi.application'
 
 
 # Password validation

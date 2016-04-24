@@ -1,6 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from srumban.settings import base as base_settings
+from scrunban.settings import base as base_settings
 
 class login_required():
     """

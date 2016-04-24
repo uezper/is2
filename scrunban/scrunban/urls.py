@@ -1,4 +1,4 @@
-"""srumban URL Configuration
+"""scrunban URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.9/topics/http/urls/
@@ -13,16 +13,11 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
-from srumban.settings import base as base_settings
-from apps.autenticacion import views
+from django.conf.urls import url, include
+from django.contrib import admin
 
+#TODO Fix to a nicer url pattern
 urlpatterns = [
-    url(r'^$', views.login, name=base_settings.LOGIN_NAME),
-    url(r'^authenticate_user/$', views.authenticate_user, name=base_settings.AUTH_NAME),
-    url(r'^deauthenticate_user/$', views.deauthenticate_user, name=base_settings.DEAUTH_NAME),
-    
-    url(r'^app/$', views.app, name=base_settings.APP_NAME), 
-    url(r'^app2/$', views.app2, name=base_settings.APP2_NAME),
-    url(r'^data/$', views.data, name=base_settings.DATA_NAME),
+    url(r'^auth/', include('apps.autenticacion.urls')),
+    url(r'^admin/', admin.site.urls),
 ]
