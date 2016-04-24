@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from scrunban.settings import base as base_settings
 from apps.autenticacion import views
+from django.views.generic import TemplateView
 
 urlpatterns = [
     url(r'^$', views.login, name=base_settings.LOGIN_NAME),
@@ -25,4 +26,5 @@ urlpatterns = [
     url(r'^app/$', views.app, name=base_settings.APP_NAME), 
     url(r'^app2/$', views.app2, name=base_settings.APP2_NAME),
     url(r'^data/$', views.data, name=base_settings.DATA_NAME),
+    url(r'^perfil/$', views.perfil, name=base_settings.PERFIL_NAME),
 ]
