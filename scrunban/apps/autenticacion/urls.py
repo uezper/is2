@@ -23,8 +23,6 @@ urlpatterns = [
     url(r'^authenticate_user/$', views.authenticate_user, name=base_settings.AUTH_NAME),
     url(r'^deauthenticate_user/$', views.deauthenticate_user, name=base_settings.DEAUTH_NAME),
     
-    url(r'^app/$', views.app, name=base_settings.APP_NAME), 
-    url(r'^app2/$', views.app2, name=base_settings.APP2_NAME),
-    url(r'^data/$', views.data, name=base_settings.DATA_NAME),
+
     url(r'^perfil/$', views.perfil, name=base_settings.PERFIL_NAME),
 ]
