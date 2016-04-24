@@ -73,6 +73,77 @@ class User(models.Model):
     objects = models.Manager()
     users = UserManager()
 
+    def get_username(self):
+        """
+        Returns the user username
+        """
+        return self.user.get_username()
+
+    def get_email(self):
+        """
+        Returns the user email
+        """
+        return self.user.email
+
+    def set_email(self, new_email):
+        """
+        Sets the user email
+        """
+        self.user.email = new_email
+        self.user.save()
+
+    def get_first_name(self):
+        """
+        Returns the user first name
+        """        
+        return self.user.first_name
+
+    def set_first_name(self, new_first_name):
+        """
+        Sets the user first name
+        """
+        self.user.first_name = new_first_name
+        self.user.save()
+
+    def get_last_name(self):
+        """
+        Returns the user last name
+        """
+        return self.user.last_name
+
+    def set_last_name(self, new_last_name):
+        """
+        Sets the user last name
+        """
+        self.user.last_name = new_last_name
+        self.user.save()
+
+    def get_telefono(self):
+        """
+        Returns the user telephone
+        """        
+        return self.telefono
+
+    def set_telefono(self, new_telefono):
+        """
+        Sets the user telephone
+        """
+        self.telefono = new_telefono
+        self.save()
+
+    def get_direccion(self):
+        """
+        Returns the user address
+        """
+        return self.direccion
+
+    def set_direccion(self, new_direccion):
+        """
+        Sets the user address
+        """
+        self.direccion = new_direccion
+        self.save()
+
     def __str__(self):
         username = self.user.get_username()
         return "{}".format(username)
