@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 
 # Ignorar directorio estatico
-scrunban/static/
+scrunban/statics/
 
 # Documentacion generada
 scrunban/docs/build/

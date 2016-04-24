@@ -1,0 +1,49 @@
+.navbar-right { margin-right: 0px; }
+.navbar-brand  h3 
+{ 
+	margin: auto; 
+	font-weight: bold;
+	font-family: "Verdana", serif;
+
+}
+.sideBar { padding: 0px; padding-top: -1px;  }
+.sideBar li a 
+{
+	border-radius: 0px;
+	color: #616161;
+}
+.sideBar .title
+{
+   padding: 10px;
+   color: #EEEEEE;
+   background-color: #455A64;
+   font-weight: bold;
+}
+.sideBar .active
+{
+	background-color:#E0E0E0;
+}
+.topBar { margin-bottom: 0px; border-bottom: 0px; }
+
+.mainContent { 
+	margin-top: 8px; 
+}
+.mainContent .breadcrumb {
+	background-color: #455A64;
+}
+.mainContent .breadcrumb li
+{
+	color: #EEEEEE;
+}
+
+.mainContent .breadcrumb li a
+{
+	color: #90A4AE;
+}
+
+#sideBar-extension {
+	background-color: #f8f8f8;
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+}
