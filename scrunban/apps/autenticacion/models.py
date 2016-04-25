@@ -1,3 +1,4 @@
+from django.core.exceptions import FieldError
 from django.dispatch import receiver
 from django.db import models
 from django.contrib.auth.models import User as djUser
@@ -18,12 +19,12 @@ class UserManager(models.Manager):
         """
         # Checking for required fields
         required_fields = ['username', 'password']
-        for key in required_fields:
-            if key not in kwargs.keys():
-                raise KeyError('{} is required.'.format(key))
+        for required_field in required_fields:
+            if required_field not in kwargs.keys():
+                raise KeyError('{} is required.'.format(required_field))
 
         # Checking if username has already been taken
-        if self.get(kwargs['username']) is None:
+        if djUser.objects.filter(username=kwargs['username']).count() == 0:
             dj_user = djUser.objects.create(username=kwargs['username'])
             dj_user.set_password(kwargs['password'])
             dj_user.email = kwargs.get('email', '')
@@ -42,7 +43,30 @@ class UserManager(models.Manager):
         else:
             return None
 
-    #TODO Extend
+    def filter(self, **kwargs):
+        django_user_fields = ['username', 'email', 'first_name', 'last_name']
+        custom_user_fields = ['direccion', 'telefono']
+        
+        # Check arguments
+        accepted_fields = django_user_fields + custom_user_fields
+        for key in kwargs.keys():
+            if key not in accepted_fields:
+                raise FieldError('Cannot resolve {} into field.'.format(key))
+
+        # Construct params
+        params = {}
+        for key, value in kwargs.items():
+            if key not in custom_user_fields:
+                new_key = 'user__' + key
+                params[new_key] = value
+            else:
+                params[key] = value
+
+        # Make query and return
+        return User.objects.filter(**params)
+
+
+    #TODO Deprecated, find something like filter
     def get(self, username):
         results = [user for user in User.objects.all() if user.user.username == username]
         if len(results) == 0:
@@ -155,6 +179,28 @@ def user_delete(sender, instance, *args, **kwargs):
     """
     instance.user.delete()
 
+class RoleManager(models.Manager):
+    def create(self, **kwargs):
+        # Checking for required fields
+        required_fields = ['name']
+        for required_field in required_fields:
+            if required_field not in kwargs.keys():
+                raise KeyError("{} is required.".format(required_field))
+
+        # Checking if name has already been taken
+        if djGroup.objects.filter(name=kwargs['name']).count() == 0:
+            dj_group = djGroup.objects.create(name=kwargs['name'])
+            
+            new_role = Role.objects.create(
+                group=dj_group,
+                desc_larga=kwargs.get('desc_larga', 'Sin descripcion.')
+            )
+
+            return new_role
+        
+        else:
+            return None
+
 class Role(models.Model):
     """
     Este modelo *extiende* (no hereda) el model por defecto de Django:
@@ -167,17 +213,46 @@ class Role(models.Model):
     :param desc_larga: Descripcion larga de un rol (nombre legible para usuario)
 
     """
-    # TODO Cuidar eliminacion
+    # Public fields mapped to DB columns
     group = models.OneToOneField(djGroup, on_delete=models.CASCADE, verbose_name="Grupo")
     desc_larga = models.TextField("Descripcion larga")
 
-    # TODO Add unit test
+    # Public fields for simplicity
+    objects = models.Manager()
+    roles = RoleManager()
+    
     def add_user(self, user):
+        """
+        Adds the user to this role
+        :param user: Instance of autenticacion.models.User
+        """
         user.user.groups.add(self.group)
 
-    # TODO Add unit test
     def remove_user(self, user):
+        """
+        Removes user from this role
+        :param user: Instance of autenticacion.models.User
+        """
         user.user.groups.remove(self.group)
+
+    def get_name(self):
+        """
+        Returns role name
+        """
+        return self.group.name
+
+    def get_desc(self):
+        """
+        Returns role description
+        """
+        return self.desc_larga
+
+    def set_desc(self, new_desc):
+        """
+        Sets role description
+        """
+        self.desc_larga = new_desc
+        self.save()
 
     def __str__(self):
         return "{g.name}, desc_larga: {d}".format(g=self.group, d=self.desc_larga)
