@@ -75,9 +75,12 @@ data = {
 }
 
 user = User.users.create( **data ) # Para crear.
+# users.get esta despreciado (:O) por users.filter, se va a terminar eliminando
 result = User.users.get( 'johndoe1990' ) # Para obtener. Se estará extendiendo esto...
 result.delete() # Para eliminar.
-
+User.users.all() # Para listar.
+User.users.filter(username='johndoe1990', ...) # Para hacer queries. Igual que con objects.filter
+# Para users.filter se puede usar username, email, first_name, ..., telefono
 ```
 
-Notar los ```**``` en las creaciones!
+Notar los ```**``` en las creaciones! Es para separar el proceso de ''construccion'' de los datos del proceso de ''creacion''. Tambien se puede hacer ```User.users.create(username='user', password='pass') # Y demas```. Con ```**``` se hacen lineas mas cortas, tambien.
