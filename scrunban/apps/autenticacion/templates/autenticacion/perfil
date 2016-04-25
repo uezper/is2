@@ -1,0 +1,57 @@
+{% extends "base" %}
+
+{% block "include" %}{% endblock %}
+
+{% block "title" %} {{ block.super }} | Perfil {% endblock %}
+
+{% block "top_menu" %}  
+
+	{% if user.is_staff %}
+		<li><a href="#">Administracion</a></li> 
+	{% endif %}
+
+	<li class="dropdown">
+	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.first_name }} {{ user.last_name }} <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+		<li><a href="#">Mi Perfil</a></li>            
+		<li role="separator" class="divider"></li>
+		<li><a href="{% url DEAUTH_NAME %}">Salir</a></li>
+	</ul>
+
+{% endblock %}
+
+{% block "left_menu_title" %} Mi Perfil {% endblock %}
+
+{% block "left_menu_options" %} 
+	<li class="active"><a href="#">Visualizar</a></li>						
+{% endblock %}
+
+{% block "working_path" %}		
+	<li></li>
+	<li>Mi Perfil</li>
+	<li class="active">Visualizar</li>
+{% endblock %}
+
+{% block "content" %}
+	
+	<div class="panel panel-default">
+		
+		<div class="panel-body">	
+			<div class="row">
+		                <div class="col-md-10">
+		                    <h3>Mi Perfil</h3>
+				    <hr />
+		                    <p><strong>Nombres: </strong> {{ user.first_name }} </p>
+		                    <p><strong>Apellidos: </strong> {{ user.last_name }} </p>
+		                    <p><strong>Telefono: </strong> {{ user.telefono }} </p>
+		                    <p><strong>Email: </strong> {{ user.email }} </p>
+		                    <p><strong>Direccion: </strong> {{ user.direccion }} </p>
+		                </div>
+			</div>
+		</div>
+	</div>
+
+
+
+	
+{% endblock %}

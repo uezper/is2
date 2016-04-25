@@ -16,9 +16,9 @@ def login(request):
 
     :returns: Un 'renderizado' del template correspondiente.
     """
-
+    
     if request.user.is_active:
-        return HttpResponseRedirect(reverse(base_settings.APP_NAME))
+        return HttpResponseRedirect(reverse( base_settings.PERFIL_NAME ))
 
     # For cookie-based sessions
     request.session.set_test_cookie()
@@ -112,9 +112,24 @@ def app2(request):
     """
     return HttpResponse('Hi!, you\'re in a private area. <a href={}>App1</a>'.format(reverse(base_settings.APP_NAME)))
 
-def data(request):
+@login_required( base_settings.PERFIL_NAME )
+def perfil(request):
     """
-    Vista temporal, para simular la aplicación. Muestra los datos del usuario.
+    Retorna la vista correspondiente al perfil del usuario
+
+    :param request: Los datos de la solicitud
+
+    :returns: Un 'renderizado' del template perfil.
+
     """
-    user = request.user
-    return HttpResponse('You are {}'.format(user))
+
+    # TODO! Esto se tiene que automatizar de alguna manera
+    context = {
+        "PERFIL_NAME": base_settings.PERFIL_NAME,
+        "DEAUTH_NAME": base_settings.DEAUTH_NAME,
+        "LOGIN_NAME": base_settings.LOGIN_NAME,
+    }
+
+    return render(request, 'autenticacion/perfil', context)
+
+

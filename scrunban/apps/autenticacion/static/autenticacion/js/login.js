@@ -40,7 +40,7 @@ loginApp.controller('loginForm', ['$scope', '$http', '$cookies', '$window', '$lo
 		      status  = response['data']['STATUS'];
 		      $scope.message = message;
 		      if( status == 'OK' ){
-			  defaultDestination = '/auth/app/'; // Default destination of redirection
+			  defaultDestination = '/auth/perfil/'; // Default destination of redirection
 			  var destination = $location.search().next;
 			  if( destination == undefined ){
 			      $window.location.href = defaultDestination;
