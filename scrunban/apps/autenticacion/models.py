@@ -1,21 +1,37 @@
+from django.core.exceptions import FieldError
 from django.dispatch import receiver
 from django.db import models
 from django.contrib.auth.models import User as djUser
-from django.contrib.auth.models import Permission as djPermission
 from django.contrib.auth.models import Group as djGroup
+from guardian.shortcuts import assign_perm, get_perms
 
 class UserManager(models.Manager):
+    """
+    Clase administradora de operaciones a nivel de tabla del modelo ``User''.
+    """
     #TODO Check in ERS for optional fields...
-    #TODO Check for unique username!
     def create(self, **kwargs):
-        if self.get(kwargs['username']) is None:
-            dj_user = djUser.objects.create( username=kwargs['username'], password=kwargs['password'] )
-            dj_user.email      = kwargs.get('email', '')
+        """
+        Crea un usuario.
+        :param kwargs: User details.
+        :returns: En caso de haberse creado, el nuevo usuario. Sino ``None''
+        """
+        # Checking for required fields
+        required_fields = ['username', 'password']
+        for required_field in required_fields:
+            if required_field not in kwargs.keys():
+                raise KeyError('{} is required.'.format(required_field))
+
+        # Checking if username has already been taken
+        if djUser.objects.filter(username=kwargs['username']).count() == 0:
+            dj_user = djUser.objects.create(username=kwargs['username'])
+            dj_user.set_password(kwargs['password'])
+            dj_user.email = kwargs.get('email', '')
             dj_user.first_name = kwargs.get('first_name', '')
-            dj_user.last_name  = kwargs.get('last_name', '')
+            dj_user.last_name = kwargs.get('last_name', '')
             dj_user.save()
 
-            new_user = User._default_manager.create(
+            new_user = User.objects.create(
                 user=dj_user,
                 telefono=kwargs.get('telefono', ''),
                 direccion=kwargs.get('direccion', '')
@@ -26,16 +42,41 @@ class UserManager(models.Manager):
         else:
             return None
 
-    #TODO Check if no user
-    #TODO Extend
+    def filter(self, **kwargs):
+        """
+        Returns the results of a query.
+        :param kwargs: Query details.
+        :returns: An instance of QuerySet containing the results of the query.
+        """
+        django_user_fields = ['username', 'email', 'first_name', 'last_name']
+        custom_user_fields = ['direccion', 'telefono']
+
+        # Check arguments
+        accepted_fields = django_user_fields + custom_user_fields
+        for key in kwargs.keys():
+            if key not in accepted_fields:
+                raise FieldError('Cannot resolve {} into field.'.format(key))
+
+        # Construct params
+        params = {}
+        for key, value in kwargs.items():
+            if key not in custom_user_fields:
+                new_key = 'user__' + key
+                params[new_key] = value
+            else:
+                params[key] = value
+
+        # Make query and return
+        return User.objects.filter(**params)
+
+
+    #TODO Deprecated, find something like filter
     def get(self, username):
-        results = [user for user in User._default_manager.all() if user.user.username == username]
+        results = [user for user in User.objects.all() if user.user.username == username]
         if len(results) == 0:
             return None
         else:
             return results[0]
-    
-
 
 class User(models.Model):
     """
@@ -51,43 +92,153 @@ class User(models.Model):
     :param direccion: Direccion
 
     """
-    _default_manager = models.Manager()
-    user = models.OneToOneField( djUser, verbose_name = "Usuario para Autenticacion")
-    telefono = models.TextField( "Telefono" )
-    direccion =  models.TextField( "Direccion" )
-    objects = UserManager() 
+    # Public fields mapped to DB columns
+    user = models.OneToOneField(djUser, verbose_name="Usuario para Autenticacion")
+    telefono = models.TextField("Telefono")
+    direccion = models.TextField("Direccion")
+
+    # Public fields for simplicity
+    objects = models.Manager()
+    users = UserManager()
+
+    def get_username(self):
+        """
+        Returns the user username
+        """
+        return self.user.get_username()
+
+    def get_email(self):
+        """
+        Returns the user email
+        """
+        return self.user.email
+
+    def set_email(self, new_email):
+        """
+        Sets the user email
+        """
+        self.user.email = new_email
+        self.user.save()
+
+    def get_first_name(self):
+        """
+        Returns the user first name
+        """
+        return self.user.first_name
+
+    def set_first_name(self, new_first_name):
+        """
+        Sets the user first name
+        """
+        self.user.first_name = new_first_name
+        self.user.save()
+
+    def get_last_name(self):
+        """
+        Returns the user last name
+        """
+        return self.user.last_name
+
+    def set_last_name(self, new_last_name):
+        """
+        Sets the user last name
+        """
+        self.user.last_name = new_last_name
+        self.user.save()
+
+    def get_telefono(self):
+        """
+        Returns the user telephone
+        """
+        return self.telefono
+
+    def set_telefono(self, new_telefono):
+        """
+        Sets the user telephone
+        """
+        self.telefono = new_telefono
+        self.save()
+
+    def get_direccion(self):
+        """
+        Returns the user address
+        """
+        return self.direccion
+
+    def set_direccion(self, new_direccion):
+        """
+        Sets the user address
+        """
+        self.direccion = new_direccion
+        self.save()
 
     def __str__(self):
-        dataString = "{u.username}, email: {u.email}"
-        return dataString.format(u=self.user)
+        username = self.user.get_username()
+        return "{}".format(username)
 
-"""
-Escucha al evento de eliminación de User para eliminar el django.contrib.auth.models.User asociado.
-"""
 @receiver(models.signals.post_delete, sender=User, dispatch_uid='user_delete_signal')
 def user_delete(sender, instance, *args, **kwargs):
-    djUser.objects.get(username=instance.user.username).delete()
-    
-class Permission(models.Model):
     """
-        Este modelo *extiende* (no hereda) el model por defecto de Django:
-        ``django.contrib.auth.models.Permission``, agregando un campo.
-
-        El model es usado para manejar los permisos en el sistema.
-
-        :param id: Id unico
-        :param permission: Modelo por defecto de Django. Usado con el framework
-        :param desc_larga: Descripcion larga de un permiso (nombre legible para usuario)
-
+    Escucha al evento de eliminación de User para eliminar el User de Django asociado.
     """
-    permission = models.OneToOneField( djPermission, on_delete = models.CASCADE, verbose_name = "Permiso" ) #TODO Cuidar eliminación
-    desc_larga = models.TextField( "Descripcion larga" )
+    instance.user.delete()
 
-    def __str__(self):
-        dataString = "<{p.codename}, name: {p.name}, desc_larga: {d}>"
-        return dataString.format(p=self.permission, d=desc_larga)
+class RoleManager(models.Manager):
+    def create(self, **kwargs):
+        """
+        Wrapper of the creation function for Role
+        :param kwargs: Role data.
+        :returns: None if the role has not been created or
+        the instance of the new role.
+        """
+        # Checking for required fields
+        required_fields = ['name']
+        for required_field in required_fields:
+            if required_field not in kwargs.keys():
+                raise KeyError('{} is required.'.format(required_field))
 
-class Group(models.Model):
+        # Checking if name has already been taken
+        if djGroup.objects.filter(name=kwargs['name']).count() == 0:
+            dj_group = djGroup.objects.create(name=kwargs['name'])
+
+            new_role = Role.objects.create(
+                group=dj_group,
+                desc_larga=kwargs.get('desc_larga', 'Sin descripcion.')
+            )
+
+            return new_role
+
+        else:
+            return None
+
+    def filter(self, **kwargs):
+        """
+        Returns the results of a query.
+        :param kwargs: Query details.
+        :returns: An instance of QuerySet containing the results of the query.
+        """
+        django_group_fields = ['name'] # We does not use the permission field
+        custom_group_fields = ['desc_larga']
+
+        # Check arguments
+        accepted_fields = django_group_fields + custom_group_fields
+        for key in kwargs.keys():
+            if key not in accepted_fields:
+                raise FieldError('Cannot resolve {} into field.'.format(key))
+
+        # Construct params
+        params = {}
+        for key, value in kwargs.items():
+            if key not in custom_group_fields:
+                new_key = 'group__' + key
+                params[new_key] = value
+            else:
+                params[key] = value
+
+        # Make query and return
+        return Role.objects.filter(**params)
+
+class Role(models.Model):
     """
     Este modelo *extiende* (no hereda) el model por defecto de Django:
     ``django.contrib.auth.models.Group``, agregando un campo.
@@ -99,9 +250,131 @@ class Group(models.Model):
     :param desc_larga: Descripcion larga de un rol (nombre legible para usuario)
 
     """
-    group = models.OneToOneField( djGroup, on_delete = models.CASCADE, verbose_name = "Grupo" ) #TODO Cuidar eliminación
-    desc_larga = models.TextField( "Descripcion larga" )
+    # Public fields mapped to DB columns
+    group = models.OneToOneField(djGroup, on_delete=models.CASCADE, verbose_name="Grupo")
+    desc_larga = models.TextField("Descripcion larga")
+
+    # Public fields for simplicity
+    objects = models.Manager()
+    roles = RoleManager()
+
+    def add_user(self, user):
+        """
+        Adds the user to this role
+        :param user: Instance of autenticacion.models.User
+        """
+        user.user.groups.add(self.group)
+
+    def remove_user(self, user):
+        """
+        Removes user from this role
+        :param user: Instance of autenticacion.models.User
+        """
+        user.user.groups.remove(self.group)
+
+    def get_name(self):
+        """
+        Returns role name
+        """
+        return self.group.name
+
+    def get_desc(self):
+        """
+        Returns role description
+        """
+        return self.desc_larga
+
+    def set_desc(self, new_desc):
+        """
+        Sets role description
+        """
+        self.desc_larga = new_desc
+        self.save()
 
     def __str__(self):
-        dataString = "<{g.name}, desc_larga: {d}>"
-        return dataString.format(g=self.group, d=self.desc_larga)
+        return "{g.name}, desc_larga: {d}".format(g=self.group, d=self.desc_larga)
+
+
+@receiver(models.signals.post_delete, sender=Role, dispatch_uid='role_delete_signal')
+def role_delete(sender, instance, *args, **kwargs):
+    """
+    Escucha al evento de eliminación de Role para eliminar el Group de Django asociado.
+    """
+    instance.group.delete()
+
+class ProjectManager(models.Manager):
+    def create(self, **kwargs):
+        """
+        Wrapper of the creation function for Project.
+        :param kwargs: Project data.
+        :returns: None if the project has not been created or
+        the instance of the new project.
+        """
+        # Checking for required fields
+        required_fields = ['name']
+        for required_field in required_fields:
+            if required_field not in kwargs.keys():
+                raise KeyError('{} is required.'.format(required_field))
+
+        # Checking if name has already been taken
+        if Project.projects.filter(name=kwargs['name']).count() == 0:
+            return Project.objects.create(name=kwargs['name'])
+
+        else:
+            return None
+
+    def filter(self, **kwargs):
+        """
+        Returns the results of a query.
+        :param kwargs: Query details.
+        :returns: An instance of QuerySet containing the results of the query.
+        """
+        return Project.objects.filter(**kwargs)
+
+class Project(models.Model):
+    """
+    Dummy project class!!
+    """
+    # Public fields mapped to DB columns
+    name = models.TextField('Project name')
+
+    # Public fields for simplicity
+    objects = models.Manager()
+    projects = ProjectManager()
+
+    class Meta:
+        default_permissions = () # To explicitly list permissions
+        permissions = (
+            ('add_project', 'Crea un projecto y asigna el "Scrum Master".'),
+            ('delete_project', 'Elimina un projecto.'),
+            ('view_project_details', 'Ver detalles del projecto.'),
+            ('view_kanbam', 'Ver Kanbam.'),
+        )
+
+    def assign_perm(self, perm, user):
+        """
+        Asigna el permiso ``perm'' sobre la instancia al usuario ``user''.
+        En caso de que no exista el permiso se alza DoesNotExists.
+
+        :param perm: Cadena que identifica el permiso. Ver clase interna Meta de Project.
+        :param user: Instancia de User del usuario a quien asignamos el permiso.
+        """
+        assign_perm(perm, user.user, self)
+
+    def get_perms(self, user):
+        """
+        Obtiene una lista de todos los permisos de usuario ``user'' sobre la instancia.
+
+        :param user: Instancia de User de quien obtenemos la lista de permisos.
+        :returns: La lista de permisos asignados a user sobre la actual instancia.
+        """
+        return get_perms(user.user, self)
+
+    def get_name(self):
+        """
+        Returns the project name
+        """
+        return self.name
+
+    def __str__(self):
+        return "{}".format(self.name)
