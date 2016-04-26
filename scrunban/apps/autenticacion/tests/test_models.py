@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.test.utils import setup_test_environment
 
 from django.contrib.auth import authenticate
-from apps.autenticacion.models import User, Role
+from apps.autenticacion.models import User, Role, Project
 
 class AutenticacionModelsTests(TestCase):
         def test_user_create_delete_minimal(self):
@@ -248,3 +248,76 @@ class AutenticacionModelsTests(TestCase):
                 
                 user.delete()
                 role.delete()
+
+        def test_role_custom_filter_method(self):
+                data = {
+                        'name' : 'Role',
+                }
+                
+                role = Role.roles.create(**data)
+
+                name_query = Role.roles.filter(name=data['name'])
+                self.assertEqual(name_query.exists(), True)
+
+                role.delete()
+
+        def test_project_create_delete(self):
+                data = {
+                        'name' : 'Project',
+                }
+
+                project = Project.projects.create(**data)
+                self.assertNotEqual(project, None)
+                project.delete()
+
+        def test_project_create_delete_existing_project(self):
+                data = {
+                        'name' : 'Project',
+                }
+
+                project1 = Project.projects.create(**data)
+                project2 = Project.projects.create(**data)
+                self.assertNotEqual(project1, None)
+                self.assertEqual(project2, None)
+                project1.delete()
+
+        def test_project_check_params(self):
+                no_name = {
+                }
+
+                self.assertRaises(KeyError, Project.projects.create, **no_name)
+
+        def test_project_check_getters(self):
+                data = {
+                        'name' : 'Project',
+                }
+
+                project = Project.projects.create(**data)
+                self.assertEqual(data['name'], project.get_name())
+
+        def test_project_check_perm_assignment(self):
+                user_data = {
+                        'username' : 'user_test',
+                        'password' : 'password',
+                }
+                project_data = {
+                        'name' : 'project',
+                }
+                # TODO Improve somehow... TT_TT
+                # Probably using Project._meta.permissions..??
+                perm_codename = 'view_kanbam'
+
+                user = User.users.create(**user_data)
+                project = Project.projects.create(**project_data)
+
+                self.assertNotEqual(user, None)
+                self.assertNotEqual(project, None)
+
+                project.assign_perm(perm_codename, user)
+
+                user_perms = project.get_perms(user)
+                self.assertEqual(perm_codename in user_perms, True)
+
+                user.delete()
+                project.delete()
+                

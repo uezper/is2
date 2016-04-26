@@ -1,7 +1,7 @@
 import json
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate as djAuthenticate
 from django.contrib.auth import login as djLogin
 from django.contrib.auth import logout as djLogout
@@ -18,7 +18,7 @@ def login(request):
     """
     
     if request.user.is_active:
-        return HttpResponseRedirect(reverse( base_settings.PERFIL_NAME ))
+        return HttpResponseRedirect(reverse(base_settings.PERFIL_NAME))
 
     # For cookie-based sessions
     request.session.set_test_cookie()
@@ -59,7 +59,8 @@ def authenticate_user(request):
                 data['STATUS'] = 'ERROR'
                 return JsonResponse(data)
 
-            user = djAuthenticate(username=from_client['username'], password=from_client['password'])
+            user = djAuthenticate(username=from_client['username'],
+                                  password=from_client['password'])
             if user is not None:
                 if user.is_active:
                     #TODO And if there is a request of login of a already loged in user?
@@ -96,7 +97,7 @@ def deauthenticate_user(request):
     djLogout(request)
     return HttpResponseRedirect(reverse(base_settings.LOGIN_NAME))
 
-@login_required( base_settings.PERFIL_NAME )
+@login_required(base_settings.PERFIL_NAME)
 def perfil(request):
     """
     Retorna la vista correspondiente al perfil del usuario
