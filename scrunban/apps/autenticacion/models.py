@@ -11,10 +11,9 @@ class UserManager(models.Manager):
     """
     #TODO Check in ERS for optional fields...
     def create(self, **kwargs):
-        # TODO Extend docstring for kwargs
         """
         Crea un usuario.
-
+        :param kwargs: User details.
         :returns: En caso de haberse creado, el nuevo usuario. Sino ``None''
         """
         # Checking for required fields
@@ -44,9 +43,14 @@ class UserManager(models.Manager):
             return None
 
     def filter(self, **kwargs):
+        """
+        Returns the results of a query.
+        :param kwargs: Query details.
+        :returns: An instance of QuerySet containing the results of the query.
+        """
         django_user_fields = ['username', 'email', 'first_name', 'last_name']
         custom_user_fields = ['direccion', 'telefono']
-        
+
         # Check arguments
         accepted_fields = django_user_fields + custom_user_fields
         for key in kwargs.keys():
@@ -119,7 +123,7 @@ class User(models.Model):
     def get_first_name(self):
         """
         Returns the user first name
-        """        
+        """
         return self.user.first_name
 
     def set_first_name(self, new_first_name):
@@ -145,7 +149,7 @@ class User(models.Model):
     def get_telefono(self):
         """
         Returns the user telephone
-        """        
+        """
         return self.telefono
 
     def set_telefono(self, new_telefono):
@@ -181,25 +185,58 @@ def user_delete(sender, instance, *args, **kwargs):
 
 class RoleManager(models.Manager):
     def create(self, **kwargs):
+        """
+        Wrapper of the creation function for Role
+        :param kwargs: Role data.
+        :returns: None if the role has not been created or
+        the instance of the new role.
+        """
         # Checking for required fields
         required_fields = ['name']
         for required_field in required_fields:
             if required_field not in kwargs.keys():
-                raise KeyError("{} is required.".format(required_field))
+                raise KeyError('{} is required.'.format(required_field))
 
         # Checking if name has already been taken
         if djGroup.objects.filter(name=kwargs['name']).count() == 0:
             dj_group = djGroup.objects.create(name=kwargs['name'])
-            
+
             new_role = Role.objects.create(
                 group=dj_group,
                 desc_larga=kwargs.get('desc_larga', 'Sin descripcion.')
             )
 
             return new_role
-        
+
         else:
             return None
+
+    def filter(self, **kwargs):
+        """
+        Returns the results of a query.
+        :param kwargs: Query details.
+        :returns: An instance of QuerySet containing the results of the query.
+        """
+        django_group_fields = ['name'] # We does not use the permission field
+        custom_group_fields = ['desc_larga']
+
+        # Check arguments
+        accepted_fields = django_group_fields + custom_group_fields
+        for key in kwargs.keys():
+            if key not in accepted_fields:
+                raise FieldError('Cannot resolve {} into field.'.format(key))
+
+        # Construct params
+        params = {}
+        for key, value in kwargs.items():
+            if key not in custom_group_fields:
+                new_key = 'group__' + key
+                params[new_key] = value
+            else:
+                params[key] = value
+
+        # Make query and return
+        return Role.objects.filter(**params)
 
 class Role(models.Model):
     """
@@ -220,7 +257,7 @@ class Role(models.Model):
     # Public fields for simplicity
     objects = models.Manager()
     roles = RoleManager()
-    
+
     def add_user(self, user):
         """
         Adds the user to this role
@@ -257,11 +294,53 @@ class Role(models.Model):
     def __str__(self):
         return "{g.name}, desc_larga: {d}".format(g=self.group, d=self.desc_larga)
 
+
+@receiver(models.signals.post_delete, sender=Role, dispatch_uid='role_delete_signal')
+def role_delete(sender, instance, *args, **kwargs):
+    """
+    Escucha al evento de eliminación de Role para eliminar el Group de Django asociado.
+    """
+    instance.group.delete()
+
+class ProjectManager(models.Manager):
+    def create(self, **kwargs):
+        """
+        Wrapper of the creation function for Project.
+        :param kwargs: Project data.
+        :returns: None if the project has not been created or
+        the instance of the new project.
+        """
+        # Checking for required fields
+        required_fields = ['name']
+        for required_field in required_fields:
+            if required_field not in kwargs.keys():
+                raise KeyError('{} is required.'.format(required_field))
+
+        # Checking if name has already been taken
+        if Project.projects.filter(name=kwargs['name']).count() == 0:
+            return Project.objects.create(name=kwargs['name'])
+
+        else:
+            return None
+
+    def filter(self, **kwargs):
+        """
+        Returns the results of a query.
+        :param kwargs: Query details.
+        :returns: An instance of QuerySet containing the results of the query.
+        """
+        return Project.objects.filter(**kwargs)
+
 class Project(models.Model):
     """
     Dummy project class!!
     """
+    # Public fields mapped to DB columns
     name = models.TextField('Project name')
+
+    # Public fields for simplicity
+    objects = models.Manager()
+    projects = ProjectManager()
 
     class Meta:
         default_permissions = () # To explicitly list permissions
@@ -274,7 +353,8 @@ class Project(models.Model):
 
     def assign_perm(self, perm, user):
         """
-        Asigna el permiso ``perm'' sobre la instancia al usuario ``user''
+        Asigna el permiso ``perm'' sobre la instancia al usuario ``user''.
+        En caso de que no exista el permiso se alza DoesNotExists.
 
         :param perm: Cadena que identifica el permiso. Ver clase interna Meta de Project.
         :param user: Instancia de User del usuario a quien asignamos el permiso.
@@ -289,6 +369,12 @@ class Project(models.Model):
         :returns: La lista de permisos asignados a user sobre la actual instancia.
         """
         return get_perms(user.user, self)
+
+    def get_name(self):
+        """
+        Returns the project name
+        """
+        return self.name
 
     def __str__(self):
         return "{}".format(self.name)
