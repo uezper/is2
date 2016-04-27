@@ -84,3 +84,69 @@ User.users.filter(username='johndoe1990', ...) # Para hacer queries. Igual que c
 ```
 
 Notar los ```**``` en las creaciones! Es para separar el proceso de ''construccion'' de los datos del proceso de ''creacion''. Tambien se puede hacer ```User.users.create(username='user', password='pass') # Y demas```. Con ```**``` se hacen lineas mas cortas, tambien.
+
+Para roles y permisos
+
+La creacion de un permiso se realiza utilizando el modelo de Django `django.auth.contrib.models.Permission` de la siguiente manera:
+
+```python
+  from django.auth.contrib.models import Permission
+  from django.contrib.contenttypes.models import ContentType
+  
+  permission_data = {
+          'name': 'Creacion de Sprints',                             # Descripcion larga del Permiso
+          'codename': 'crear_sprint',                                # Nombre en codigo del Permiso
+          'content_type': ContentType.objects.get_for_model(Project) # ContentType de algun modelo
+  }
+  
+  perm = Permission.objects.create(**permission_data)
+
+```
+Sin embargo estos permisos deberian ser creados una sola vez. (Permisos por defecto del sistema)
+
+Luego, para crear un rol, y teniendo en cuenta que la creacion de roles tendra sentido solo dentro del contexto de un proyecto, se realiza de la siguiente manera:
+
+```python
+  from apps.autenticacion.models import Role
+  from apps.autenticacion.models import Project # Ubicacion temporal 
+  
+  role_data = {
+    'name': 'scrum_master',         # Nombre en codigo del Rol
+    'desc_larga': 'Scrum Master'     # Descripcion larga del Rol
+  }
+  
+  # Crea el rol 'scrum_master' asociado al proyecto instanciado por p
+  rol = p.add_rol(**role_data)      # p es una instancia de Project
+
+```
+
+Procedemos a agregar permisos al rol:
+
+```python
+  ...
+  
+  # Agrega el permiso 'crear_sprint' al rol 'scrum_master'
+  rol.add_perm(perm)              # perm es una instancia de Permission
+
+  ...
+  
+```
+
+Ahora le asignamos el rol a un usuario y comprobamos si tiene un permiso dentro del proyecto. Para esto utilizamos
+el nombre en codigo del permiso, de esta manera:
+
+```python
+  ...
+  
+  rol.add_user(user)            # user es una instancia de apps.autenticacion.models.User
+  
+  # Verificar si el usuario user tiene el permiso 'crear_sprint' dentro del proyecto p
+  if p.has_perm(user, 'crear_sprint'):
+    pass
+  
+  ...
+  
+```
+
+
+
