@@ -29,7 +29,8 @@ PREREQ_APPS = [
 ]
 
 PROJECT_APPS = [
-    'apps.autenticacion',
+    'apps.autenticacion.apps.AutenticacionConfig',
+    'apps.administracion.apps.AdministracionConfig',
 ]
 
 INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS
