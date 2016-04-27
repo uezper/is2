@@ -2,6 +2,8 @@ from django.test import TestCase
 from django.test.utils import setup_test_environment
 
 from django.contrib.auth import authenticate
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Permission
 from apps.autenticacion.models import User, Role, Project
 
 class AutenticacionModelsTests(TestCase):
@@ -261,6 +263,89 @@ class AutenticacionModelsTests(TestCase):
 
                 role.delete()
 
+        def test_rol_get_users(self):
+
+                user_data_1 = {
+                        'username': 'random_nxhOkbjysw_1',
+                        'password': 'pass'
+                }
+
+                user_data_2 = {
+                        'username': 'random_nxhOkbjysw_2',
+                        'password': 'pass'
+                }
+
+                rol_data = {
+                        'name': 'test_role_2',
+                        'desc_larga': 'Role description',
+                }
+
+                user_1 = User.users.create(**user_data_1)
+                self.assertNotEqual(user_1, None)
+
+                user_2 = User.users.create(**user_data_2)
+                self.assertNotEqual(user_2, None)
+
+                rol = Role.roles.create(**rol_data)
+                self.assertNotEqual(rol, None)
+
+                rol.add_user(user_1)
+                self.assertEqual(rol.group in user_1.user.groups.all(), True)
+
+                rol.add_user(user_2)
+                self.assertEqual(rol.group in user_2.user.groups.all(), True)
+
+                user_list = rol.get_users()
+                self.assertEqual(len(user_list), 2)
+                self.assertEqual(user_1 in user_list, True)
+                self.assertEqual(user_2 in user_list, True)
+
+                rol.delete()
+                user_1.delete()
+                user_2.delete()
+
+
+        def test_role_get_perms(self):
+
+                rol_data = {
+                        'name': 'test_role_2',
+                        'desc_larga': 'Role description',
+                }
+
+                permission_data_1 = {
+                        'name': 'Permission Description',
+                        'codename': 'permission_1',
+                        'content_type': ContentType.objects.get_for_model(Project)
+                }
+
+                permission_data_2 = {
+                        'name': 'Permission Description',
+                        'codename': 'permission_2',
+                        'content_type': ContentType.objects.get_for_model(Project)
+                }
+
+                rol = Role.roles.create(**rol_data)
+                self.assertNotEqual(rol, None)
+
+                perm_1 = Permission.objects.create(**permission_data_1)
+                rol.add_perm(perm_1)
+                self.assertEqual(perm_1 in rol.group.permissions.all(), True)
+
+                perm_2 = Permission.objects.create(**permission_data_2)
+                rol.add_perm(perm_2)
+                self.assertEqual(perm_1 in rol.group.permissions.all(), True)
+
+                perm_list = rol.get_perms()
+
+                self.assertEqual(len(perm_list), 2)
+                self.assertEqual(perm_1 in perm_list, True)
+                self.assertEqual(perm_2 in perm_list, True)
+
+                perm_1.delete()
+                perm_2.delete()
+                rol.delete()
+
+
         def test_project_create_delete(self):
                 data = {
                         'name' : 'Project',
@@ -320,4 +405,215 @@ class AutenticacionModelsTests(TestCase):
 
                 user.delete()
                 project.delete()
-                
+
+        def test_project_create_delete_rol(self):
+                project_data = {
+                        'name': 'project',
+                }
+
+                rol_data = {
+                        'name': 'test_role',
+                        'desc_larga': 'Role description',
+                }
+
+                project = Project.projects.create(**project_data)
+                self.assertNotEqual(project, None)
+
+                new_rol = project.add_rol(**rol_data)
+                self.assertNotEqual(new_rol, None)
+
+                project_id = project.id
+                rol_name = str(project_id) + '_' + rol_data['name']
+                self.assertEqual(new_rol.get_name(), rol_name)
+
+                project.remove_rol(rol_data['name'])
+
+                removed_rol = Role.objects.filter(group__name=rol_name)
+                self.assertEqual(len(removed_rol), 0)
+
+                project.delete()
+
+        def test_project_create_delete_existing_rol(self):
+                project_data = {
+                        'name': 'project',
+                }
+
+                rol_data = {
+                        'name': 'test_role',
+                        'desc_larga': 'Role description',
+                }
+
+                project = Project.projects.create(**project_data)
+                self.assertNotEqual(project, None)
+
+                new_rol = project.add_rol(**rol_data)
+                self.assertNotEqual(new_rol, None)
+
+                new_rol_2 = project.add_rol(**rol_data)
+                self.assertEqual(new_rol_2, None)
+
+                new_rol.delete()
+                project.delete()
+
+        def test_project_get_role_list(self):
+                project_data = {
+                        'name': 'project',
+                }
+
+                rol_data_1 = {
+                        'name': 'test_role_1',
+                        'desc_larga': 'Role description',
+                }
+
+                rol_data_2 = {
+                        'name': 'test_role_2',
+                        'desc_larga': 'Role description',
+                }
+
+                rol_data_3 = {
+                        'name': 'test_role_3',
+                        'desc_larga': 'Role description',
+                }
+
+                project = Project.projects.create(**project_data)
+                self.assertNotEqual(project, None)
+
+                new_rol_1 = project.add_rol(**rol_data_1)
+                self.assertNotEqual(new_rol_1, None)
+                new_rol_2 = project.add_rol(**rol_data_2)
+                self.assertNotEqual(new_rol_2, None)
+                new_rol_3 = project.add_rol(**rol_data_3)
+                self.assertNotEqual(new_rol_3, None)
+
+                role_list = project.get_roles()
+                self.assertEqual(len(role_list), 3)
+
+                new_rol_1.delete()
+                new_rol_2.delete()
+                new_rol_3.delete()
+                project.delete()
+
+        def test_project_get_user_permissions(self):
+                user_data = {
+                        'username': 'random_nxhOkbjysw',
+                        'password': 'pass'
+                }
+
+                project_data = {
+                        'name': 'project',
+                }
+
+                rol_data_1 = {
+                        'name': 'test_role_1',
+                        'desc_larga': 'Role description',
+                }
+
+                rol_data_2 = {
+                        'name': 'test_role_2',
+                        'desc_larga': 'Role description',
+                }
+
+                permission_data_1 = {
+                        'name': 'Permission Description',
+                        'codename': 'permission_1',
+                        'content_type' : ContentType.objects.get_for_model(Project)
+                }
+
+                permission_data_2 = {
+                        'name': 'Permission Description',
+                        'codename': 'permission_2',
+                        'content_type': ContentType.objects.get_for_model(Project)
+                }
+
+
+                user = User.users.create(**user_data)
+                self.assertNotEqual(user, None)
+
+                project = Project.projects.create(**project_data)
+                self.assertNotEqual(project, None)
+
+                rol_1 = project.add_rol(**rol_data_1)
+                self.assertNotEqual(rol_1, None)
+
+                rol_2 = project.add_rol(**rol_data_2)
+                self.assertNotEqual(rol_2, None)
+
+                perm_1 = Permission.objects.create(**permission_data_1)
+                self.assertNotEqual(perm_1, None)
+
+                perm_2 = Permission.objects.create(**permission_data_2)
+                self.assertNotEqual(perm_2, None)
+
+                rol_1.add_perm(perm_1)
+                self.assertEqual(perm_1 in rol_1.group.permissions.all(), True)
+
+                rol_2.add_perm(perm_2)
+                self.assertEqual(perm_2 in rol_2.group.permissions.all(), True)
+
+                rol_1.add_user(user)
+                self.assertEqual(rol_1.group in user.user.groups.all(), True)
+                perm_list = project.get_user_perms(user)
+                self.assertEqual(len(perm_list), 1)
+                self.assertEqual(perm_1 in perm_list, True)
+
+                rol_2.add_user(user)
+                self.assertEqual(rol_2.group in user.user.groups.all(), True)
+                perm_list = project.get_user_perms(user)
+                self.assertEqual(len(perm_list), 2)
+                self.assertEqual(perm_2 in perm_list, True)
+
+                perm_1.delete()
+                perm_2.delete()
+                rol_1.delete()
+                rol_2.delete()
+                project.delete()
+                user.delete()
+
+        def test_project_has_perm(self):
+                user_data = {
+                        'username': 'random_nxhOkbjysw',
+                        'password': 'pass'
+                }
+
+                project_data = {
+                        'name': 'project',
+                }
+
+                rol_data = {
+                        'name': 'test_role',
+                        'desc_larga': 'Role description',
+                }
+
+                permission_data = {
+                        'name': 'Permission Description',
+                        'codename': 'permission',
+                        'content_type': ContentType.objects.get_for_model(Project)
+                }
+
+                user = User.users.create(**user_data)
+                self.assertNotEqual(user, None)
+
+                project = Project.projects.create(**project_data)
+                self.assertNotEqual(project, None)
+
+                rol = project.add_rol(**rol_data)
+                self.assertNotEqual(rol, None)
+
+                perm = Permission.objects.create(**permission_data)
+                self.assertNotEqual(perm, None)
+
+                rol.add_perm(perm)
+                self.assertEqual(perm in rol.group.permissions.all(), True)
+
+                rol.add_user(user)
+                self.assertEqual(rol.group in user.user.groups.all(), True)
+                self.assertEqual(perm in project.get_user_perms(user), True)
+                self.assertEqual(project.has_perm(user, permission_data['codename']), True)
+
+
+                perm.delete()
+                rol.delete()
+                project.delete()
+                user.delete()
+
+

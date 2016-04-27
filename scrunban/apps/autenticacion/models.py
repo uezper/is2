@@ -172,6 +172,7 @@ class User(models.Model):
         self.direccion = new_direccion
         self.save()
 
+
     def __str__(self):
         username = self.user.get_username()
         return "{}".format(username)
@@ -272,6 +273,34 @@ class Role(models.Model):
         """
         user.user.groups.remove(self.group)
 
+    def add_perm(self, permission):
+        """
+
+        Agrega un permiso al rol
+
+        :param permission: Instancia de contrib.auth.models.Permission
+        """
+        self.group.permissions.add(permission)
+
+    def remove_perm(self, permission):
+        """
+
+        Quita un permiso del rol
+
+        :param permission: Instancia de contrib.auth.models.Permission
+        """
+        self.group.permissions.remove(permission)
+
+    def get_perms(self):
+        """
+
+        Obtiene una lista de todos los permisos asociados al rol
+        :return: Lista de instancias de contrib.auth.models.Permission
+        """
+
+        return self.group.permissions.all()
+
+
     def get_name(self):
         """
         Returns role name
@@ -290,6 +319,19 @@ class Role(models.Model):
         """
         self.desc_larga = new_desc
         self.save()
+
+    def get_users(self):
+        """
+        Retorna usuarios asociados al rol
+
+        :return: Lista de usuarios
+        """
+
+        users = list(user.user for user in self.group.user_set.all())
+
+
+        return users
+
 
     def __str__(self):
         return "{g.name}, desc_larga: {d}".format(g=self.group, d=self.desc_larga)
@@ -370,11 +412,94 @@ class Project(models.Model):
         """
         return get_perms(user.user, self)
 
+
     def get_name(self):
         """
         Returns the project name
         """
         return self.name
+
+    def add_rol(self, **kwargs):
+        """
+
+        Crea un rol de proyecto con un nombre de la forma ``idProyecto_shortName``
+
+        :param desc_larga:  Descripcion larga del Rol
+        :param name:  Nombre en codigo del Rol
+        :returns: Instancia del nuevo rol creado
+        """
+
+        required_fields = ['name', 'desc_larga']
+        for required_field in required_fields:
+            if required_field not in kwargs.keys():
+                raise KeyError('{} is required.'.format(required_field))
+
+        p_id = self.id
+        data = {
+            'name' : str(p_id) + '_' + kwargs['name'],
+            'desc_larga' : kwargs['desc_larga'],
+        }
+        new_rol = Role.roles.create(**data)
+        return new_rol
+
+    def remove_rol(self, short_name):
+        """
+
+        Remueve un rol de un proyecto
+
+        :param short_name: Nombre en codigo del Rol
+        """
+
+        p_id = self.id
+        Role.objects.filter(group__name=str(p_id) + '_' + short_name)[0].delete()
+
+    def get_roles(self):
+
+        """
+
+        Obtiene una lista de todos los roles asociados con el proyecto
+
+        :returns: Una lista de roles
+        """
+
+        p_id = self.id
+        roles = Role.objects.filter(group__name__startswith=str(p_id) + '_')
+
+        return roles
+
+    def get_user_perms(self, user):
+        """
+
+        Obtiene una lista de todos los permisos de un Usuario asociados al proyecto a traves de algun rol
+
+        :param user: Instancia de usuario
+        :returns: Lista de permisos
+        """
+        p_id = self.id
+        roles = user.user.groups.filter(name__startswith=str(p_id) + '_')
+
+        perms = []
+
+        for rol in roles:
+            perms += rol.permissions.all()
+
+        return perms
+
+    def has_perm(self, user, perm):
+        """
+
+        Verifica si un usuario tiene un permiso dado dentro de un proyecto
+
+        :param user: Instancia de usuario que se va a verificar que tenga el permiso
+        :param perm: Permiso que se desea verificar en su nombre en codigo
+        :return:
+        """
+
+        for p in self.get_user_perms(user):
+            if (p.codename == perm):
+                return True
+
+        return False
 
     def __str__(self):
         return "{}".format(self.name)

@@ -43,9 +43,9 @@
 				    <hr />
 		                    <p><strong>Nombres: </strong> {{ user.first_name }} </p>
 		                    <p><strong>Apellidos: </strong> {{ user.last_name }} </p>
-		                    <p><strong>Telefono: </strong> {{ user.telefono }} </p>
+		                    <p><strong>Telefono: </strong> {{ user.user.telefono }} </p>
 		                    <p><strong>Email: </strong> {{ user.email }} </p>
-		                    <p><strong>Direccion: </strong> {{ user.direccion }} </p>
+		                    <p><strong>Direccion: </strong> {{ user.user.direccion }} </p>
 		                </div>
 			</div>
 		</div>
