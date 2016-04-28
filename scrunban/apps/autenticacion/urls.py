@@ -25,4 +25,11 @@ urlpatterns = [
     
 
     url(r'^perfil/$', views.perfil, name=base_settings.PERFIL_NAME),
+
+    # TODO! Cambiar cuando este la nueva app
+    url(r'^project/(?P<project_id>[0-9]+)/roles/$', views.role_list, name=base_settings.PROJECT_ROLE_LIST),
+    url(r'^project/(?P<project_id>[0-9]+)/roles/create/$', views.role_create, name=base_settings.PROJECT_ROLE_CREATE),
+    url(r'^project/(?P<project_id>[0-9]+)/roles/delete/(?P<rol_id>[0-9]+)/$', views.rol_delete, name=base_settings.PROJECT_ROLE_DELETE),
+    url(r'^project/(?P<project_id>[0-9]+)/roles/(?P<rol_id>[0-9]+)/$', views.rol_detail, name=base_settings.PROJECT_ROLE_DETAIL),
+    url(r'^project/(?P<project_id>[0-9]+)/roles/edit/(?P<rol_id>[0-9]+)/$', views.role_edit, name=base_settings.PROJECT_ROLE_EDIT),
 ]

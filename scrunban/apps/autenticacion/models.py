@@ -422,22 +422,38 @@ class Project(models.Model):
     def add_rol(self, **kwargs):
         """
 
-        Crea un rol de proyecto con un nombre de la forma ``idProyecto_shortName``
+        Crea un rol de proyecto con un nombre de la forma ``idProyecto_name`` si es que ``name`` es especificado,
+         de lo contrario el nombre queda de la forma ``idProyecto_r_num`` donde ``num`` va aumentando secuencialmente.
+
 
         :param desc_larga:  Descripcion larga del Rol
         :param name:  Nombre en codigo del Rol
         :returns: Instancia del nuevo rol creado
         """
 
-        required_fields = ['name', 'desc_larga']
+        required_fields = ['desc_larga']
         for required_field in required_fields:
             if required_field not in kwargs.keys():
                 raise KeyError('{} is required.'.format(required_field))
 
         p_id = self.id
+        r_name = ''
+
+        if ('name' not in kwargs.keys()):
+            r_tot = Role.objects.filter(group__name__startswith=str(p_id) + '_r_')
+            if (len(r_tot) == 0):
+                r_name = str(p_id) + '_r_0'
+            else:
+                r_last = r_tot.last().get_name()
+                r_last = int(r_last[len(r_last) - 1]) + 1
+                r_name = str(p_id) + '_r_' + str(r_last)
+        else:
+            r_name = str(p_id) + '_' + kwargs['name']
+
         data = {
-            'name' : str(p_id) + '_' + kwargs['name'],
+            'name' : r_name,
             'desc_larga' : kwargs['desc_larga'],
+
         }
         new_rol = Role.roles.create(**data)
         return new_rol
@@ -451,7 +467,7 @@ class Project(models.Model):
         """
 
         p_id = self.id
-        Role.objects.filter(group__name=str(p_id) + '_' + short_name)[0].delete()
+        Role.objects.filter(group__name=short_name)[0].delete()
 
     def get_roles(self):
 

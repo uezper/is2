@@ -1,0 +1,346 @@
+{% extends "base" %}
+
+{% block "include" %}
+<script>
+    $(document).ready(function(){
+
+
+        cargar_datos();
+        check_create();
+
+        if ($("#errors").children().length > 0)
+        {
+            $("#errors").show();
+        }
+        else
+        {
+            $("#errors").hide();
+        }
+
+        $("#addPerm").click(function () {
+            perms = [];
+
+            $('#comboPermisos :selected').each(function(i, selected){
+                perms[i] = $(selected).val();
+            });
+
+            $.each(perms, function (index, value) {
+                var element = $("#comboPermisos option[value='" + value +"']");
+
+                $("#addedPermisos").append(element);
+            });
+
+            check_create();
+        });
+
+        $("#removePerm").click(function () {
+            perms = [];
+
+            $('#addedPermisos :selected').each(function(i, selected){
+                perms[i] = $(selected).val();
+            });
+
+            $.each(perms, function (index, value) {
+                var element = $("#addedPermisos option[value='" + value +"']");
+
+                $("#comboPermisos").append(element);
+            });
+
+            check_create();
+        });
+
+
+        $("#addUser").click(function () {
+            users = [];
+
+            $('#comboUsers :selected').each(function(i, selected){
+                users[i] = $(selected).val();
+            });
+
+            $.each(users, function (index, value) {
+                var element = $("#comboUsers option[value='" + value +"']");
+
+                $("#addedUsers").append(element);
+            });
+
+            check_create();
+        });
+
+        $("#removeUser").click(function () {
+            users = [];
+
+            $('#addedUsers :selected').each(function(i, selected){
+                users[i] = $(selected).val();
+            });
+
+            $.each(users, function (index, value) {
+                var element = $("#addedUsers option[value='" + value +"']");
+
+
+                $("#comboUsers").append(element);
+            });
+
+            check_create();
+        });
+
+        $("#rolNombre").keyup(function(){
+           check_create();
+        });
+
+        function cargar_datos()
+        {
+            rol_name = $("#id_data_inputNombre").val();
+            perm_list = $("#id_data_inputPerms").val();
+            user_list = $("#id_data_inputUsers").val();
+
+
+
+            if (rol_name != undefined)
+            {
+                $("#rolNombre").val(rol_name);
+            }
+
+            if (perm_list != undefined)
+            {
+                $.each(perm_list.split(","), function(index, perm){
+                   opt = $("option[value='" + perm +"']");
+                   $("#addedPermisos").append($(opt));
+                });
+            }
+
+            if (user_list != undefined)
+            {
+                $.each(user_list.split(","), function(index, perm){
+                   opt = $("option[value='" + perm +"']");
+                   $("#addedUsers").append($(opt));
+                });
+            }
+
+
+        }
+
+        function check_create()
+        {
+            len_added_perms = $("#addedPermisos").children().size();
+            if (len_added_perms > 0 && $("#rolNombre").val() != '')
+            {
+                $("#create").prop("disabled", false);
+            }
+            else
+            {
+                $("#create").prop("disabled", true);
+            }
+
+        }
+
+        $("#form").submit(function(event){
+
+            if ($("#accept").length)
+            {
+
+                event.preventDefault();
+                url_ = '{% url URL_NAMES.PROJECT_ROLE_LIST project.id %}';
+                $(location).attr('href',url_);
+            }
+
+            var vals = "";
+
+            $("#addedPermisos").children().each(function(index, value){
+                vals += $(value).val() + ",";
+            });
+            $("input[name='inputPerms']").val(vals);
+
+            vals = "";
+            $("#addedUsers").children().each(function(index, value){
+                vals += $(value).val() + ",";
+            });
+            $("input[name='inputUsers']").val(vals);
+
+            $("input[name='inputNombre']").val($("#rolNombre").val());
+        });
+
+
+    });
+</script>
+
+{% endblock %}
+
+{% block "title" %} {{ block.super }} | {{ project.name }} |
+{{ section_title }}
+{% endblock %}
+
+{% block "top_menu" %}
+
+	{% if user.is_staff %}
+		<li><a href="#">Administracion</a></li>
+	{% endif %}
+
+	<li class="dropdown">
+	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.first_name }} {{ user.last_name }} <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+		<li><a href="#">Mi Perfil</a></li>
+		<li role="separator" class="divider"></li>
+		<li><a href="{% url URL_NAMES.DEAUTH_NAME %}">Salir</a></li>
+	</ul>
+
+{% endblock %}
+
+{% block "left_menu_title" %} Proyecto {% endblock %}
+
+{% block "left_menu_options" %}
+	<li class="active"><a href="#">Roles</a></li>
+{% endblock %}
+
+{% block "working_path" %}
+	<li></li>
+	<li><a href="#">Mis Proyectos</a></li>
+	<li><a href="#" >{{ project.name }}</a></li>
+	<li><a href="{% url URL_NAMES.PROJECT_ROLE_LIST project.id %}">Roles</a></li>
+    <li class="active">{{ section_title }}</li>
+{% endblock %}
+
+{% block "content" %}
+
+	<div class="panel panel-default">
+
+		<div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>{{ section_title }}</h3>
+                    <hr />
+
+                    <div class="alert alert-danger" role="alert" id="errors">
+                        {% if delete_form %}
+                        <p class="warning"> Estas seguro de que quieres borrar?</p>
+                        {% else %}
+                        {{form.inputNombre.errors}}
+                        {{form.inputPerms.errors}}
+                        {{form.inputUsers.errors}}
+                        {% endif %}
+                    </div>
+                    <form class="form-horizontal" method="post" action="#" id="form">
+                        {% csrf_token %}
+
+                        {% if delete_form %}
+                        <input id="id_inputID" name="inputID" type="hidden" value="{{delete_id}}"/>
+                        {% else %}
+                        <input id="id_projectID" name="projectID" type="hidden" value="{{project.id}}"/>
+                        <input id="id_inputOldNombre" name="inputOldNombre" type="hidden" value="{{edit_old_name}}"/>
+                        {{ form.inputPerms }}
+                        {{ form.inputUsers }}
+                        {{ form.inputNombre }}
+                        {% endif %}
+
+                        {% if form_data %}
+                        <input id="id_data_inputPerms" type="hidden" value="{{form_data.inputPerms}}"/>
+                        <input id="id_data_inputUsers" type="hidden" value="{{form_data.inputUsers}}"/>
+                        <input id="id_data_inputNombre" type="hidden" value="{{form_data.inputNombre}}"/>
+                        {% endif %}
+
+                      <div class="form-group {% if form.inputNombre.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowNombre" class="col-sm-2 control-label">Nombre:</label>
+
+                            <div class="row" id="rowNombre">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="rolNombre" placeholder="Nombre del Rol" {% if no_editable %} readonly {% endif %}>
+                                </div>
+                            </div>
+
+                      </div>
+                        <div class="form-group {% if form.inputPerms.errors|length > 0 %} has-error {% endif %}">
+                            <label for="rowPermisos" class="col-sm-2 control-label">Permisos:</label>
+
+                            <div class="row" id="rowPermisos" >
+
+                                <div class="col-md-4" {% if no_editable or not_editable_perms %} style="display: none" {% endif %}>
+                                 <!--   <input type="text" class="form-control" placeholder="Buscar permiso">-->
+
+                                    <select multiple="multiple" class="form-control" id="comboPermisos">
+                                        {% for p in perm_list %}
+                                                <option value="{{p.codename}}">{{p.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1" {% if no_editable or not_editable_perms %} style="display: none" {% endif %}>
+                                    <button type="button" class="btn btn-default btn-sm" id="addPerm">
+                                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-default btn-sm" id="removePerm">
+                                        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <!--<input type="text" class="form-control" placeholder="Buscar permiso">-->
+                                    <select multiple="multiple" class="form-control"  id="addedPermisos" {% if no_editable or not_editable_perms %} readonly {% endif %}>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group {% if form.inputUsers.errors|length > 0 %} has-error {% endif %}">
+                            <label for="rowUsuarios" class="col-sm-2 control-label">Usuarios:</label>
+                            <div class="row" id="rowUsuarios">
+                                <div class="col-md-4" {% if no_editable %} style="display: none" {% endif %}>
+                                   <!-- <input type="text" class="form-control" placeholder="Buscar usuario" id="BuscarUser1">-->
+                                    <select multiple class="form-control" id="comboUsers">
+                                        {% for u in user_list %}
+                                            <option value="{{u.id}}">{{u.user.first_name}} {{u.user.last_name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-1" {% if no_editable %} style="display: none" {% endif %}>
+                                    <button type="button" class="btn btn-default btn-sm" id="addUser">
+                                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-default btn-sm" id="removeUser">
+                                        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                   <!-- <input type="text" class="form-control" placeholder="Buscar usuario">-->
+                                    <select multiple class="form-control" id="addedUsers" {% if no_editable %} readonly {% endif %}>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                      <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            {% if delete_form %}
+                            <button type="submit" class="btn btn-default" id="delete">Borrar</button>
+                            <a href="{% url URL_NAMES.PROJECT_ROLE_EDIT project.id rol_id %}">
+                            <button type="button" class="btn btn-default" id="edit">Editar</button>
+                            </a>
+                            {% elif detail_form %}
+                            <button type="submit" class="btn btn-default" id="accept">Aceptar</button>
+                            <a href="{% url URL_NAMES.PROJECT_ROLE_EDIT project.id rol_id %}">
+                            <button type="button" class="btn btn-default" id="edit">Editar</button>
+                            </a>
+                            {% elif edit_form %}
+                            <button type="submit" class="btn btn-default" id="save">Guardar</button>
+                            {% if not_editable_perms %}
+                            {% else %}
+                            <a href="{% url URL_NAMES.PROJECT_ROLE_DELETE project.id rol_id %}">
+                            <button type="button" class="btn btn-default" id="delete">Borrar</button>
+                            </a>
+                            {% endif %}
+                            {% else %}
+                            <button type="submit" class="btn btn-default" id="create">Crear</button>
+                            {% endif %}
+                        </div>
+                      </div>
+                    </form>
+
+                </div>
+            </div>
+
+		</div>
+	</div>
+
+
+
+
+{% endblock %}
