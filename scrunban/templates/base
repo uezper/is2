@@ -1,0 +1,79 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>{% block "title" %}Scrunban{% endblock %}</title>
+
+<!-- Latest compiled and minified CSS -->
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+<link rel="stylesheet" href="{% static 'css/bootstrap-theme.css' %}">
+<script src="{% static 'js/angular.js' %}"></script>
+<script src="{% static 'js/angular-cookies.js' %}"></script>
+
+<script src="{% static 'js/base.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+   
+
+{% block "include" %}{% endblock %}
+
+</head>
+
+<body>
+<nav class="navbar navbar-default navbar-static-top navbar-inverse topBar">
+
+    <div class="navbar-header"> 				
+		<span class="navbar-brand"><h3>Scrunban</h3></span>
+		<button class="navbar-toggle" data-toggle="collapse" data-target=".navMenu" >
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		</button> 
+	</div>
+	
+	
+	<div class="collapse navbar-collapse navMenu"> 			
+		<ul class="nav navbar-nav navbar-right">
+			{% block "top_menu" %}
+			{% endblock %}
+		  </ul>
+  </div>
+</nav>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-2 sideBar">
+		
+		<ul class="nav navbar-stacked navbar-default">
+			
+			
+				<li class="title">
+					{% block "left_menu_title" %}{% endblock %}			  
+				</li>
+				{% block "left_menu_options" %}					
+				{% endblock %}					
+				
+        	</ul>
+			
+			
+		</div>
+		
+		<div class="col-md-10 mainContent">
+			<ol class="breadcrumb">
+			  {% block "working_path" %}		
+			  {% endblock %}
+			</ol>
+			
+			{% block "content" %}{% endblock %}			
+			
+		</div>
+		
+</div>
+<div id="sideBar-extension"></div>
+</div>
+</body>
+</html>
