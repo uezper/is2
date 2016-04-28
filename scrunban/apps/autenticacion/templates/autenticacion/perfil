@@ -15,7 +15,7 @@
 	<ul class="dropdown-menu">
 		<li><a href="#">Mi Perfil</a></li>            
 		<li role="separator" class="divider"></li>
-		<li><a href="{% url DEAUTH_NAME %}">Salir</a></li>
+		<li><a href="{% url URL_NAMES.DEAUTH_NAME %}">Salir</a></li>
 	</ul>
 
 {% endblock %}

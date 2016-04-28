@@ -406,7 +406,7 @@ class AutenticacionModelsTests(TestCase):
                 user.delete()
                 project.delete()
 
-        def test_project_create_delete_rol(self):
+        def test_project_create_delete_rol_with_name(self):
                 project_data = {
                         'name': 'project',
                 }
@@ -426,7 +426,35 @@ class AutenticacionModelsTests(TestCase):
                 rol_name = str(project_id) + '_' + rol_data['name']
                 self.assertEqual(new_rol.get_name(), rol_name)
 
-                project.remove_rol(rol_data['name'])
+                project.remove_rol(new_rol.get_name())
+
+                removed_rol = Role.objects.filter(group__name=rol_name)
+                self.assertEqual(len(removed_rol), 0)
+
+                project.delete()
+
+        def test_project_create_delete_rol_without_name(self):
+                project_data = {
+                        'name': 'project',
+                }
+
+                rol_data = {
+                        'desc_larga': 'Role description',
+                }
+
+                project = Project.projects.create(**project_data)
+                self.assertNotEqual(project, None)
+
+                new_rol = project.add_rol(**rol_data)
+                self.assertNotEqual(new_rol, None)
+
+                project_id = project.id
+                rol_name_starts_with = str(project_id) + '_r_'
+                self.assertEqual(new_rol.get_name().startswith(rol_name_starts_with), True)
+
+                rol_name = new_rol.get_name()
+
+                project.remove_rol(new_rol.get_name())
 
                 removed_rol = Role.objects.filter(group__name=rol_name)
                 self.assertEqual(len(removed_rol), 0)
