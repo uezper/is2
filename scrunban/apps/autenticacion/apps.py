@@ -3,7 +3,9 @@ from django.apps import AppConfig
 class AutenticacionConfig(AppConfig):
     name = 'apps.autenticacion'
 
-    def ready(self):
+    # Llamar a este metodo para poblar la base de datos con los permisos por defecto del sistema
+    # Pero antes deben estar aplicado las migraciones
+    def get_ready(self):
         from apps.autenticacion.models import Role
         from apps.autenticacion import settings
         from django.contrib.auth.models import Permission
