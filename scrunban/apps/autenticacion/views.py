@@ -10,7 +10,7 @@ from apps.autenticacion.decorators import login_required
 
 
 #TODO! Cambiar cuando este la nueva app
-from apps.autenticacion.models import Project
+from apps.administracion.models import Project
 from django.shortcuts import get_object_or_404, HttpResponse
 from apps.autenticacion import settings as role_settings
 from django.contrib.auth.models import Permission
