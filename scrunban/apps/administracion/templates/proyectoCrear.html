@@ -88,6 +88,9 @@
                         </h3>
                     </div>
                     <div class="modal-body">
+                        {% if not proyecto_list %}
+                            No existe ningun usuario.
+                        {% endif %}
                         {% for user in user_list %}
                             <a data-dismiss="modal" id='addScrumMaster{{ forloop.counter }}' href='#'> {{ user.get_username }} </a><br>
                             <script>
@@ -113,6 +116,9 @@
                         </h3>
                     </div>
                     <div class="modal-body">
+                        {% if not proyecto_list %}
+                            No existe ningun usuario.
+                        {% endif %}
                         {% for user in user_list %}
                             <a data-dismiss="modal" id='addProductOwner{{ forloop.counter }}' href='#'> {{ user.get_username }} </a><br>
                             <script>
