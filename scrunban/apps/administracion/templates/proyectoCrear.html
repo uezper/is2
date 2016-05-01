@@ -44,33 +44,33 @@
             {% csrf_token %}
             {{ form.non_field_errors }}
             <div class="fieldWrapper">
-                <label for='{{ form.nombre }}'>Nombre del proyecto:</label>
-                {{ form.nombre }}
-                {{ form.nombre.errors }}
+                <label for='{{ form.name}}'>Nombre del proyecto:</label>
+                {{ form.name }}
+                {{ form.name.errors }}
             </div>
             <div class="fieldWrapper">
-                <label for='{{ form.fechaInicio }}'>Fecha de inicio:</label>
-                {{ form.fechaInicio }}
+                <label for='{{ form.date_start }}'>Fecha de inicio:</label>
+                {{ form.date_start }}
                 Formato: AAAA-MM-DD
-                {{ form.fechaInicio.errors }}
+                {{ form.date_start.errors }}
             </div>
             <div class="fieldWrapper">
-                <label for='{{ form.fechaFinal }}'>Fecha de finalizacion:</label>
-                {{ form.fechaFinal }}
+                <label for='{{ form.date_end }}'>Fecha de finalizacion:</label>
+                {{ form.date_end }}
                 Formato: AAAA-MM-DD
-                {{ form.fechaFinal.errors }}
+                {{ form.date_end.errors }}
             </div>
             <div class="fieldWrapper">
-                <label for='{{ form.scrumMaster }}'>Scrum Master:</label>
-                {{ form.scrumMaster }}
+                <label for='{{ form.scrum_master }}'>Scrum Master:</label>
+                {{ form.scrum_master }}
                 <button type="button" data-toggle="modal" data-target=".scrumMaster-popup">Click para elegir un Usuario</button>
-                {{ form.scrumMaster.errors }}
+                {{ form.scrum_master.errors }}
             </div>
             <div class="fieldWrapper">
-                <label for='{{ form.productOwner }}'>Product Owner:</label>
-                {{ form.productOwner }}
+                <label for='{{ form.product_owner }}'>Product Owner:</label>
+                {{ form.product_owner }}
                 <button type="button" data-toggle="modal" data-target=".productOwner-popup">Click para elegir un Usuario</button>
-                {{ form.productOwner.errors }}
+                {{ form.product_owner.errors }}
             </div>
 
             <input type="submit" value="Crear" />
@@ -88,14 +88,14 @@
                         </h3>
                     </div>
                     <div class="modal-body">
-                        {% if not proyecto_list %}
+                        {% if not user_list %}
                             No existe ningun usuario.
                         {% endif %}
                         {% for user in user_list %}
                             <a data-dismiss="modal" id='addScrumMaster{{ forloop.counter }}' href='#'> {{ user.get_username }} </a><br>
                             <script>
                                 document.getElementById('addScrumMaster{{ forloop.counter }}').addEventListener('click', function(){
-                                    document.getElementById("id_scrumMaster").value = "{{ user.get_username }}"
+                                    document.getElementById("id_scrum_master").value = "{{ user.get_username }}"
                                 });
                             </script>
                         {% endfor %}
@@ -116,14 +116,14 @@
                         </h3>
                     </div>
                     <div class="modal-body">
-                        {% if not proyecto_list %}
+                        {% if not user_list %}
                             No existe ningun usuario.
                         {% endif %}
                         {% for user in user_list %}
                             <a data-dismiss="modal" id='addProductOwner{{ forloop.counter }}' href='#'> {{ user.get_username }} </a><br>
                             <script>
                                 document.getElementById('addProductOwner{{ forloop.counter }}').addEventListener('click', function(){
-                                    document.getElementById("id_productOwner").value = "{{ user.get_username }}"
+                                    document.getElementById("id_product_owner").value = "{{ user.get_username }}"
                                 });
                             </script>
                         {% endfor %}

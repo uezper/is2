@@ -30,7 +30,7 @@
 {% block "working_path" %}
 	<li></li>
 	<li><a href="#">Mis Proyectos</a></li>
-	<li><a href="#" >{{ project.nombre }}</a></li>
+	<li><a href="#" >{{ project.name }}</a></li>
 	<li class="active">Roles</li>
 {% endblock %}
 

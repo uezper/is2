@@ -6,14 +6,14 @@ from django.contrib.auth.models import Group as djGroup
 
 class UserManager(models.Manager):
     """
-    Clase administradora de operaciones a nivel de tabla del modelo ``User''.
+    Clase administradora de operaciones a nivel de tabla del modelo ``User``.
     """
     #TODO Check in ERS for optional fields...
     def create(self, **kwargs):
         """
         Crea un usuario.
         :param kwargs: User details.
-        :returns: En caso de haberse creado, el nuevo usuario. Sino ``None''
+        :returns: En caso de haberse creado, el nuevo usuario. Sino ``None``
         """
         # Checking for required fields
         required_fields = ['username', 'password']
@@ -342,4 +342,3 @@ def role_delete(sender, instance, *args, **kwargs):
     Escucha al evento de eliminación de Role para eliminar el Group de Django asociado.
     """
     instance.group.delete()
-

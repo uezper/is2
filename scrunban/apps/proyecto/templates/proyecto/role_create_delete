@@ -194,7 +194,7 @@
 {% block "working_path" %}
 	<li></li>
 	<li><a href="#">Mis Proyectos</a></li>
-	<li><a href="#" >{{ project.nombre }}</a></li>
+	<li><a href="#" >{{ project.name }}</a></li>
 	<li><a href="{% url URL_NAMES.PROJECT_ROLE_LIST project.id %}">Roles</a></li>
     <li class="active">{{ section_title }}</li>
 {% endblock %}

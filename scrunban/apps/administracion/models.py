@@ -6,14 +6,9 @@ from apps.autenticacion.models import User, Role
 
 class ProductBacklog(models.Model):
     id = models.AutoField(primary_key=True)
+
     def __str__(self):
         return "%d" % self.id
-
-class SprintBacklog(models.Model):
-    id = models.AutoField(primary_key=True)
-    def __str__(self):
-        return "%d" % self.id
-
 
 
 class ProjectManager(models.Manager):
@@ -25,27 +20,29 @@ class ProjectManager(models.Manager):
         the instance of the new project.
         """
         # Checking for required fields
-        required_fields = ['nombre', 'fechaInicio', 'fechaFinal', 'scrumMaster', 'productOwner']
+
+        required_fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
         for required_field in required_fields:
             if required_field not in kwargs.keys():
                 raise KeyError('{} is required.'.format(required_field))
 
         # Checking if name has already been taken
-        if Proyecto.projects.filter(nombre=kwargs['nombre']).count() == 0:
+
+        if Project.projects.filter(name=kwargs['name']).count() == 0:
             data = {}
             for f in required_fields:
                 data[f] = kwargs[f]
 
-            p = Proyecto()
+            p = Project()
             pb = ProductBacklog()
             pb.save()
 
-            p.nombre = data['nombre']
-            p.fechaInicio = data['fechaInicio']
-            p.fechaFinal = data['fechaFinal']
-            p.scrumMaster = data['scrumMaster']
-            p.productOwner = data['productOwner']
-            p.productBacklog = pb
+            p.name = data['name']
+            p.date_start = data['date_start']
+            p.date_end = data['date_end']
+            p.scrum_master = data['scrum_master']
+            p.product_owner = data['product_owner']
+            p.product_backlog = pb
             p.save()
 
             return p
@@ -60,33 +57,47 @@ class ProjectManager(models.Manager):
         :param kwargs: Query details.
         :returns: An instance of QuerySet containing the results of the query.
         """
-        return Proyecto.objects.filter(**kwargs)
+        return Project.objects.filter(**kwargs)
 
 
+class Project(models.Model):
+    """
 
-class Proyecto(models.Model):
+    El model se encarga de guardar informacion de todos los proyectos del sistema.
+
+    :param id: Id unico
+    :param name: Nombre del proyecto
+    :param date_start: Fecha de inicio del proyecto
+    :param date_end: Fecha de finalizacion del proyecto
+    :param scrum_master: Scrum Master del proyecto
+    :param product_owner: Product Owner del proyecto
+    :param development_team: Todos los Development Teams del proyecto
+    :param product_backlog: Todos los User Stories del proyecto
+    """
+    # Public fields mapped to DB columns
     id = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=128)
-    fechaInicio = models.DateField()
-    fechaFinal = models.DateField()
-    scrumMaster = models.ForeignKey(User, null=True, related_name='asdf')
-    productOwner = models.ForeignKey(User, null=True, related_name='asdf2')
-    developmentTeam = models.ManyToManyField(User, related_name='asdf3')
-    productBacklog = models.OneToOneField(ProductBacklog)
-    sprintBacklog = models.ForeignKey(SprintBacklog, null=True)
+    name = models.TextField('Project name', unique=True)
+    date_start = models.DateField()
+    date_end = models.DateField()
+    scrum_master = models.ForeignKey(User, null=True, related_name='fk_project_scrum_master')
+    product_owner = models.ForeignKey(User, null=True, related_name='fk_project_product_owner')
+    development_team = models.ManyToManyField(User, related_name='mm_project_development_team')
+    product_backlog = models.OneToOneField(ProductBacklog)
+
 
     # Public fields for simplicity
     objects = models.Manager()
     projects = ProjectManager()
 
     def __str__(self):
-        return "%s" % self.nombre
+        return "{}".format(self.name)
+
 
     def get_name(self):
         """
         Returns the project name
         """
-        return self.nombre
+        return self.name
 
     def add_rol(self, **kwargs):
         """
@@ -189,7 +200,9 @@ class Proyecto(models.Model):
 
 class Sprint(models.Model):
     id = models.AutoField(primary_key=True)
-    sprint = models.ForeignKey(Proyecto, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, null=True)
+
     def __str__(self):
         return "%d" % self.id
+
 

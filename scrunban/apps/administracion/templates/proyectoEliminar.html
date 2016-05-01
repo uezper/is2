@@ -36,20 +36,20 @@
 {% block "content" %}
     <script>
         function updatePopup() {
-            document.getElementById("popup1_span1").innerHTML = proyectoToDelete;
-            document.getElementById("popup1_yes").value = proyectoToDelete;
+            document.getElementById("popup1_span1").innerHTML = projectToDelete;
+            document.getElementById("popup1_yes").value = projectToDelete;
             return false;
         }
     </script>
 	<div class="panel panel-default">
 		<div class="panel-body">
             <h1>EliminarProyecto</h1>
-            {% if not proyecto_list %}
+            {% if not project_list %}
                 No existe ningun proyecto.
             {% endif %}
-            {% for proyecto in proyecto_list %}
-                <script> function setName{{ proyecto.nombre }}(){ proyectoToDelete = "{{ proyecto.nombre }}"; } </script>
-                {{ proyecto.nombre }} | <a onclick="setName{{ proyecto.nombre }}(); updatePopup();" href="#" data-toggle="modal" data-target=".popup1">Eliminar</a> <br>
+            {% for project in project_list %}
+                <script> function setName{{ project.name }}(){ projectToDelete = "{{ project.name }}"; } </script>
+                {{ project.name }} | <a onclick="setName{{ project.name }}(); updatePopup();" href="#" data-toggle="modal" data-target=".popup1">Eliminar</a> <br>
             {% endfor %}
         </div>
 	</div>
@@ -68,7 +68,7 @@
 
                     <form action="/adm/proyecto/eliminar" method="post">
                         {% csrf_token %}
-                        <input id="popup1_yes" name="proyecto" type="hidden" value="asdf">
+                        <input id="popup1_yes" name="project" type="hidden" value="">
                         <button type="button" data-dismiss="modal" data-target=".scrumMaster-popup">Cancelar</button>
                         <input type="submit" value="Eliminar" />
                     </form>

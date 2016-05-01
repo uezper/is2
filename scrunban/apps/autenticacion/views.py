@@ -9,7 +9,6 @@ from scrunban.settings import base as base_settings
 from apps.autenticacion.decorators import login_required
 
 
-
 def login(request):
     """
     Retorna la vista correspondiente a la página de login.

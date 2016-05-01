@@ -1,13 +1,20 @@
 from django import forms
-from apps.autenticacion.settings import DEF_ROLE_SCRUM_MASTER
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Permission
 from apps.autenticacion.models import User
-from apps.administracion.models import Proyecto as Project
+from apps.administracion.models import Project
 from apps.proyecto.fields import PermissionListField, UserListField
 
 
 class CreateRolForm(forms.Form):
+    """
+    Formulario que se encarga de validar los datos necesarios para la creacion de un nuevo rol
+
+    :param projectID: ID del proyecto
+    :param inputNombre: Nombre del rol (descripcion larga)
+    :param inputPerms: Lista de permisos (codename de los permisos)
+    :param inputUsers: Lista de usuarios (sus id) * Este campo es opcional
+    """
 
     projectID = forms.CharField(widget=forms.HiddenInput,required=True)
     inputNombre = forms.CharField(min_length=1, required=True,widget=forms.HiddenInput, error_messages={'required' : 'Debe introducir el nombre del Rol'})
@@ -77,7 +84,16 @@ class CreateRolForm(forms.Form):
 
 
 class EditRolForm(CreateRolForm):
+    """
+        Formulario que se encarga de validar los datos necesarios para la edicion de un rol
 
+        :param projectID: ID del proyecto
+        :param inputNombre: Nombre nuevo del rol (descripcion larga)
+        :param inputOldNombre: Nombre actual del rol (descripcion larga)
+        :param inputPerms: Lista de permisos (codename de los permisos)
+        :param inputUsers: Lista de usuarios (sus id) * Este campo es opcional
+
+    """
     inputOldNombre = forms.CharField(min_length=1, required=True, widget=forms.HiddenInput)
     projectID = forms.CharField(widget=forms.HiddenInput)
     inputNombre = forms.CharField(min_length=1, required=True, widget=forms.HiddenInput,                                  error_messages={'required': 'Debe introducir el nombre del Rol'})
@@ -147,6 +163,13 @@ class EditRolForm(CreateRolForm):
 
 
 class DeleteRolForm(EditRolForm):
+    """
+        Formulario que se encarga de validar los datos necesarios para eliminar un rol
+
+        :param projectID: ID del proyecto
+        :param inputID: ID del rol que se va a borrar
+
+    """
 
     error_messages = {
         'required': 'Debe introducir el nombre del Rol',

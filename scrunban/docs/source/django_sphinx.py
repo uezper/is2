@@ -8,14 +8,18 @@ def process_docstring(app, what, name, obj, options, lines):
     from django.db import models
 
 
+
     # Only look at objects that inherit from Django's base model class
     if inspect.isclass(obj) and issubclass(obj, models.Model):
 
         # Grab the field list from the meta class
         fields = obj._meta.get_fields()
+
+
         latelines = []
 
         for field in fields:
+
             if not hasattr(field, 'attname') or isinstance(field, models.ForeignKey):
                 field.attname = field.name
                 # Decode and strip any html out of the field's help text
@@ -63,7 +67,7 @@ def process_docstring(app, what, name, obj, options, lines):
 
 
             lines.append('')
-            lines += latelines
+        lines += latelines
 
     # Return the extended docstring
     return lines

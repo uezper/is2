@@ -3,7 +3,7 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import FormView
 from django.views.generic.detail import SingleObjectMixin
 from apps.autenticacion.models import Role
-from apps.administracion.models import Proyecto as Project
+from apps.administracion.models import Project
 
 from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
 from apps.proyecto import forms
@@ -18,6 +18,7 @@ class RoleListView(ListView, SingleObjectMixin, UrlNamesContextMixin):
 
     """
     Clase correspondiente a la vista que lista los roles de un proyecto
+
 
     """
     model = Role

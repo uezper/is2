@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
 from apps.autenticacion.models import User, Role
-from apps.administracion.models import Proyecto as Project
+from apps.administracion.models import Project
 import time
 
 
@@ -16,11 +16,11 @@ class AutenticacionModelsTests(TestCase):
                 u = User.users.create(username='Test_user', password='dummy password')
 
                 data = {
-                        'nombre': nombre,
-                        'fechaInicio': time.strftime('%Y-%m-%d'),
-                        'fechaFinal': time.strftime('%Y-%m-%d'),
-                        'scrumMaster': u,
-                        'productOwner': u,
+                        'name': nombre,
+                        'date_start': time.strftime('%Y-%m-%d'),
+                        'date_end': time.strftime('%Y-%m-%d'),
+                        'scrum_master': u,
+                        'product_owner': u,
                 }
 
                 return Project.projects.create(**data)

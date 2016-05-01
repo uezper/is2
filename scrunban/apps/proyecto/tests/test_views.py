@@ -3,9 +3,9 @@ from django import http
 from django.test import TestCase
 from scrunban.settings import base as base_settings
 from apps.autenticacion.models import User
-from apps.administracion.models import Proyecto as Project
-from apps.autenticacion.settings import DEF_ROLE_SCRUM_MASTER
+from apps.administracion.models import Project
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 import time
 
 class AutenticacionViewsTests(TestCase):
@@ -17,16 +17,17 @@ class AutenticacionViewsTests(TestCase):
                 client.login(username='Test_client_user', password='client')
 
 
+
         def create_project(self, nombre='Testing project'):
 
                 u = User.users.create(username='Test_user', password='dummy password')
 
                 data = {
-                        'nombre': nombre,
-                        'fechaInicio': time.strftime('%Y-%m-%d'),
-                        'fechaFinal': time.strftime('%Y-%m-%d'),
-                        'scrumMaster': u,
-                        'productOwner': u,
+                        'name': nombre,
+                        'date_start': time.strftime('%Y-%m-%d'),
+                        'date_end': time.strftime('%Y-%m-%d'),
+                        'scrum_master': u,
+                        'product_owner': u,
                 }
 
                 return Project.projects.create(**data)
@@ -99,9 +100,9 @@ class AutenticacionViewsTests(TestCase):
 
 
                 perm_data = {
-                        'name' : DEF_ROLE_SCRUM_MASTER[2][0][1],
-                        'codename' : DEF_ROLE_SCRUM_MASTER[2][0][0],
-                        'content_type': DEF_ROLE_SCRUM_MASTER[2][0][2],
+                        'name' : 'testing perm',
+                        'codename' : 'testing_perm',
+                        'content_type': ContentType.objects.get_for_model(Permission),
                 }
 
                 project = self.create_project()
@@ -112,9 +113,9 @@ class AutenticacionViewsTests(TestCase):
                 user = User.users.create(**user_data)
                 self.assertNotEqual(user, None)
 
+
                 perm = Permission.objects.create(**perm_data)
                 self.assertNotEqual(perm, None)
-
 
                 data = {
                         'projectID': project.id,

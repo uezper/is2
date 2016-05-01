@@ -22,10 +22,12 @@ class PermissionListField(StringListField):
     def validate(self, value):
 
 
+
         perm_list = list(value)
 
         if (len(perm_list) == 0):
             raise ValidationError(self.error_messages['is_required'])
+
 
         x = 0
 
