@@ -1,5 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
-from apps.autenticacion.models import User, Project
+from apps.autenticacion.models import User
+from apps.administracion.models import Proyecto as Project
 
 __user_contenttype = ContentType.objects.get_for_model(User)
 __project_contenttype = ContentType.objects.get_for_model(Project)

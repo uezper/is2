@@ -27,7 +27,9 @@ class login_required():
         Retuns:
             Un envolvente de la vista para proteger de usuarios sin autentificación.
         """
+
         def view_wrapper(request):
+
             if not request.user.is_authenticated():
                 # El hashtag (#) es necesario para poder utilizar $location.search() en el script.
                 return HttpResponseRedirect( "{}#?next={}".format( reverse( base_settings.LOGIN_NAME ), request.path_info ) )
