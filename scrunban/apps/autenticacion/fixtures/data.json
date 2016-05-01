@@ -1,0 +1,83 @@
+[
+    {
+	"model": "auth.user",
+	"pk": 10,
+	"fields": {
+	    "username": "test_user1",
+            "password": "test_user1",
+            "first_name": "Test User 1",
+            "last_name": "Test User 1",
+            "email": "tuser1@scrunban.com"
+	}
+    },
+    {
+        "model": "autenticacion.User",
+        "pk": 10,
+        "fields": {
+	    "user": 10,
+            "telefono": "0123 456789",
+            "direccion": "Somewhere"
+        }
+    },
+    {
+	"model": "auth.user",
+	"pk": 11,
+	"fields": {
+	    "username": "test_user2",
+            "password": "test_user2",
+            "first_name": "Test User 2",
+            "last_name": "Test User 2",
+            "email": "tuser2@scrunban.com"
+	}
+    },
+    {
+        "model": "autenticacion.User",
+        "pk": 11,
+        "fields": {
+	    "user": 11,
+            "telefono": "1594 546987",
+            "direccion": "Somewhere else"
+        }
+    },
+    {
+	"model": "auth.user",
+	"pk": 12,
+	"fields": {
+	    "username": "test_user3",
+            "password": "test_user3",
+            "first_name": "Test User 3",
+            "last_name": "Test User 3",
+            "email": "tuser3@scrunban.com"
+	}
+    },
+    {
+        "model": "autenticacion.User",
+        "pk": 12,
+        "fields": {
+	    "user": 12,
+            "telefono": "548 14588563",
+            "direccion": "Jupiter"
+        }
+    },
+    {
+	"model": "autenticacion.Project",
+	"pk": 10,
+	"fields": {
+	    "name": "Projecto A"
+	}
+    },
+    {
+	"model": "autenticacion.Project",
+	"pk": 11,
+	"fields": {
+	    "name": "Projecto B"
+	}
+    },
+    {
+	"model": "autenticacion.Project",
+	"pk": 12,
+	"fields": {
+	    "name": "Projecto C"
+	}
+    }
+]

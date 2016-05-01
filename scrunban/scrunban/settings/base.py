@@ -30,7 +30,8 @@ PREREQ_APPS = [
 ]
 
 PROJECT_APPS = [
-    'apps.autenticacion',
+    'apps.autenticacion.apps.AutenticacionConfig',
+    'apps.administracion.apps.AdministracionConfig',
 ]
 
 INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS
@@ -126,6 +127,7 @@ AUTH_NAME   = URL_NAME_FORMAT.format( APP_NAME_AUTENTICACION, 'auth')
 DEAUTH_NAME = URL_NAME_FORMAT.format( APP_NAME_AUTENTICACION, 'deauth')
 
 PERFIL_NAME = URL_NAME_FORMAT.format( APP_NAME_AUTENTICACION, 'perfil')
+
 
 PROJECT_ROLE_LIST = URL_NAME_FORMAT.format( APP_NAME_AUTENTICACION, 'role_list')
 PROJECT_ROLE_CREATE = URL_NAME_FORMAT.format( APP_NAME_AUTENTICACION, 'role_create_delete')
