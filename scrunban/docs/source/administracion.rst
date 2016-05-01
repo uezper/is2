@@ -15,5 +15,9 @@ Vistas
 
 .. automodule:: apps.administracion.views
    :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. autofunction:: eliminar_proyecto(request)
 
 

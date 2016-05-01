@@ -89,9 +89,9 @@
 
         function cargar_datos()
         {
-            rol_name = $("#id_data_inputNombre").val();
-            perm_list = $("#id_data_inputPerms").val();
-            user_list = $("#id_data_inputUsers").val();
+            rol_name = $("#id_inputNombre").val();
+            perm_list = $("#id_inputPerms").val();
+            user_list = $("#id_inputUsers").val();
 
 
 
@@ -213,30 +213,24 @@
                     <div class="alert alert-danger" role="alert" id="errors">
                         {% if delete_form %}
                         <p class="warning"> Estas seguro de que quieres borrar?</p>
-                        {% else %}
+                        {% endif %}
+
+                        {{form.inputID.errors}}
                         {{form.inputNombre.errors}}
                         {{form.inputPerms.errors}}
                         {{form.inputUsers.errors}}
-                        {% endif %}
+
                     </div>
                     <form class="form-horizontal" method="post" action="#" id="form">
                         {% csrf_token %}
 
-                        {% if delete_form %}
-                        <input id="id_inputID" name="inputID" type="hidden" value="{{delete_id}}"/>
-                        {% else %}
-                        <input id="id_projectID" name="projectID" type="hidden" value="{{project.id}}"/>
-                        <input id="id_inputOldNombre" name="inputOldNombre" type="hidden" value="{{edit_old_name}}"/>
+                        {{ form.inputID }}
+                        {{ form.projectID }}
+                        {{ form.inputOldNombre }}
                         {{ form.inputPerms }}
                         {{ form.inputUsers }}
                         {{ form.inputNombre }}
-                        {% endif %}
 
-                        {% if form_data %}
-                        <input id="id_data_inputPerms" type="hidden" value="{{form_data.inputPerms}}"/>
-                        <input id="id_data_inputUsers" type="hidden" value="{{form_data.inputUsers}}"/>
-                        <input id="id_data_inputNombre" type="hidden" value="{{form_data.inputNombre}}"/>
-                        {% endif %}
 
                       <div class="form-group {% if form.inputNombre.errors|length > 0 %} has-error {% endif %}">
                         <label for="rowNombre" class="col-sm-2 control-label">Nombre:</label>
@@ -311,19 +305,14 @@
                         <div class="col-sm-offset-2 col-sm-10">
                             {% if delete_form %}
                             <button type="submit" class="btn btn-default" id="delete">Borrar</button>
-                            <a href="{% url URL_NAMES.PROJECT_ROLE_EDIT project.id rol_id %}">
-                            <button type="button" class="btn btn-default" id="edit">Editar</button>
-                            </a>
-                            {% elif detail_form %}
-                            <button type="submit" class="btn btn-default" id="accept">Aceptar</button>
-                            <a href="{% url URL_NAMES.PROJECT_ROLE_EDIT project.id rol_id %}">
+                            <a href="{% url URL_NAMES.PROJECT_ROLE_EDIT project.id rol.id %}">
                             <button type="button" class="btn btn-default" id="edit">Editar</button>
                             </a>
                             {% elif edit_form %}
                             <button type="submit" class="btn btn-default" id="save">Guardar</button>
                             {% if not_editable_perms %}
                             {% else %}
-                            <a href="{% url URL_NAMES.PROJECT_ROLE_DELETE project.id rol_id %}">
+                            <a href="{% url URL_NAMES.PROJECT_ROLE_DELETE project.id rol.id %}">
                             <button type="button" class="btn btn-default" id="delete">Borrar</button>
                             </a>
                             {% endif %}

@@ -66,6 +66,7 @@ def crear_proyecto(request):
 @login_required("adm:proyecto_eliminar")
 def eliminar_proyecto(request):
     """
+
     Retorna la vista correspondiente a la pagina de creacion de proyecto.
 
     :param request: Los datos de la solicitud

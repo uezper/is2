@@ -15,14 +15,13 @@
 
 import sys
 import os
-
 import django
 
 sys.path.insert(0, os.path.abspath('../../'))
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath('../../../venv/lib/python3.4/site-packages/'))
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "scrunban.settings.base")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "scrunban.settings.dev")
 django.setup()
 extensions = [
     'sphinx.ext.autodoc',
@@ -316,5 +315,4 @@ intersphinx_mapping = {
 locale_dirs = ['../../../venv/lib/python3.4/site-packages/django/conf/locale/']
 def setup(app):
 	from django_sphinx import process_docstring
-        # Register the docstring processor with sphinx
 	app.connect('autodoc-process-docstring', process_docstring)

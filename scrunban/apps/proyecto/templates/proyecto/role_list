@@ -64,7 +64,7 @@
 				<tbody>
 					{% for rol in role_list %}
 					<tr>
-						<td><a href="{% url URL_NAMES.PROJECT_ROLE_DETAIL project.id rol.0.id %}">{{rol.0.desc_larga}}</a></td>
+						<td><a href="{% url URL_NAMES.PROJECT_ROLE_EDIT project.id rol.0.id %}">{{rol.0.desc_larga}}</a></td>
 						<td class="text-center">{{rol.2}}</td>
 						<td class="text-right">
 
@@ -86,7 +86,23 @@
 			{% endif %}
 			</table>
 
-		</div></div>
+			<span class="step-links">
+				{% if page_obj.has_previous %}
+					<a href="?page={{ page_obj.previous_page_number }}"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>
+				{% endif %}
+
+				<span class="current">
+					Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+				</span>
+
+				{% if page_obj.has_next %}
+					<a href="?page={{ page_obj.next_page_number }}"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a>
+				{% endif %}
+			</span>
+
+		</div>
+
+		</div>
 
 		</div>
 	</div>

@@ -1,7 +1,5 @@
 from django.db import models
-from apps.autenticacion.models import User
-from apps.autenticacion.models import Role
-from guardian.shortcuts import assign_perm, get_perms
+from apps.autenticacion.models import User, Role
 
 # Create your models here.
 
@@ -22,14 +20,33 @@ class ProjectManager(models.Manager):
         the instance of the new project.
         """
         # Checking for required fields
-        required_fields = ['name']
+
+        required_fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
         for required_field in required_fields:
             if required_field not in kwargs.keys():
                 raise KeyError('{} is required.'.format(required_field))
 
         # Checking if name has already been taken
+
         if Project.projects.filter(name=kwargs['name']).count() == 0:
-            return Project.objects.create(name=kwargs['name'])
+            data = {}
+            for f in required_fields:
+                data[f] = kwargs[f]
+
+            p = Project()
+            pb = ProductBacklog()
+            pb.save()
+
+            p.name = data['name']
+            p.date_start = data['date_start']
+            p.date_end = data['date_end']
+            p.scrum_master = data['scrum_master']
+            p.product_owner = data['product_owner']
+            p.product_backlog = pb
+            p.save()
+
+            return p
+
 
         else:
             return None
@@ -67,37 +84,13 @@ class Project(models.Model):
     development_team = models.ManyToManyField(User, related_name='mm_project_development_team')
     product_backlog = models.OneToOneField(ProductBacklog)
 
+
     # Public fields for simplicity
     objects = models.Manager()
     projects = ProjectManager()
 
-    class Meta:
-        default_permissions = () # To explicitly list permissions
-        permissions = (
-            ('add_project', 'Crea un projecto y asigna el "Scrum Master".'),
-            ('delete_project', 'Elimina un projecto.'),
-            ('view_project_details', 'Ver detalles del projecto.'),
-            ('view_kanbam', 'Ver Kanbam.'),
-        )
-
-    def assign_perm(self, perm, user):
-        """
-        Asigna el permiso ``perm`` sobre la instancia al usuario ``user``.
-        En caso de que no exista el permiso se alza DoesNotExists.
-
-        :param perm: Cadena que identifica el permiso. Ver clase interna Meta de Project.
-        :param user: Instancia de User del usuario a quien asignamos el permiso.
-        """
-        assign_perm(perm, user.user, self)
-
-    def get_perms(self, user):
-        """
-        Obtiene una lista de todos los permisos de usuario ``user`` sobre la instancia.
-
-        :param user: Instancia de User de quien obtenemos la lista de permisos.
-        :returns: La lista de permisos asignados a user sobre la actual instancia.
-        """
-        return get_perms(user.user, self)
+    def __str__(self):
+        return "{}".format(self.name)
 
 
     def get_name(self):
@@ -138,8 +131,8 @@ class Project(models.Model):
             r_name = str(p_id) + '_' + kwargs['name']
 
         data = {
-            'name' : r_name,
-            'desc_larga' : kwargs['desc_larga'],
+            'name': r_name,
+            'desc_larga': kwargs['desc_larga'],
 
         }
         new_rol = Role.roles.create(**data)
@@ -203,9 +196,6 @@ class Project(models.Model):
                 return True
 
         return False
-
-    def __str__(self):
-        return "{}".format(self.name)
 
 
 class Sprint(models.Model):
