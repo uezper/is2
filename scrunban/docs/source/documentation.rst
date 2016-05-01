@@ -8,4 +8,6 @@ Documentacion
    :maxdepth: 1
 
    authentication
+
+   administracion
    
