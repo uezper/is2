@@ -7,7 +7,7 @@
 {% block "top_menu" %}  
 
 
-		<li><a href="{% url 'adm:index' %}">Administracion</a></li>
+		<li><a href="{% url URL_NAMES.ADM_USER_LIST %}">Administracion</a></li>
 
 
 	<li class="dropdown">
