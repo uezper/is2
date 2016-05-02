@@ -1,0 +1,297 @@
+{% extends "base" %}
+
+{% block "include" %}
+<script>
+    $(document).ready(function(){
+
+
+        cargar_datos();
+        check_create();
+
+        if ($("#errors").children().length > 0)
+        {
+            $("#errors").show();
+        }
+        else
+        {
+            $("#errors").hide();
+        }
+
+        $("#username").click(function () {
+   
+
+            check_create();
+        });
+
+       $("#password").click(function () {
+   
+
+            check_create();
+        });
+
+        
+        function cargar_datos()
+        {
+            username = $("#id_username").val();
+            first_name = $("#id_first_name").val();
+            last_name = $("#id_last_name").val();
+            email = $("#id_email").val();
+            direccion = $("#id_direccion").val();
+            telefono = $("#id_telefono").val();
+
+		$("#username").val(username);
+		$("#first_name").val(first_name);
+		$("#last_name").val(last_name);
+		$("#email").val(email);
+		$("#direccion").val(direccion);
+		$("#telefono").val(telefono);
+            
+        }
+
+        function check_create()
+        {
+
+            if ($("#username").val() != '' && $("#password").val() != '')
+            {
+                $("#create").prop("disabled", false);
+            }
+            else
+            {
+                $("#create").prop("disabled", true);
+            }
+                $("#create").prop("disabled", false);
+
+        }
+
+        $("#form").submit(function(event){
+
+       		username = $("#username").val();
+       		password = $("#password").val();
+            first_name = $("#first_name").val();
+            last_name = $("#last_name").val();
+            email = $("#email").val();
+            direccion = $("#direccion").val();
+            telefono = $("#telefono").val();
+            
+
+if (username != undefined){
+			$("#id_username").val(username);
+		}
+if (password != undefined){
+			$("#id_password").val(password);
+		}
+if (first_name != undefined){
+			$("#id_first_name").val(first_name);
+		}
+if (last_name != undefined){
+			$("#id_last_name").val(last_name);
+		}
+if (direccion != undefined){
+			$("#id_direccion").val(direccion);
+		}
+if (telefono != undefined){
+			$("#id_telefono").val(telefono);
+		}
+if (email != undefined){
+			$("#id_email").val(email);
+		}
+
+        });
+
+
+    });
+</script>
+
+{% endblock %}
+
+{% block "title" %} {{ block.super }} | Administracion |
+{{ section_title }}
+{% endblock %}
+
+{% block "top_menu" %}
+
+
+		<li><a href="{% url URL_NAMES.ADM_USER_LIST %}">Administracion</a></li>
+
+	<li class="dropdown">
+	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.first_name }} {{ user.last_name }} <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+		<li><a href="#">Mi Perfil</a></li>
+		<li role="separator" class="divider"></li>
+		<li><a href="{% url URL_NAMES.DEAUTH_NAME %}">Salir</a></li>
+	</ul>
+
+{% endblock %}
+
+{% block "left_menu_title" %} Proyecto {% endblock %}
+
+{% block "left_menu_options" %}
+	<li><a href="{% url URL_NAMES.ADM_PROJECT_CREATE %}">Nuevo Proyecto</a></li>
+	<li><a href="{% url URL_NAMES.ADM_PROJECT_DELETE %}">Eliminar Proyecto</a></li>
+	<li class="active"><a href="{% url URL_NAMES.ADM_USER_LIST %}">Usuarios</a></li>
+{% endblock %}
+
+{% block "working_path" %}
+	<li></li>
+	<li><a href="#">Administracion</a></li>
+	<li><a href="{% url URL_NAMES.ADM_USER_LIST %}">Usuarios</a></li>
+    <li class="active">{{ section_title }}</li>
+{% endblock %}
+
+{% block "content" %}
+
+	<div class="panel panel-default">
+
+		<div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>{{ section_title }}</h3>
+                    <hr />
+
+                    <div class="alert alert-danger" role="alert" id="errors">
+                        {% if delete_form %}
+                        <p class="warning"> Estas seguro de que quieres borrar?</p>
+                        {% endif %}
+
+                        {{form.id.errors}}
+                        {{form.username.errors}}
+                        {{form.password.errors}}
+                        {{form.email.errors}}
+                        {{form.direccion.errors}}
+                        {{form.telefono.errors}}
+
+                    </div>
+                    <form class="form-horizontal" method="post" action="#" id="form">
+                        {% csrf_token %}
+
+
+                        {{form.id}}
+                        {{form.username}}
+                        {{form.password}}
+			{{form.first_name}}
+			{{form.last_name}}
+                        {{form.email}}
+                        {{form.direccion}}
+                        {{form.telefono}}
+
+
+                      <div class="form-group {% if form.username.errors|length > 0 %} has-error {% endif %}">
+                        <label for="row1" class="col-sm-2 control-label">Username:</label>
+
+                            <div class="row" id="row1">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="username" placeholder="Username" {% if no_editable %} readonly {% endif %}>
+                                </div>
+                            </div>
+
+                      </div>
+                        
+
+
+                      <div class="form-group {% if form.first_name.errors|length > 0 %} has-error {% endif %}">
+                        <label for="row2" class="col-sm-2 control-label">Nombres:</label>
+
+                            <div class="row" id="row2">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="first_name" placeholder="Nombres" {% if no_editable %} readonly {% endif %}>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+
+                      <div class="form-group {% if form.last_name.errors|length > 0 %} has-error {% endif %}">
+                        <label for="row3" class="col-sm-2 control-label">Apellidos:</label>
+
+                            <div class="row" id="row3">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="last_name" placeholder="Apellidos" {% if no_editable %} readonly {% endif %}>
+                                </div>
+                            </div>
+
+                      </div>
+
+{% if delete_form %}
+{% else %}
+
+                      <div class="form-group {% if form.password.errors|length > 0 %} has-error {% endif %}">
+                        <label for="row4" class="col-sm-2 control-label">Password:</label>
+
+                            <div class="row" id="row4">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="password" class="form-control" id="password" placeholder="Password" {% if no_editable %} readonly {% endif %}>
+                                </div>
+                            </div>
+
+                      </div>
+
+{% endif %}
+                      <div class="form-group {% if form.email.errors|length > 0 %} has-error {% endif %}">
+                        <label for="row5" class="col-sm-2 control-label">Email:</label>
+
+                            <div class="row" id="row5">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="email" placeholder="Email" {% if no_editable %} readonly {% endif %}>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+
+                      <div class="form-group {% if form.direccion.errors|length > 0 %} has-error {% endif %}">
+                        <label for="row6" class="col-sm-2 control-label">Direccion:</label>
+
+                            <div class="row" id="row6">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="direccion" placeholder="Direccion" {% if no_editable %} readonly {% endif %}>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+                      <div class="form-group {% if form.telefono.errors|length > 0 %} has-error {% endif %}">
+                        <label for="row7" class="col-sm-2 control-label">Telefono:</label>
+
+                            <div class="row" id="row7">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="telefono" placeholder="Telefono" {% if no_editable %} readonly {% endif %}>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+
+
+
+
+
+
+
+
+
+                      <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            {% if delete_form %}
+                            <button type="submit" class="btn btn-default" id="delete">Borrar</button>
+                            {% else %}
+                            <button type="submit" class="btn btn-default" id="create">Crear</button>
+                            {% endif %}
+                        </div>
+                      </div>
+                    </form>
+
+                </div>
+            </div>
+
+		</div>
+	</div>
+
+
+
+
+{% endblock %}
