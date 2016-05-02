@@ -60,6 +60,13 @@ DB_DATABASE = 'EL NOMBRE DE TU BD';
 ### Test Unitarios
 Para ejecutar los tests unitarios, se debe ejecutar "./manage.py test"
 
+Para ejecutar las pruebas unitarias usamos `python manage.py test DIRECCION_AL_DIRECTORIO"` donde DIRECCION_AL_DIRECTORIO es el camino al directorio donde residen los archivos con las pruebas. Los archivos deben tener el nombre de la forma `test_*.py` para ser detectados. Por ejemplo, 
+```
+python manager.py test apps/autenticacion/tests/
+python manager.py test apps/administracion/tests/
+```
+Sería interesante poder usar un `script` para ejecutar todas las pruebas de una vez, sin embargo habría que leer si Django no posee esa funcionalidad.
+
 ### Sobre modelos
 Para usuario:
 
