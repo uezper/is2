@@ -3,11 +3,11 @@
 	"model": "auth.user",
 	"pk": 10,
 	"fields": {
-	    "username": "test_user1",
-            "password": "test_user1",
-            "first_name": "Test User 1",
-            "last_name": "Test User 1",
-            "email": "tuser1@scrunban.com"
+	    "username": "keverild",
+            "password": "keverild",
+            "first_name": "Kishan",
+            "last_name": "Everild",
+            "email": "keverild@scrunban.com"
 	}
     },
     {
@@ -16,18 +16,18 @@
         "fields": {
 	    "user": 10,
             "telefono": "0123 456789",
-            "direccion": "Somewhere"
+            "direccion": "South Africa"
         }
     },
     {
 	"model": "auth.user",
 	"pk": 11,
 	"fields": {
-	    "username": "test_user2",
-            "password": "test_user2",
-            "first_name": "Test User 2",
-            "last_name": "Test User 2",
-            "email": "tuser2@scrunban.com"
+	    "username": "finsyl",
+            "password": "finsyl",
+            "first_name": "Finnuala",
+            "last_name": "Sylvana",
+            "email": "finsyl@scrunban.com"
 	}
     },
     {
@@ -36,18 +36,18 @@
         "fields": {
 	    "user": 11,
             "telefono": "1594 546987",
-            "direccion": "Somewhere else"
+            "direccion": "England"
         }
     },
     {
 	"model": "auth.user",
 	"pk": 12,
 	"fields": {
-	    "username": "test_user3",
-            "password": "test_user3",
-            "first_name": "Test User 3",
-            "last_name": "Test User 3",
-            "email": "tuser3@scrunban.com"
+	    "username": "aerja",
+            "password": "aerja",
+            "first_name": "Aaliyah",
+            "last_name": "Erja",
+            "email": "aerja@scrunban.com"
 	}
     },
     {
@@ -56,28 +56,142 @@
         "fields": {
 	    "user": 12,
             "telefono": "548 14588563",
-            "direccion": "Jupiter"
+            "direccion": "India"
         }
     },
     {
-	"model": "autenticacion.Project",
+	"model": "auth.user",
+	"pk": 13,
+	"fields": {
+	    "username": "smina",
+            "password": "smina",
+            "first_name": "Salomon",
+            "last_name": "Mina",
+            "email": "smina@scrunban.com"
+	}
+    },
+    {
+        "model": "autenticacion.User",
+        "pk": 13,
+        "fields": {
+	    "user": 13,
+            "telefono": "321 45678975",
+            "direccion": "France"
+        }
+    },
+    {
+	"model": "auth.user",
+	"pk": 14,
+	"fields": {
+	    "username": "esevere",
+            "password": "esevere",
+            "first_name": "Evike",
+            "last_name": "Severe",
+            "email": "esevere@scrunban.com"
+	}
+    },
+    {
+        "model": "autenticacion.User",
+        "pk": 14,
+        "fields": {
+	    "user": 14,
+            "telefono": "548 17524834",
+            "direccion": "France"
+        }
+    },
+    {
+	"model": "administracion.ProductBacklog",
 	"pk": 10,
 	"fields": {
-	    "name": "Projecto A"
+	    "id": 10
 	}
     },
     {
-	"model": "autenticacion.Project",
+	"model": "administracion.Project",
+	"pk": 10,
+	"fields": {
+	    "name": "Drugdul Project",
+	    "date_start": "2016-05-05",
+	    "date_end": "2016-06-05",
+	    "scrum_master": 10,
+	    "product_owner": 11,
+	    "product_backlog": 10
+	}
+    },
+    {
+	"model": "administracion.ProductBacklog",
 	"pk": 11,
 	"fields": {
-	    "name": "Projecto B"
+	    "id": 11
 	}
     },
     {
-	"model": "autenticacion.Project",
+	"model": "administracion.Project",
+	"pk": 11,
+	"fields": {
+	    "name": "Gordarg Project",
+	    "date_start": "2016-05-06",
+	    "date_end": "2016-06-06",
+	    "scrum_master": 11,
+	    "product_owner": 10,
+	    "product_backlog": 11
+	}
+    },
+    {
+	"model": "administracion.ProductBacklog",
 	"pk": 12,
 	"fields": {
-	    "name": "Projecto C"
+	    "id": 12
+	}
+    },
+    {
+	"model": "administracion.Project",
+	"pk": 12,
+	"fields": {
+	    "name": "Uilosdir Project",
+	    "date_start": "2016-05-07",
+	    "date_end": "2016-06-07",
+	    "scrum_master": 12,
+	    "product_owner": 13,
+	    "product_backlog": 12
+	}
+    },
+    {
+	"model": "administracion.ProductBacklog",
+	"pk": 13,
+	"fields": {
+	    "id": 13
+	}
+    },
+    {
+	"model": "administracion.Project",
+	"pk": 13,
+	"fields": {
+	    "name": "Roston Project",
+	    "date_start": "2016-05-08",
+	    "date_end": "2016-06-08",
+	    "scrum_master": 13,
+	    "product_owner": 12,
+	    "product_backlog": 13
+	}
+    },
+    {
+	"model": "administracion.ProductBacklog",
+	"pk": 14,
+	"fields": {
+	    "id": 14
+	}
+    },
+    {
+	"model": "administracion.Project",
+	"pk": 14,
+	"fields": {
+	    "name": "Cualnol Project",
+	    "date_start": "2016-05-10",
+	    "date_end": "2016-06-10",
+	    "scrum_master": 10,
+	    "product_owner": 11,
+	    "product_backlog": 14
 	}
     }
 ]
