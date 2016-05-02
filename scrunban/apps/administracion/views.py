@@ -9,6 +9,21 @@ from scrunban.settings import base as base_settings
 from apps.autenticacion.decorators import login_required
 from django.db.utils import IntegrityError
 
+#Todo! look at this
+from django.core.urlresolvers import reverse
+from django.views.generic.list import ListView
+from django.views.generic.edit import FormView
+from apps.autenticacion.models import Role
+from apps.administracion.models import Project
+
+from apps.administracion import forms
+from django.shortcuts import get_object_or_404, HttpResponseRedirect
+
+from apps.proyecto.mixins import UrlNamesContextMixin
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from scrunban.settings import base as base_settings
+
 
 # Create your views here.
 def index(request):
@@ -33,6 +48,7 @@ def crear_proyecto(request):
         "DEAUTH_NAME": base_settings.DEAUTH_NAME,
         "LOGIN_NAME": base_settings.LOGIN_NAME,
         'user_list': User.objects.all(),
+        'URL_NAMES' : base_settings.URL_NAMES
     }
     if request.method == 'POST':
         form = ProjectForm(request.POST)
@@ -79,6 +95,7 @@ def eliminar_proyecto(request):
         "DEAUTH_NAME": base_settings.DEAUTH_NAME,
         "LOGIN_NAME": base_settings.LOGIN_NAME,
         "project_list": Project.objects.all(),
+        'URL_NAMES': base_settings.URL_NAMES
     }
     if request.method == 'POST':
         try:
@@ -90,3 +107,130 @@ def eliminar_proyecto(request):
     return render(request, 'proyectoEliminar.html', context)
 
 
+class UserCreateView(FormView, UrlNamesContextMixin):
+    """
+    Clase correspondiente a la vista que permite crear un usuario
+
+    """
+
+    form_class = forms.UserCreateForm
+    template_name = 'administracion/user_create_delete.html'
+
+    section_title = 'Nuevo Usuario'
+
+    @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
+    def dispatch(self, *args, **kwargs):
+        return super(UserCreateView, self).dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+
+        context = super(UserCreateView, self).get_context_data(**kwargs)
+
+        self.get_url_context(context)
+
+        context['section_title'] = self.section_title
+
+        return context
+
+    def get_success_url(self):
+        return reverse(base_settings.ADM_USER_LIST)
+
+    def form_valid(self, form):
+
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form):
+
+        print(form)
+
+        context = {
+            'form' : form
+        }
+
+        return super(UserCreateView, self).render_to_response(self.get_context_data(**context))
+
+
+
+class UserListView(ListView, UrlNamesContextMixin):
+
+    """
+    Clase correspondiente a la vista que lista los usuarios
+
+
+    """
+    model = User
+    context_object_name = 'user_list'
+    template_name = 'administracion/user_list.html'
+
+    section_title = 'Lista de Usuarios'
+    allow_empty = True
+
+    paginate_by = 10
+
+    @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
+    def dispatch(self, *args, **kwargs):
+        return super(UserListView, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super(UserListView, self).get_context_data(**kwargs)
+
+        self.get_url_context(context)
+
+        context['section_title'] = self.section_title
+
+        return context
+
+class UserDeleteView(UserCreateView):
+    """
+    Clase correspondiente a la vista que permite eliminar un rol usuario
+
+    """
+
+
+    form_class = forms.UserDeleteForm
+
+    section_title = 'Borrar Usuario'
+
+    user_id_kwname = 'user_id'
+
+    def get(self, request, *args, **kwargs):
+
+        form = self.form_class(self.get_initial())
+        print('en get')
+        print(form)
+
+        if (form.is_valid()):
+            return super(UserDeleteView, self).get(request, *args, **kwargs)
+        else:
+            from scrunban.settings.base import ADM_USER_LIST
+
+            return HttpResponseRedirect(reverse(ADM_USER_LIST))
+
+    def get_initial(self):
+        id = self.kwargs.get(self.user_id_kwname)
+
+        user = get_object_or_404(User, id=id)
+
+        initial = {
+            'id' : user.id,
+            'username' : user.get_username(),
+            'first_name' : user.get_first_name(),
+            'last_name' : user.get_last_name(),
+            'direccion' : user.get_direccion(),
+            'telefono' : user.get_telefono(),
+            'email' : user.get_email()
+        }
+        return initial
+
+    def get_context_data(self, **kwargs):
+
+        context = super(UserDeleteView, self).get_context_data(**kwargs)
+
+        context['no_editable'] = True
+        context['delete_form'] = True
+
+        return context
