@@ -98,7 +98,7 @@ def deauthenticate_user(request):
     djLogout(request)
     return HttpResponseRedirect(reverse(base_settings.LOGIN_NAME))
 
-@login_required(base_settings.PERFIL_NAME)
+@login_required()
 def perfil(request):
     """
     Retorna la vista correspondiente al perfil del usuario

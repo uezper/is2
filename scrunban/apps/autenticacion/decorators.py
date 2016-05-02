@@ -11,11 +11,12 @@ class login_required():
     :param redirect_url: La dirección originalmente solicitada. Se agrega dentro de la URL.
 
     """
-    def __init__(self, redirect_url):
+    def __init__(self):
         """
-        Inicializador. Se almacena la url solicitada.
+        Inicializador.
         """
-        self.redirect_url = redirect_url
+        pass
+
         
     def __call__(self, view):
         """

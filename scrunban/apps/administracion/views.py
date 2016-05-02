@@ -19,7 +19,7 @@ def index(request):
                         "<a href='http://localhost:8000/adm/proyecto/eliminar'>Eliminar Proyecto</a></body></html>")
 
 
-@login_required("proyecto_crear")
+@login_required()
 def crear_proyecto(request):
     """
     Retorna la vista correspondiente a la página de creacion de proyecto.
@@ -63,7 +63,7 @@ def crear_proyecto(request):
     return render(request, 'proyectoCrear.html', context)
 
 
-@login_required("adm:proyecto_eliminar")
+@login_required()
 def eliminar_proyecto(request):
     """
 
