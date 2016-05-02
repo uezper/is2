@@ -1,0 +1,102 @@
+[
+    {
+	"model": "auth.user",
+	"pk": 10,
+	"fields": {
+	    "username": "keverild",
+            "password": "keverild",
+            "first_name": "Kishan",
+            "last_name": "Everild",
+            "email": "keverild@scrunban.com"
+	}
+    },
+    {
+        "model": "autenticacion.User",
+        "pk": 10,
+        "fields": {
+	    "user": 10,
+            "telefono": "0123 456789",
+            "direccion": "South Africa"
+        }
+    },
+    {
+	"model": "auth.user",
+	"pk": 11,
+	"fields": {
+	    "username": "finsyl",
+            "password": "finsyl",
+            "first_name": "Finnuala",
+            "last_name": "Sylvana",
+            "email": "finsyl@scrunban.com"
+	}
+    },
+    {
+        "model": "autenticacion.User",
+        "pk": 11,
+        "fields": {
+	    "user": 11,
+            "telefono": "1594 546987",
+            "direccion": "England"
+        }
+    },
+    {
+	"model": "auth.user",
+	"pk": 12,
+	"fields": {
+	    "username": "aerja",
+            "password": "aerja",
+            "first_name": "Aaliyah",
+            "last_name": "Erja",
+            "email": "aerja@scrunban.com"
+	}
+    },
+    {
+        "model": "autenticacion.User",
+        "pk": 12,
+        "fields": {
+	    "user": 12,
+            "telefono": "548 14588563",
+            "direccion": "India"
+        }
+    },
+    {
+	"model": "auth.user",
+	"pk": 13,
+	"fields": {
+	    "username": "smina",
+            "password": "smina",
+            "first_name": "Salomon",
+            "last_name": "Mina",
+            "email": "smina@scrunban.com"
+	}
+    },
+    {
+        "model": "autenticacion.User",
+        "pk": 13,
+        "fields": {
+	    "user": 13,
+            "telefono": "321 45678975",
+            "direccion": "France"
+        }
+    },
+    {
+	"model": "auth.user",
+	"pk": 14,
+	"fields": {
+	    "username": "esevere",
+            "password": "esevere",
+            "first_name": "Evike",
+            "last_name": "Severe",
+            "email": "esevere@scrunban.com"
+	}
+    },
+    {
+        "model": "autenticacion.User",
+        "pk": 14,
+        "fields": {
+	    "user": 14,
+            "telefono": "548 17524834",
+            "direccion": "France"
+        }
+    }
+]

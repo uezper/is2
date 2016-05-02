@@ -60,6 +60,13 @@ DB_DATABASE = 'EL NOMBRE DE TU BD';
 ### Test Unitarios
 Para ejecutar los tests unitarios, se debe ejecutar "./manage.py test"
 
+Para ejecutar las pruebas unitarias usamos `python manage.py test DIRECCION_AL_DIRECTORIO"` donde DIRECCION_AL_DIRECTORIO es el camino al directorio donde residen los archivos con las pruebas. Los archivos deben tener el nombre de la forma `test_*.py` para ser detectados. Por ejemplo, 
+```
+python manager.py test apps/autenticacion/tests/
+python manager.py test apps/administracion/tests/
+```
+Sería interesante poder usar un `script` para ejecutar todas las pruebas de una vez, sin embargo habría que leer si Django no posee esa funcionalidad.
+
 ### Sobre modelos
 Para usuario:
 
@@ -151,8 +158,6 @@ el nombre en codigo del permiso, de esta manera:
 ### Sobre población de la base de datos
 Ejecutar
 ```
-python manager.py loaddata data.json
+python manager.py loaddata users.json    # Para agregar usuarios de autenticacion/fixtures/users.json
+python manager.py loaddata projects.json # Para agregar projectos de administracion/fixtures/projects.json
 ```
-Para agregar mas datos modificar el archivo en scrunban/apps/autenticacion/fixtures/data.json
-
-Mas adelante implementamos una convención para los nombres y así controlar los datos a cargar por nombres de archivo, también creo que es necesario incluir el nombre de la aplicacion dentro del nombre. Hay una opcion -app de loaddata que no he aprendido a usar todavía, tal vez facilite las cosas.

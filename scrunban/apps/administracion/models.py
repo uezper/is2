@@ -1,11 +1,37 @@
 from django.db import models
 from apps.autenticacion.models import User, Role
 
-# Create your models here.
+class ProductBacklogManager(models.Manager):
+    def create(self, **kwargs):
+        """
+        Wrapper of the creation function for Product Backlog
+        :param kwargs: Product Backlog data.
+        :returns: None if the product backlog has been created or
+        the instance of the new product backlog.
+        """
+        # Checking for required fields
 
+        required_fields = ['id']
+        for required_field in required_fields:
+            if required_field not in kwargs.keys():
+                raise KeyError('{} is required.'.format(required_field))
+
+        # Check if id has been taken
+        if ProductBacklog.productbacklogs.filter(id=kwargs['id']).count() == 0:
+            new_pb = ProductBacklog(kwargs['id'])
+
+            return new_pb
+        else:
+            return None
 
 class ProductBacklog(models.Model):
+    
+    # Public fields mapped to DB columns
     id = models.AutoField(primary_key=True)
+    
+    # Public fields mapped to DB columns
+    productbacklogs = ProductBacklogManager()
+    objects = models.Manager()
 
     def __str__(self):
         return "%d" % self.id

@@ -3,13 +3,11 @@ from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
 from apps.autenticacion.models import User, Role
-from apps.administracion.models import Project
+from apps.administracion.models import Project, ProductBacklog
 import time
 
 
 class AutenticacionModelsTests(TestCase):
-
-
         def create_project(self, nombre='Testing project'):
 
 
@@ -273,4 +271,13 @@ class AutenticacionModelsTests(TestCase):
                 project.delete()
                 user.delete()
 
+        def test_pbacklog_create_delete(self):
+                data = {
+                        'id' : 155
+                }
 
+                pb = ProductBacklog.productbacklogs.create(**data)
+
+                self.assertNotEqual(pb, None)
+
+                pb.delete()
