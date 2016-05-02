@@ -151,8 +151,6 @@ el nombre en codigo del permiso, de esta manera:
 ### Sobre población de la base de datos
 Ejecutar
 ```
-python manager.py loaddata data.json
+python manager.py loaddata users.json    # Para agregar usuarios de autenticacion/fixtures/users.json
+python manager.py loaddata projects.json # Para agregar projectos de administracion/fixtures/projects.json
 ```
-Para agregar mas datos modificar el archivo en scrunban/apps/autenticacion/fixtures/data.json
-
-Mas adelante implementamos una convención para los nombres y así controlar los datos a cargar por nombres de archivo, también creo que es necesario incluir el nombre de la aplicacion dentro del nombre. Hay una opcion -app de loaddata que no he aprendido a usar todavía, tal vez facilite las cosas.
