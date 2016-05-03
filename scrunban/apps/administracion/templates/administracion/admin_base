@@ -1,0 +1,18 @@
+{% extends "base" %}
+
+{% block "title" %}
+    {{ block.super }} | Administracion
+{% endblock %}
+
+{% block "left_menu_title" %} Administracion {% endblock %}
+
+{% block "left_menu_options" %}
+<li {% if left_active == 'Nuevo Proyecto' %} class="active" {% endif %}><a href="{% url URL_NAMES.ADM_PROJECT_CREATE %}">Nuevo Proyecto</a></li>
+<li {% if left_active == 'Eliminar Proyecto' %} class="active" {% endif %}><a href="{% url URL_NAMES.ADM_PROJECT_DELETE %}">Eliminar Proyecto</a></li>
+<li {% if left_active == 'Usuarios' %} class="active" {% endif %}><a href="{% url URL_NAMES.ADM_USER_LIST %}">Usuarios</a></li>
+{% endblock %}
+
+{% block "working_path" %}
+	<li></li>
+	<li><a href="#">Administracion</a></li>
+{% endblock %}

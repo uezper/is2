@@ -1,33 +1,7 @@
-{% extends "base" %}
-
-{% block "include" %}
-{% endblock %}
-
-{% block "title" %} {{ block.super }} | Perfil {% endblock %}
-
-{% block "top_menu" %}
-
-		<li><a href="{% url URL_NAMES.ADM_USER_LIST %}">Administracion</a></li>
-
-	<li class="dropdown">
-	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.first_name }} {{ user.last_name }} <span class="caret"></span></a>
-	<ul class="dropdown-menu">
-		<li><a href="#">Mi Perfil</a></li>
-		<li role="separator" class="divider"></li>
-		<li><a href="{% url URL_NAMES.DEAUTH_NAME %}">Salir</a></li>
-	</ul>
-
-{% endblock %}
-
-{% block "left_menu_title" %} Proyecto {% endblock %}
-
-{% block "left_menu_options" %}
-	<li class="active"><a href="#">Roles</a></li>
-{% endblock %}
+{% extends "proyecto/project_base" %}
 
 {% block "working_path" %}
-	<li></li>
-	<li><a href="#">Mis Proyectos</a></li>
+	{{ block.super }}
 	<li><a href="#" >{{ project.name }}</a></li>
 	<li class="active">Roles</li>
 {% endblock %}
@@ -40,7 +14,7 @@
 
 		<div class="row">
 		                <div class="col-md-12">
-		                    <h3>Lista de Roles</h3>
+		                    <h3>{{ section_title }}</h3>
 				    <hr />
 
 			<table class="table table-striped">

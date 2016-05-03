@@ -29,6 +29,9 @@ class RoleListView(ListView, SingleObjectMixin, UrlNamesContextMixin):
 
     paginate_by = 10
 
+    section_title = 'Lista de Roles'
+    left_active = 'Roles'
+
     @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
     def dispatch(self, *args, **kwargs):
         return super(RoleListView, self).dispatch(*args, **kwargs)
@@ -44,6 +47,9 @@ class RoleListView(ListView, SingleObjectMixin, UrlNamesContextMixin):
         self.get_url_context(context)
 
         context['project'] = self.object
+
+        context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
 
 
         return context
@@ -77,10 +83,12 @@ class RoleCreateView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserList
     form_class = forms.CreateRolForm
     template_name = 'proyecto/role_create_delete'
 
-    section_title = 'Crear Rol'
     context_object_name = 'project'
 
     pk_url_kwarg = 'project_id'
+
+    section_title = 'Crear Rol'
+    left_active = 'Roles'
 
     @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
     def dispatch(self, *args, **kwargs):
@@ -98,6 +106,7 @@ class RoleCreateView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserList
 
 
         context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
 
         return context
 

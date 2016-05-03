@@ -44,11 +44,9 @@ def crear_proyecto(request):
     :returns: Un 'renderizado' del template correspondiente.
     """
     context = {
-        "PERFIL_NAME": base_settings.PERFIL_NAME,
-        "DEAUTH_NAME": base_settings.DEAUTH_NAME,
-        "LOGIN_NAME": base_settings.LOGIN_NAME,
         'user_list': User.objects.all(),
-        'URL_NAMES' : base_settings.URL_NAMES
+        'URL_NAMES' : base_settings.URL_NAMES,
+        'left_active': 'Nuevo Proyecto'
     }
     if request.method == 'POST':
         form = ProjectForm(request.POST)
@@ -71,12 +69,12 @@ def crear_proyecto(request):
             except IntegrityError as e:
                 print(e)
                 form.add_error('name', 'Project name already exist')
-                return render(request, 'proyectoCrear.html', context)
-            return render(request, 'proyectoCrearExitoso.html', context)
+                return render(request, 'administracion/proyectoCrear.html', context)
+            return render(request, 'administracion/proyectoCrearExitoso.html', context)
     else:
         form = ProjectForm()
         context['form'] = form
-    return render(request, 'proyectoCrear.html', context)
+    return render(request, 'administracion/proyectoCrear.html', context)
 
 
 @login_required()
@@ -91,11 +89,9 @@ def eliminar_proyecto(request):
 
     """
     context = {
-        "PERFIL_NAME": base_settings.PERFIL_NAME,
-        "DEAUTH_NAME": base_settings.DEAUTH_NAME,
-        "LOGIN_NAME": base_settings.LOGIN_NAME,
         "project_list": Project.objects.all(),
-        'URL_NAMES': base_settings.URL_NAMES
+        'URL_NAMES': base_settings.URL_NAMES,
+        'left_active': 'Eliminar Proyecto'
     }
     if request.method == 'POST':
         try:
@@ -103,8 +99,8 @@ def eliminar_proyecto(request):
             p.delete()
         except KeyError:
             x = None
-        return render(request, 'proyectoEliminar.html', context)
-    return render(request, 'proyectoEliminar.html', context)
+        return render(request, 'administracion/proyectoEliminar.html', context)
+    return render(request, 'administracion/proyectoEliminar.html', context)
 
 
 class UserCreateView(FormView, UrlNamesContextMixin):
@@ -117,6 +113,7 @@ class UserCreateView(FormView, UrlNamesContextMixin):
     template_name = 'administracion/user_create_delete.html'
 
     section_title = 'Nuevo Usuario'
+    left_active = 'Usuarios'
 
     @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
     def dispatch(self, *args, **kwargs):
@@ -129,6 +126,7 @@ class UserCreateView(FormView, UrlNamesContextMixin):
         self.get_url_context(context)
 
         context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
 
         return context
 
@@ -165,6 +163,8 @@ class UserListView(ListView, UrlNamesContextMixin):
     template_name = 'administracion/user_list.html'
 
     section_title = 'Lista de Usuarios'
+    left_active = 'Usuarios'
+
     allow_empty = True
 
     paginate_by = 10
@@ -182,6 +182,7 @@ class UserListView(ListView, UrlNamesContextMixin):
         self.get_url_context(context)
 
         context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
 
         return context
 

@@ -1,4 +1,4 @@
-{% extends "base" %}
+{% extends "administracion/admin_base" %}
 
 {% block "include" %}
 <script>
@@ -125,37 +125,9 @@
 
 {% endblock %}
 
-{% block "title" %} {{ block.super }} | Administracion |
-{{ section_title }}
-{% endblock %}
-
-{% block "top_menu" %}
-
-
-		<li><a href="{% url URL_NAMES.ADM_USER_LIST %}">Administracion</a></li>
-
-	<li class="dropdown">
-	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.first_name }} {{ user.last_name }} <span class="caret"></span></a>
-	<ul class="dropdown-menu">
-		<li><a href="#">Mi Perfil</a></li>
-		<li role="separator" class="divider"></li>
-		<li><a href="{% url URL_NAMES.DEAUTH_NAME %}">Salir</a></li>
-	</ul>
-
-{% endblock %}
-
-
-{% block "left_menu_title" %} Administracion {% endblock %}
-
-{% block "left_menu_options" %}
-<li><a href="{% url URL_NAMES.ADM_PROJECT_CREATE %}">Nuevo Proyecto</a></li>
-<li><a href="{% url URL_NAMES.ADM_PROJECT_DELETE %}">Eliminar Proyecto</a></li>
-<li class="active"><a href="{% url URL_NAMES.ADM_USER_LIST %}">Usuarios</a></li>
-{% endblock %}
 
 {% block "working_path" %}
-	<li></li>
-	<li><a href="#">Administracion</a></li>
+	{{ block.super }}
 	<li><a href="{% url URL_NAMES.ADM_USER_LIST %}">Usuarios</a></li>
 	<li class="active">{{ section_title }}</li>
 {% endblock %}
