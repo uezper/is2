@@ -3,9 +3,11 @@
 {% block "include" %}
 {% endblock %}
 
-{% block "title" %} {{ block.super }} | Administracion {% endblock %}
+
+{% block "title" %} {{ block.super }} | Administracion | {{ section_title }} {% endblock %}
 
 {% block "top_menu" %}
+
 
 		<li><a href="{% url URL_NAMES.ADM_USER_LIST %}">Administracion</a></li>
 
@@ -22,15 +24,16 @@
 {% block "left_menu_title" %} Administracion {% endblock %}
 
 {% block "left_menu_options" %}
-	<li><a href="{% url URL_NAMES.ADM_PROJECT_CREATE %}">Nuevo Proyecto</a></li>
-	<li><a href="{% url URL_NAMES.ADM_PROJECT_DELETE %}">Eliminar Proyecto</a></li>
-	<li class="active"><a href="{% url URL_NAMES.ADM_USER_LIST %}">Usuarios</a></li>
+<li><a href="{% url URL_NAMES.ADM_PROJECT_CREATE %}">Nuevo Proyecto</a></li>
+<li><a href="{% url URL_NAMES.ADM_PROJECT_DELETE %}">Eliminar Proyecto</a></li>
+<li class="active"><a href="{% url URL_NAMES.ADM_USER_LIST %}">Usuarios</a></li>
 {% endblock %}
 
 {% block "working_path" %}
 	<li></li>
 	<li><a href="#">Administracion</a></li>
-	<li class="active">{{ section_title }}</li>
+
+	<li class="active">{{section_title}}</li>
 {% endblock %}
 
 {% block "content" %}
@@ -46,9 +49,10 @@
 
 			<table class="table table-striped">
 				<thead>
-					<tr>  <th>Username</th> <th>Nombre</th>
+
+					<tr>  <th>CI</th> <th>Nombre</th>
 						<th class="text-right">
-							<a href="{% url URL_NAMES.ADM_USER_CREATE %}">
+                        <a href="{% url URL_NAMES.ADM_USER_CREATE %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
 							</button></a>
@@ -67,7 +71,7 @@
 						<td>{{us.user.first_name}} {{us.user.last_name}}</td>
 						<td class="text-right">
 
-							{% if user.id != us.user.id %}
+							{% if us.user.id != user.id %}
 							<a href="{% url URL_NAMES.ADM_USER_DELETE us.id %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
