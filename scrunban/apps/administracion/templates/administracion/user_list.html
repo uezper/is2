@@ -3,6 +3,7 @@
 {% block "include" %}
 {% endblock %}
 
+
 {% block "title" %} {{ block.super }} | Administracion | {{ section_title }} {% endblock %}
 
 {% block "top_menu" %}
@@ -31,6 +32,7 @@
 {% block "working_path" %}
 	<li></li>
 	<li><a href="#">Administracion</a></li>
+
 	<li class="active">{{section_title}}</li>
 {% endblock %}
 
@@ -47,6 +49,7 @@
 
 			<table class="table table-striped">
 				<thead>
+
 					<tr>  <th>CI</th> <th>Nombre</th>
 						<th class="text-right">
                         <a href="{% url URL_NAMES.ADM_USER_CREATE %}">
@@ -67,6 +70,7 @@
 						<td>{{us.user.username}}</td>
 						<td>{{us.user.first_name}} {{us.user.last_name}}</td>
 						<td class="text-right">
+
 							{% if us.user.id != user.id %}
 							<a href="{% url URL_NAMES.ADM_USER_DELETE us.id %}">
 							<button type="button" class="btn btn-default btn-sm">

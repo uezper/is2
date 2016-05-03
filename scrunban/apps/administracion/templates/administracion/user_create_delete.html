@@ -17,6 +17,7 @@
             $("#errors").hide();
         }
 
+
         $("#username").keyup(function () {
            check_create();
         });
@@ -69,7 +70,9 @@
         function check_create()
         {
 
-            if ($("#username").val() != '' && $("#password") != '')
+
+            if ($("#username").val() != '' && $("#password").val() != '')
+
             {
                 $("#create").prop("disabled", false);
             }
@@ -83,14 +86,36 @@
         $("#form").submit(function(event){
 
 
-            $("input[name='username']").val($("#username").val());
-            $("input[name='password']").val($("#password").val());
-            $("input[name='email']").val($("#email").val());
-            $("input[name='direccion']").val($("#direccion").val());
-            $("input[name='telefono']").val($("#telefono").val());
-            $("input[name='first_name']").val($("#first_name").val());
-            $("input[name='last_name']").val($("#last_name").val());
+		username = $("#username").val();
+		password = $("#password").val();
+		first_name = $("#first_name").val();
+		last_name = $("#last_name").val();
+		email = $("#email").val();
+		direccion = $("#direccion").val();
+		telefono = $("#telefono").val();
+    
 
+		if (username != undefined){
+			$("#id_username").val(username);
+		}
+		if (password != undefined){
+			$("#id_password").val(password);
+		}
+		if (first_name != undefined){
+			$("#id_first_name").val(first_name);
+		}
+		if (last_name != undefined){
+			$("#id_last_name").val(last_name);
+		}
+		if (direccion != undefined){
+			$("#id_direccion").val(direccion);
+		}
+		if (telefono != undefined){
+			$("#id_telefono").val(telefono);
+		}
+		if (email != undefined){
+			$("#id_email").val(email);
+		}
 
         });
 
@@ -119,6 +144,7 @@
 
 {% endblock %}
 
+
 {% block "left_menu_title" %} Administracion {% endblock %}
 
 {% block "left_menu_options" %}
@@ -130,7 +156,8 @@
 {% block "working_path" %}
 	<li></li>
 	<li><a href="#">Administracion</a></li>
-    <li class="active">{{ section_title }}</li>
+	<li><a href="{% url URL_NAMES.ADM_USER_LIST %}">Usuarios</a></li>
+	<li class="active">{{ section_title }}</li>
 {% endblock %}
 
 {% block "content" %}
@@ -148,9 +175,11 @@
                         {% if delete_form %}
                         <p class="warning"> Estas seguro de que quieres borrar?</p>
                         {% endif %}
+
                     </div>
                     <form class="form-horizontal" method="post" action="#" id="form">
                         {% csrf_token %}
+
 
                         {{ form.id }}
                         {{ form.username }}
@@ -191,6 +220,7 @@
                       </div>
 
 
+
                         <div class="form-group {% if form.last_name.errors|length > 0 %} has-error {% endif %}">
                         <label for="rowLast_name" class="col-sm-2 control-label">Apellidos:</label>
 
@@ -203,6 +233,7 @@
                             </div>
 
                       </div>
+
 
                         {% if delete_form %}
                         {% else %}
@@ -217,6 +248,7 @@
                             </div>
 
                       </div>
+
                         {% endif %}
 
 
@@ -233,6 +265,7 @@
                       </div>
 
 
+
                         <div class="form-group {% if form.direccion.errors|length > 0 %} has-error {% endif %}">
                         <label for="rowDireccion" class="col-sm-2 control-label">Direccion:</label>
 
@@ -245,6 +278,7 @@
 
                       </div>
 
+
                           <div class="form-group {% if form.telefono.errors|length > 0 %} has-error {% endif %}">
                         <label for="rowTelefono" class="col-sm-2 control-label">Telefono:</label>
 
@@ -256,8 +290,6 @@
                             </div>
 
                       </div>
-
-
 
                       <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
@@ -275,8 +307,5 @@
 
 		</div>
 	</div>
-
-
-
 
 {% endblock %}
