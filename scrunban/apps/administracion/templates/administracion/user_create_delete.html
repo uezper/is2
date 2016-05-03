@@ -1,0 +1,282 @@
+{% extends "base" %}
+
+{% block "include" %}
+<script>
+    $(document).ready(function(){
+
+
+        cargar_datos();
+        check_create();
+
+        if ($("#errors").children().length > 0)
+        {
+            $("#errors").show();
+        }
+        else
+        {
+            $("#errors").hide();
+        }
+
+        $("#username").keyup(function () {
+           check_create();
+        });
+
+
+        $("#password").keyup(function () {
+           check_create();
+        });
+
+        function cargar_datos()
+        {
+
+
+            username = $("#id_username").val();
+            email = $("#id_email").val();
+            direccion = $("#id_direccion").val();
+            telefono = $("#id_telefono").val();
+            first_name = $("#id_first_name").val();
+            last_name = $("#id_last_name").val();
+
+            if (username != undefined)
+            {
+                $("#username").val(username);
+            }
+            if (email != undefined)
+            {
+                $("#email").val(email);
+            }
+            if (direccion != undefined)
+            {
+                $("#direccion").val(direccion);
+            }
+            if (telefono != undefined)
+            {
+                $("#telefono").val(telefono);
+            }
+            if (first_name != undefined)
+            {
+                $("#first_name").val(first_name);
+            }
+            if (last_name != undefined)
+            {
+                $("#last_name").val(last_name);
+            }
+
+
+
+        }
+
+        function check_create()
+        {
+
+            if ($("#username").val() != '' && $("#password") != '')
+            {
+                $("#create").prop("disabled", false);
+            }
+            else
+            {
+                $("#create").prop("disabled", true);
+            }
+
+        }
+
+        $("#form").submit(function(event){
+
+
+            $("input[name='username']").val($("#username").val());
+            $("input[name='password']").val($("#password").val());
+            $("input[name='email']").val($("#email").val());
+            $("input[name='direccion']").val($("#direccion").val());
+            $("input[name='telefono']").val($("#telefono").val());
+            $("input[name='first_name']").val($("#first_name").val());
+            $("input[name='last_name']").val($("#last_name").val());
+
+
+        });
+
+
+    });
+</script>
+
+{% endblock %}
+
+{% block "title" %} {{ block.super }} | Administracion |
+{{ section_title }}
+{% endblock %}
+
+{% block "top_menu" %}
+
+
+		<li><a href="{% url URL_NAMES.ADM_USER_LIST %}">Administracion</a></li>
+
+	<li class="dropdown">
+	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ user.first_name }} {{ user.last_name }} <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+		<li><a href="#">Mi Perfil</a></li>
+		<li role="separator" class="divider"></li>
+		<li><a href="{% url URL_NAMES.DEAUTH_NAME %}">Salir</a></li>
+	</ul>
+
+{% endblock %}
+
+{% block "left_menu_title" %} Administracion {% endblock %}
+
+{% block "left_menu_options" %}
+<li><a href="{% url URL_NAMES.ADM_PROJECT_CREATE %}">Nuevo Proyecto</a></li>
+<li><a href="{% url URL_NAMES.ADM_PROJECT_DELETE %}">Eliminar Proyecto</a></li>
+<li class="active"><a href="{% url URL_NAMES.ADM_USER_LIST %}">Usuarios</a></li>
+{% endblock %}
+
+{% block "working_path" %}
+	<li></li>
+	<li><a href="#">Administracion</a></li>
+    <li class="active">{{ section_title }}</li>
+{% endblock %}
+
+{% block "content" %}
+
+	<div class="panel panel-default">
+
+		<div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>{{ section_title }}</h3>
+                    <hr />
+
+                    <div class="alert alert-danger" role="alert" id="errors">
+                        {% if delete_form %}
+                        <p class="warning"> Estas seguro de que quieres borrar?</p>
+                        {% endif %}
+                    </div>
+                    <form class="form-horizontal" method="post" action="#" id="form">
+                        {% csrf_token %}
+
+                        {{ form.id }}
+                        {{ form.username }}
+                        {% if delete_form %}
+                        {% else %}
+                        {{ form.password }}
+                        {% endif %}
+                        {{ form.email }}
+                        {{ form.direccion }}
+                        {{ form.telefono }}
+                        {{ form.first_name }}
+                        {{ form.last_name }}
+
+                      <div class="form-group {% if form.username.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowUsername" class="col-sm-2 control-label">CI:</label>
+
+                            <div class="row" id="rowUsername">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="username" placeholder="Numero de cedula" aria-describedby="helpBlock1" {% if no_editable %} readonly {% endif %}>
+                                     <span id="helpBlock1" class="help-block">{{form.username.errors}}</span>
+                                </div>
+
+                            </div>
+
+                      </div>
+
+
+                        <div class="form-group {% if form.first_name.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowFirst_name" class="col-sm-2 control-label">Nombres:</label>
+
+                            <div class="row" id="rowFirst_name">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="first_name" placeholder="Nombres" aria-describedby="helpBlock2" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock2" class="help-block">{{form.first_name.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+                        <div class="form-group {% if form.last_name.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowLast_name" class="col-sm-2 control-label">Apellidos:</label>
+
+
+                            <div class="row" id="rowLast_name">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="last_name" placeholder="Apellidos" aria-describedby="helpBlock3" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock3" class="help-block">{{form.last_name.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+                        {% if delete_form %}
+                        {% else %}
+                        <div class="form-group {% if form.password.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowPassword" class="col-sm-2 control-label">Password:</label>
+
+                            <div class="row" id="rowPassword">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="password" class="form-control" id="password" placeholder="Password" aria-describedby="helpBlock4" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock4" class="help-block">{{form.password.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+                        {% endif %}
+
+
+                        <div class="form-group {% if form.email.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowEmail" class="col-sm-2 control-label">Email:</label>
+
+                            <div class="row" id="rowEmail">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="email" class="form-control" id="email" placeholder="Direccion de email" aria-describedby="helpBlock5" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock5" class="help-block">{{form.email.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+                        <div class="form-group {% if form.direccion.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowDireccion" class="col-sm-2 control-label">Direccion:</label>
+
+                            <div class="row" id="rowDireccion">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="direccion" placeholder="Direccion" aria-describedby="helpBlock6" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock6" class="help-block">{{form.direccion.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+                          <div class="form-group {% if form.telefono.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowTelefono" class="col-sm-2 control-label">Telefono:</label>
+
+                            <div class="row" id="rowTelefono">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="telefono" placeholder="Telefono" aria-describedby="helpBlock7" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock7" class="help-block">{{form.telefono.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+
+                      <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            {% if delete_form %}
+                            <button type="submit" class="btn btn-default" id="delete">Borrar</button>
+                            {% else %}
+                            <button type="submit" class="btn btn-default" id="create">Crear</button>
+                            {% endif %}
+                        </div>
+                      </div>
+                    </form>
+
+                </div>
+            </div>
+
+		</div>
+	</div>
+
+
+
+
+{% endblock %}
