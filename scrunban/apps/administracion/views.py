@@ -136,7 +136,8 @@ class UserCreateView(FormView, UrlNamesContextMixin):
         return reverse(base_settings.ADM_USER_LIST)
 
     def form_valid(self, form):
-
+        print('valid form')
+        print(form)
         form.save()
         return HttpResponseRedirect(self.get_success_url())
 
