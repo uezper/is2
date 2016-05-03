@@ -1,0 +1,23 @@
+{% extends "base" %}
+
+{% block "title" %}
+
+    {{ block.super }} | {{ project.name }}
+
+{% endblock %}
+
+{% block "left_menu_title" %} Proyecto {% endblock %}
+
+{% block "left_menu_options" %}
+
+    <li {% if left_active == 'Roles' %} class="active" {% endif %}><a href="#">Roles</a></li>
+
+{% endblock %}
+
+{% block "working_path" %}
+
+    <li></li>
+	<li><a href="#">Mis Proyectos</a></li>
+	<li><a href="#" >{{ project.name }}</a></li>
+
+{% endblock %}
