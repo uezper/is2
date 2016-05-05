@@ -1,9 +1,9 @@
 from django.test import TestCase
-
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
+from django.utils import timezone
 from apps.autenticacion.models import User, Role
-from apps.administracion.models import Project, ProductBacklog
+from apps.administracion.models import Project, ProductBacklog, UserStory
 import time
 
 
@@ -281,3 +281,46 @@ class AutenticacionModelsTests(TestCase):
                 self.assertNotEqual(pb, None)
 
                 pb.delete()
+
+        def test_userstory_create_delete(self):
+                data = {
+                        'description': 'Main Page',
+                        'details': 'Make it like google',
+                        'acceptance_requirements': 'Has to be blue',
+                        'deadline': timezone.now(),
+                        'business_value': 153.1,
+                        'tecnical_value': 45.8,
+                        'urgency': 80
+                }
+
+                us = UserStory.objects.create(**data)
+                
+                self.assertNotEqual(us, None)
+                
+                us.delete()
+
+        def test_userstory_getters_setters(self):
+                data = {
+                        'description': 'Main Page',
+                        'details': 'Make it like google',
+                        'acceptance_requirements': 'Has to be blue',
+                        'deadline': timezone.now(),
+                        'business_value': 153.1,
+                        'tecnical_value': 45.8,
+                        'urgency': 80
+                }
+
+                us = UserStory.objects.create(**data)
+                
+                self.assertNotEqual(us, None)
+
+                self.assertEqual(us.description, data['description'])
+                self.assertEqual(us.details, data['details'])
+                self.assertEqual(us.acceptance_requirements, data['acceptance_requirements'])
+                self.assertEqual(us.deadline, data['deadline'])
+                self.assertEqual(us.business_value, data['business_value'])
+                self.assertEqual(us.tecnical_value, data['tecnical_value'])
+                self.assertEqual(us.urgency, data['urgency'])
+                
+                us.delete()                
+                

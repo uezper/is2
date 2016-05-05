@@ -10,7 +10,6 @@ class ProductBacklogManager(models.Manager):
         the instance of the new product backlog.
         """
         # Checking for required fields
-
         required_fields = ['id']
         for required_field in required_fields:
             if required_field not in kwargs.keys():
@@ -230,5 +229,29 @@ class Sprint(models.Model):
 
     def __str__(self):
         return "%d" % self.id
+    
+class UserStory(models.Model):
+    # Public fields mapped to DB columns
+    description = models.CharField(max_length=140) # Twetter..?? XD
+    details = models.TextField()
+    acceptance_requirements = models.TextField()
+    deadline = models.DateTimeField()
+    business_value = models.FloatField()
+    tecnical_value = models.FloatField()
+    urgency = models.FloatField()
 
+    # Public fields for simplicity
+    objects = models.Manager()
 
+    def get_notes(self):
+        return UserStoryNote.objects.filter(user_story=self)
+    
+    def __str__(self):
+        return "{}".format(self.description)
+    
+class UserStoryNote(models.Model):
+    """
+    Modelo para almacenar notas sobre un User Story
+    """
+    note = models.TextField()
+    user_story = models.ForeignKey(UserStory, on_delete=models.CASCADE)
