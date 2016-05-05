@@ -231,6 +231,9 @@ class Sprint(models.Model):
         return "%d" % self.id
     
 class UserStory(models.Model):
+    """
+    Modelo donde se almacena la información sobre cada actividad a realizar dentro del projecto.
+    """
     # Public fields mapped to DB columns
     description = models.CharField(max_length=140) # Twetter..?? XD
     details = models.TextField()

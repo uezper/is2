@@ -417,3 +417,37 @@ class AutenticacionModelsTests(TestCase):
                 usn.delete()
                 us1.delete()
                 us2.delete()
+
+        def test_userstory_get_userstorynotes(self):
+                us_data = {
+                        'description': 'Main Page',
+                        'details': 'Make it like google',
+                        'acceptance_requirements': 'Has to be blue',
+                        'deadline': timezone.now(),
+                        'business_value': 153.1,
+                        'tecnical_value': 45.8,
+                        'urgency': 80
+                }
+                
+                us = UserStory.objects.create(**us_data)
+                self.assertNotEqual(us, None)
+                
+                usn1_data = {
+                        'note': 'This is a note about an user story',
+                        'user_story': us
+                }
+                usn2_data = {
+                        'note': 'This is another note about an user story',
+                        'user_story': us
+                }
+
+                usn1 = UserStoryNote.objects.create(**usn1_data)
+                usn2 = UserStoryNote.objects.create(**usn2_data)
+                self.assertNotEqual(usn1, None)
+                self.assertNotEqual(usn2, None)
+                
+                self.assertEqual(usn1 in us.get_notes(), True)
+                self.assertEqual(usn2 in us.get_notes(), True)
+                
+                us.delete()
+                self.assertEqual(UserStoryNote.objects.all().count(), 0)
