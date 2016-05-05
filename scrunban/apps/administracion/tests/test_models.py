@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
 from django.utils import timezone
 from apps.autenticacion.models import User, Role
-from apps.administracion.models import Project, ProductBacklog, UserStory
+from apps.administracion.models import Project, ProductBacklog, UserStory, UserStoryNote
 import time
 
 
@@ -309,6 +309,15 @@ class AutenticacionModelsTests(TestCase):
                         'tecnical_value': 45.8,
                         'urgency': 80
                 }
+                new_data = {
+                        'description': 'New Main Page',
+                        'details': 'Make it not like google',
+                        'acceptance_requirements': 'Has not to be blue',
+                        'deadline': timezone.now(),
+                        'business_value': 15,
+                        'tecnical_value': 455.8,
+                        'urgency': 88
+                }
 
                 us = UserStory.objects.create(**data)
                 
@@ -321,6 +330,90 @@ class AutenticacionModelsTests(TestCase):
                 self.assertEqual(us.business_value, data['business_value'])
                 self.assertEqual(us.tecnical_value, data['tecnical_value'])
                 self.assertEqual(us.urgency, data['urgency'])
+
+                us.description = new_data['description']
+                us.details = new_data['details']
+                us.acceptance_requirements = new_data['acceptance_requirements']
+                us.business_value = new_data['business_value']
+                us.tecnical_value = new_data['tecnical_value']
+                us.urgency = new_data['urgency']
+
+                self.assertEqual(us.description, new_data['description'])
+                self.assertEqual(us.details, new_data['details'])
+                self.assertEqual(us.acceptance_requirements, new_data['acceptance_requirements'])
+                self.assertEqual(us.business_value, new_data['business_value'])
+                self.assertEqual(us.tecnical_value, new_data['tecnical_value'])
+                self.assertEqual(us.urgency, new_data['urgency'])
                 
                 us.delete()                
                 
+        def test_userstorynote_create_delete(self):
+                us_data = {
+                        'description': 'Main Page',
+                        'details': 'Make it like google',
+                        'acceptance_requirements': 'Has to be blue',
+                        'deadline': timezone.now(),
+                        'business_value': 153.1,
+                        'tecnical_value': 45.8,
+                        'urgency': 80
+                }
+                
+                us = UserStory.objects.create(**us_data)
+                self.assertNotEqual(us, None)
+                
+                usn_data = {
+                        'note': 'This is a note about an user story',
+                        'user_story': us
+                        }
+
+                usn = UserStoryNote.objects.create(**usn_data)
+                self.assertNotEqual(usn, None)
+                
+                usn.delete()
+                us.delete()
+
+        def test_userstorynote_getters_setters(self):
+                us1_data = {
+                        'description': 'Main Page',
+                        'details': 'Make it like google',
+                        'acceptance_requirements': 'Has to be blue',
+                        'deadline': timezone.now(),
+                        'business_value': 153.1,
+                        'tecnical_value': 45.8,
+                        'urgency': 80
+                }
+                us2_data = {
+                        'description': 'New Main Page',
+                        'details': 'Make it not like google',
+                        'acceptance_requirements': 'Has not to be blue',
+                        'deadline': timezone.now(),
+                        'business_value': 15,
+                        'tecnical_value': 455.8,
+                        'urgency': 88
+                }
+                us1 = UserStory.objects.create(**us1_data)
+                us2 = UserStory.objects.create(**us2_data)
+                self.assertNotEqual(us1, None)
+                self.assertNotEqual(us2, None)
+                
+                usn_data = {
+                        'note': 'This is a note',
+                        'user_story': us1
+                }
+
+                usn = UserStoryNote.objects.create(**usn_data)
+                self.assertNotEqual(usn, None)
+                
+                self.assertEqual(usn.note, usn_data['note'])
+                self.assertEqual(usn.user_story, usn_data['user_story'])
+
+                new_note = 'This is a new note'
+                usn.note = new_note
+                self.assertEqual(usn.note, new_note)
+
+                usn.user_story = us2
+                self.assertEqual(usn.user_story, us2)
+
+                usn.delete()
+                us1.delete()
+                us2.delete()
