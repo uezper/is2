@@ -23,8 +23,7 @@ class ProductBacklogManager(models.Manager):
         else:
             return None
 
-class ProductBacklog(models.Model):
-    
+class ProductBacklog(models.Model):    
     # Public fields mapped to DB columns
     id = models.AutoField(primary_key=True)
     
@@ -242,12 +241,17 @@ class UserStory(models.Model):
     business_value = models.FloatField()
     tecnical_value = models.FloatField()
     urgency = models.FloatField()
+    # Mas adelante se generaliza ProductBacklog y SprintBacklog a Backlog y se actualiza este campo
+    backlog = models.ForeignKey(to=ProductBacklog, null=True, blank=True, on_delete=models.CASCADE)
 
     # Public fields for simplicity
     objects = models.Manager()
 
     def get_notes(self):
         return UserStoryNote.objects.filter(user_story=self)
+
+    def get_weight(self):
+        return (self.business_value + self.urgency + 2*self.tecnical_value)/4
     
     def __str__(self):
         return "{}".format(self.description)
