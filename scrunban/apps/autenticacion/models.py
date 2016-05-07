@@ -175,12 +175,21 @@ class User(models.Model):
 
         from apps.administracion.models import Project
         res = []
+        perms_ = {}
 
         for group in self.user.groups.all():
             role = group.role
             project_id = role.get_name().split('_')[0]
             if project_id.isdigit():
-                res.append((Project.objects.get(id=project_id), role))
+                project = Project.objects.get(id=project_id)
+                #res.append((Project.objects.get(id=project_id), role))
+                if not(project.id in perms_.keys()):
+                    perms_[project.id] = []
+                perms_[project.id].append(role)
+
+        for key in perms_.keys():
+            project = Project.objects.get(id=key)
+            res.append((project, perms_[key]))
 
         return res
 
