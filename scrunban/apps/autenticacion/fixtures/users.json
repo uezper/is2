@@ -4,7 +4,7 @@
 	"pk": 10,
 	"fields": {
 	    "username": "3486759",
-            "password": "keverild",
+            "password": "pbkdf2_sha256$24000$HjnwWU74t7s6$qNCH32NIe9/mK7nenOs2ID8rUEcKzo0zuGtVSaFkjV0=",
             "first_name": "Kishan",
             "last_name": "Everild",
             "email": "keverild@scrunban.com"
@@ -24,7 +24,7 @@
 	"pk": 11,
 	"fields": {
 	    "username": "7452863",
-            "password": "finsyl",
+            "password": "pbkdf2_sha256$24000$HjnwWU74t7s6$qNCH32NIe9/mK7nenOs2ID8rUEcKzo0zuGtVSaFkjV0=",
             "first_name": "Finnuala",
             "last_name": "Sylvana",
             "email": "finsyl@scrunban.com"
@@ -44,7 +44,7 @@
 	"pk": 12,
 	"fields": {
 	    "username": "741256",
-            "password": "aerja",
+            "password": "pbkdf2_sha256$24000$HjnwWU74t7s6$qNCH32NIe9/mK7nenOs2ID8rUEcKzo0zuGtVSaFkjV0=",
             "first_name": "Aaliyah",
             "last_name": "Erja",
             "email": "aerja@scrunban.com"
@@ -64,7 +64,7 @@
 	"pk": 13,
 	"fields": {
 	    "username": "1234865",
-            "password": "smina",
+            "password": "pbkdf2_sha256$24000$HjnwWU74t7s6$qNCH32NIe9/mK7nenOs2ID8rUEcKzo0zuGtVSaFkjV0=",
             "first_name": "Salomon",
             "last_name": "Mina",
             "email": "smina@scrunban.com"
@@ -84,7 +84,7 @@
 	"pk": 14,
 	"fields": {
 	    "username": "2718281",
-            "password": "esevere",
+            "password": "pbkdf2_sha256$24000$HjnwWU74t7s6$qNCH32NIe9/mK7nenOs2ID8rUEcKzo0zuGtVSaFkjV0=",
             "first_name": "Evike",
             "last_name": "Severe",
             "email": "esevere@scrunban.com"
