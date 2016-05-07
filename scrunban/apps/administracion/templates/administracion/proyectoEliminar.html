@@ -20,8 +20,8 @@
                 No existe ningun proyecto.
             {% endif %}
             {% for project in project_list %}
-                <script> function setName{{ project.name }}(){ projectToDelete = "{{ project.name }}"; } </script>
-                {{ project.name }} | <a onclick="setName{{ project.name }}(); updatePopup();" href="#" data-toggle="modal" data-target=".popup1">Eliminar</a> <br>
+                <script> function setName{{ project.id }}(){ projectToDelete = "{{ project.name }}"; } </script>
+                {{ project.name }} | <a onclick="setName{{ project.id }}(); updatePopup();" href="#" data-toggle="modal" data-target=".popup1">Eliminar</a> <br>
             {% endfor %}
         </div>
 	</div>
