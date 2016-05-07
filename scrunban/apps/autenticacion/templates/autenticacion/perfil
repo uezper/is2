@@ -24,12 +24,38 @@
 			<div class="row">
 		                <div class="col-md-10">
 		                    <h3>Mi Perfil</h3>
-				    <hr />
+				    		<hr />
 		                    <p><strong>Nombres: </strong> {{ user.first_name }} </p>
 		                    <p><strong>Apellidos: </strong> {{ user.last_name }} </p>
 		                    <p><strong>Telefono: </strong> {{ user.user.telefono }} </p>
 		                    <p><strong>Email: </strong> {{ user.email }} </p>
 		                    <p><strong>Direccion: </strong> {{ user.user.direccion }} </p>
+		                </div>
+			</div>
+			<div class="row">
+		                <div class="col-md-10">
+		                    <h3>Mis Proyectos</h3>
+				    		<hr />
+		                     <table class="table table-striped" id="tableProjects">
+                                <thead>
+                                <tr> <th>Proyecto</th><th>Estado</th></th> <th>Rol</th></tr>
+                                </thead>
+                            {% if user_projects|length == 0 %}
+                                <tbody>
+                                    <tr class="alert">  <td colspan="3">No estas relacionado a ningun proyecto</td> </tr>
+                                </tbody>
+                            {% else %}
+                                <tbody>
+                                    {% for row in user_projects %}
+                                    <tr>
+                                    <td><a href="{% url URL_NAMES.PROJECT_INDEX row.0.id %}">{{row.0.name}}</a></td>
+                                    <td>-</td>
+                                    <td>{{row.1}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            {% endif %}
+                            </table>
 		                </div>
 			</div>
 		</div>

@@ -8,6 +8,8 @@ from django.contrib.auth import logout as djLogout
 from scrunban.settings import base as base_settings
 from apps.autenticacion.decorators import login_required
 
+from apps.autenticacion.mixins import UserPermissionContextMixin
+
 
 def login(request):
     """
@@ -112,6 +114,17 @@ def perfil(request):
 
     context = {
         'URL_NAMES': base_settings.URL_NAMES,
+        'user_projects' : []
     }
+
+    for p in request.user.user.get_projects():
+        names = [r.desc_larga for r in p[1]]
+        context['user_projects'].append((p[0], ', '.join(names)))
+
+    x = UserPermissionContextMixin()
+    x.request = request
+    x.get_user_permissions(context)
+
+    print(context)
 
     return render(request, 'autenticacion/perfil', context)

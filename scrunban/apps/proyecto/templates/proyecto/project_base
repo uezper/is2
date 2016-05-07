@@ -17,7 +17,7 @@
 {% block "working_path" %}
 
     <li></li>
-	<li><a href="#">Mis Proyectos</a></li>
+	<li><a href="{% url URL_NAMES.PERFIL_NAME %}">Mis Proyectos</a></li>
 	<li><a href="{% url URL_NAMES.PROJECT_INDEX project.id %}" >{{ project.name }}</a></li>
 
 {% endblock %}
