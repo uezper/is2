@@ -232,9 +232,11 @@ class UserDeleteView(UserCreateView):
 
     def get(self, request, *args, **kwargs):
 
+        if str(request.user.user.id) == kwargs.get(self.user_id_kwname):
+            from scrunban.settings.base import ADM_USER_LIST
+            return HttpResponseRedirect(reverse(ADM_USER_LIST))
+
         form = self.form_class(self.get_initial())
-        print('en get')
-        print(form)
 
         if (form.is_valid()):
             return super(UserDeleteView, self).get(request, *args, **kwargs)
@@ -242,6 +244,13 @@ class UserDeleteView(UserCreateView):
             from scrunban.settings.base import ADM_USER_LIST
 
             return HttpResponseRedirect(reverse(ADM_USER_LIST))
+
+    def post(self, request, *args, **kwargs):
+        if str(request.user.user.id) == kwargs.get(self.user_id_kwname):
+            from scrunban.settings.base import ADM_USER_LIST
+            return HttpResponseRedirect(reverse(ADM_USER_LIST))
+        else:
+            return super(UserDeleteView, self).post(self, request, *args, **kwargs)
 
     def get_initial(self):
         id = self.kwargs.get(self.user_id_kwname)
