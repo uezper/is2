@@ -1,0 +1,29 @@
+{% extends "proyecto/project_base" %}
+
+{% block "working_path" %}
+	{{ block.super }}
+	<li class="active"></li>
+{% endblock %}
+
+{% block "content" %}
+
+	<div class="panel panel-default">
+
+		<div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-12">
+                        <h3>Pagina principal</h3>
+                         <hr />
+                </div>
+
+            </div>
+
+            Aqui deberia haber algo
+		</div>
+	</div>
+
+
+
+
+{% endblock %}

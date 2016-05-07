@@ -171,6 +171,25 @@ class User(models.Model):
         self.direccion = new_direccion
         self.save()
 
+    def get_projects(self):
+
+        from apps.administracion.models import Project
+        res = []
+
+        for group in self.user.groups.all():
+            role = group.role
+            project_id = role.get_name().split('_')[0]
+            if project_id.isdigit():
+                res.append((Project.objects.get(id=project_id), role))
+
+        return res
+
+    def get_all_permissions(self):
+        res = []
+        for perm in list(self.user.get_all_permissions()):
+            res.append(perm.split('.')[1])
+
+        return res
 
     def __str__(self):
         username = self.user.get_username()

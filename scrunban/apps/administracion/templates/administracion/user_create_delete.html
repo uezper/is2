@@ -263,6 +263,37 @@
 
                       </div>
 
+                        {% if delete_form %}
+                        <div class="form-group">
+                            <label for="tableProjects" class="col-sm-2 control-label">Proyectos:</label>
+                        <div class="row" id="rowProjects">
+                            <div class="col-md-4">
+                            <table class="table table-striped" id="tableProjects">
+                                <thead>
+                                <tr> <th>Proyecto</th><th>Estado</th></th> <th>Rol</th></tr>
+                                </thead>
+                            {% if user_projects|length == 0 %}
+                                <tbody>
+                                    <tr class="success">  <td colspan="3">Este usuario no esta relacionado con ningun proyecto</td> </tr>
+                                </tbody>
+                            {% else %}
+                                <tbody>
+                                    {% for row in user_projects %}
+                                    <tr>
+                                    <td><a href="{% url URL_NAMES.PROJECT_INDEX row.0.id %}">{{row.0.name}}</a></td>
+                                    <td>-</td>
+                                    <td>{{row.1.desc_larga}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            {% endif %}
+                            </table>
+                            </div>
+                        </div>
+                        </div>
+                        {% endif %}
+
+
                       <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
                             {% if delete_form %}
@@ -273,6 +304,7 @@
                         </div>
                       </div>
                     </form>
+
 
                 </div>
             </div>
