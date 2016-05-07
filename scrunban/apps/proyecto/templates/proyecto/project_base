@@ -10,7 +10,7 @@
 
 {% block "left_menu_options" %}
 
-    <li {% if left_active == 'Roles' %} class="active" {% endif %}><a href="#">Roles</a></li>
+    <li {% if left_active == 'Roles' %} class="active" {% endif %}><a href="{% url URL_NAMES.PROJECT_ROLE_LIST project.id %}">Roles</a></li>
 
 {% endblock %}
 
@@ -18,6 +18,6 @@
 
     <li></li>
 	<li><a href="#">Mis Proyectos</a></li>
-	<li><a href="#" >{{ project.name }}</a></li>
+	<li><a href="{% url URL_NAMES.PROJECT_INDEX project.id %}" >{{ project.name }}</a></li>
 
 {% endblock %}

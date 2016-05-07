@@ -10,11 +10,15 @@ from apps.proyecto import forms
 from django.shortcuts import get_object_or_404, HttpResponseRedirect
 
 from apps.proyecto.mixins import PermissionListMixin, UrlNamesContextMixin, UserListMixin
+from apps.autenticacion.mixins import UserPermissionContextMixin
+
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from scrunban.settings import base as base_settings
 
-class RoleListView(ListView, SingleObjectMixin, UrlNamesContextMixin):
+from django.shortcuts import render
+
+class RoleListView(ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
 
     """
     Clase correspondiente a la vista que lista los roles de un proyecto
@@ -45,6 +49,7 @@ class RoleListView(ListView, SingleObjectMixin, UrlNamesContextMixin):
 
         self.get_role_info(context)
         self.get_url_context(context)
+        self.get_user_permissions(context)
 
         context['project'] = self.object
 
@@ -74,14 +79,14 @@ class RoleListView(ListView, SingleObjectMixin, UrlNamesContextMixin):
 
         context[self.context_object_name] = new_role_list
 
-class RoleCreateView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserListMixin, PermissionListMixin):
+class RoleCreateView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserListMixin, PermissionListMixin, UserPermissionContextMixin):
     """
     Clase correspondiente a la vista que permite crear un rol dentro de un proyecto
 
     """
 
     form_class = forms.CreateRolForm
-    template_name = 'proyecto/role_create_delete'
+    template_name = 'proyecto/role_crud'
 
     context_object_name = 'project'
 
@@ -103,6 +108,7 @@ class RoleCreateView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserList
         self.get_url_context(context)
         self.get_user_list_context(context)
         self.get_permission_list_context(context)
+        self.get_user_permissions(context)
 
 
         context['section_title'] = self.section_title
@@ -235,3 +241,12 @@ class RoleDeleteView(RoleEditView):
         context['delete_form'] = True
 
         return context
+
+def index(request, project_id):
+
+    context = {
+        'URL_NAMES': base_settings.URL_NAMES,
+        'project' : get_object_or_404(Project, id=project_id)
+    }
+
+    return render(request, 'proyecto/project_index', context)

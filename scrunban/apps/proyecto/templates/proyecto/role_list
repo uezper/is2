@@ -2,7 +2,6 @@
 
 {% block "working_path" %}
 	{{ block.super }}
-	<li><a href="#" >{{ project.name }}</a></li>
 	<li class="active">Roles</li>
 {% endblock %}
 

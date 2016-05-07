@@ -187,6 +187,7 @@ class Project(models.Model):
 
         return roles
 
+
     def get_user_perms(self, user):
         """
 

@@ -63,3 +63,4 @@ class UserListMixin(object):
         """
         return User.objects.all()
 
+

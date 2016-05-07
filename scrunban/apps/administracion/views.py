@@ -13,13 +13,14 @@ from django.db.utils import IntegrityError
 from django.core.urlresolvers import reverse
 from django.views.generic.list import ListView
 from django.views.generic.edit import FormView
-from apps.autenticacion.models import Role
 from apps.administracion.models import Project
 
 from apps.administracion import forms
 from django.shortcuts import get_object_or_404, HttpResponseRedirect
 
 from apps.proyecto.mixins import UrlNamesContextMixin
+from apps.autenticacion.mixins import UserPermissionContextMixin
+
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from scrunban.settings import base as base_settings
@@ -103,7 +104,7 @@ def eliminar_proyecto(request):
     return render(request, 'administracion/proyectoEliminar.html', context)
 
 
-class UserCreateView(FormView, UrlNamesContextMixin):
+class UserCreateView(FormView, UrlNamesContextMixin, UserPermissionContextMixin):
     """
     Clase correspondiente a la vista que permite crear un usuario
 
@@ -124,6 +125,7 @@ class UserCreateView(FormView, UrlNamesContextMixin):
         context = super(UserCreateView, self).get_context_data(**kwargs)
 
         self.get_url_context(context)
+        self.get_user_permissions(context)
 
         context['section_title'] = self.section_title
         context['left_active'] = self.left_active
@@ -151,7 +153,7 @@ class UserCreateView(FormView, UrlNamesContextMixin):
 
 
 
-class UserListView(ListView, UrlNamesContextMixin):
+class UserListView(ListView, UrlNamesContextMixin, UserPermissionContextMixin):
 
     """
     Clase correspondiente a la vista que lista los usuarios
@@ -180,6 +182,7 @@ class UserListView(ListView, UrlNamesContextMixin):
         context = super(UserListView, self).get_context_data(**kwargs)
 
         self.get_url_context(context)
+        self.get_user_permissions(context)
 
         context['section_title'] = self.section_title
         context['left_active'] = self.left_active
@@ -216,6 +219,7 @@ class UserDeleteView(UserCreateView):
         id = self.kwargs.get(self.user_id_kwname)
 
         user = get_object_or_404(User, id=id)
+        self.user = user
 
         initial = {
             'id' : user.id,
@@ -234,5 +238,6 @@ class UserDeleteView(UserCreateView):
 
         context['no_editable'] = True
         context['delete_form'] = True
+        context['user_projects'] = self.user.get_projects()
 
         return context
