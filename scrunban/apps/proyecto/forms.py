@@ -149,17 +149,20 @@ class EditRolForm(CreateRolForm):
 
             rol.set_desc(self.cleaned_data['inputNombre'])
 
-            for p in rol.group.permissions.all():
-                rol.remove_perm(p)
 
             for u in rol.group.user_set.all():
                 rol.remove_user(u.user)
+
+            for p in rol.group.permissions.all():
+                rol.remove_perm(p)
 
             for p in perms:
                 rol.add_perm(p)
 
             for u in users:
                 rol.add_user(u)
+
+
 
 
 class DeleteRolForm(EditRolForm):
@@ -199,3 +202,44 @@ class DeleteRolForm(EditRolForm):
             project = Project.objects.filter(id=project_id)[0]
 
             project.remove_rol(short_name=rol.get_name())
+
+
+
+class EditDevForm(forms.Form):
+    """
+        Formulario que se encarga de validar los datos necesarios para la edicion de la cantidad de hs-hombre de un
+        miembro del equipo de desarrollo
+
+        :param id: ID de la relacion Team
+        :param username: Nombre de usuario
+        :param hs_hombre: Cantidad de hs-hombre
+
+    """
+    id = forms.CharField(widget=forms.HiddenInput, required=True)
+    username = forms.CharField(widget=forms.HiddenInput, required=False)
+    hs_hombre = forms.IntegerField(widget=forms.HiddenInput, required=True)
+
+    def clean_id(self):
+
+        from apps.proyecto.models import Team
+        team = Team.objects.filter(id=self.cleaned_data['id'])
+
+        if team.count() == 0:
+            raise ValidationError('ID invalido')
+
+        return self.cleaned_data['id']
+
+    def clean_hs_hombre(self):
+
+        if self.cleaned_data['hs_hombre'] < 0:
+            raise ValidationError('La cantidad de Hs-Hombre debe ser un entero positivo')
+
+        return self.cleaned_data['hs_hombre']
+
+    def save(self):
+
+        from apps.proyecto.models import Team
+
+        team = Team.objects.get(id=self.cleaned_data['id'])
+        team.hs_hombre = self.cleaned_data['hs_hombre']
+        team.save()
