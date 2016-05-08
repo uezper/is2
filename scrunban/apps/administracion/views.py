@@ -1,11 +1,8 @@
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from .forms import ProjectForm
-from .models import Project
-from .models import ProductBacklog
+from .models import Backlog
 from apps.autenticacion.models import User
-from scrunban.settings import base as base_settings
 from apps.autenticacion.decorators import login_required
 from django.db.utils import IntegrityError
 
@@ -19,10 +16,8 @@ from apps.administracion import forms
 from django.shortcuts import get_object_or_404, HttpResponseRedirect
 
 from apps.proyecto.mixins import UrlNamesContextMixin
-from apps.autenticacion.mixins import UserPermissionContextMixin
+from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin
 
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from scrunban.settings import base as base_settings
 
 
@@ -53,7 +48,6 @@ def crear_proyecto(request):
         form = ProjectForm(request.POST)
         context['form'] = form
         if form.is_valid():
-            print("Received!")
             p = Project()
             p.name = form.cleaned_data['name']
             p.date_start = form.cleaned_data['date_start']
@@ -62,7 +56,7 @@ def crear_proyecto(request):
             p.scrum_master = sm
             po = User.users.filter(username=form.cleaned_data['product_owner']).get()
             p.product_owner = po
-            pb = ProductBacklog()
+            pb = Backlog()
             pb.save()
             p.product_backlog = pb
 
@@ -132,7 +126,7 @@ def eliminar_proyecto(request):
     return render(request, 'administracion/proyectoEliminar.html', context)
 
 
-class UserCreateView(FormView, UrlNamesContextMixin, UserPermissionContextMixin):
+class UserCreateView(UserIsAuthenticatedMixin, FormView, UrlNamesContextMixin, UserPermissionContextMixin):
     """
     Clase correspondiente a la vista que permite crear un usuario
 
@@ -144,9 +138,6 @@ class UserCreateView(FormView, UrlNamesContextMixin, UserPermissionContextMixin)
     section_title = 'Nuevo Usuario'
     left_active = 'Usuarios'
 
-    @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
-    def dispatch(self, *args, **kwargs):
-        return super(UserCreateView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
 
@@ -164,14 +155,10 @@ class UserCreateView(FormView, UrlNamesContextMixin, UserPermissionContextMixin)
         return reverse(base_settings.ADM_USER_LIST)
 
     def form_valid(self, form):
-        print('valid form')
-        print(form)
         form.save()
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form):
-
-        print(form)
 
         context = {
             'form' : form
@@ -181,7 +168,7 @@ class UserCreateView(FormView, UrlNamesContextMixin, UserPermissionContextMixin)
 
 
 
-class UserListView(ListView, UrlNamesContextMixin, UserPermissionContextMixin):
+class UserListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, UserPermissionContextMixin):
 
     """
     Clase correspondiente a la vista que lista los usuarios
@@ -198,10 +185,6 @@ class UserListView(ListView, UrlNamesContextMixin, UserPermissionContextMixin):
     allow_empty = True
 
     paginate_by = 10
-
-    @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
-    def dispatch(self, *args, **kwargs):
-        return super(UserListView, self).dispatch(*args, **kwargs)
 
     def get_queryset(self):
         return User.objects.all()

@@ -20,28 +20,32 @@
 
 
         function cargar_datos() {
-            username = $("#id_username").val();
-            hs_hombre = $("#id_hs_hombre").val();
 
-            if (username != undefined) {
-                $("#username").val(username);
+            fields = [ 'username', 'hs_hombre' ];
+            elementos = [];
+
+            for (var i in fields) {
+                elementos[i] = $("#id_" + fields[i]).val();
+
+                if (elementos[i] != undefined) {
+                    $("#" + fields[i]).val(elementos[i]);
+                }
             }
-            if (hs_hombre != undefined) {
-                $("#hs_hombre").val(hs_hombre);
-            }
+
         }
 
         $("#form").submit(function(event){
 
 
-            username = $("#username").val();
-            hs_hombre = $("#hs_hombre").val();
+            fields = [ 'username', 'hs_hombre' ];
+            elementos = [];
 
-            if (username != undefined){
-                $("#id_username").val(username);
-            }
-            if (hs_hombre != undefined){
-                $("#id_hs_hombre").val(hs_hombre);
+            for (var i in fields) {
+                elementos[i] = $("#" + fields[i]).val();
+
+                if (elementos[i] != undefined) {
+                    $("#id_" + fields[i]).val(elementos[i]);
+                }
             }
 
         });
@@ -73,8 +77,6 @@
                     <form class="form-horizontal" method="post" action="#" id="form">
                         {% csrf_token %}
 
-
-                        {{ form.id }}
                         {{ form.username }}
                         {{ form.hs_hombre }}
 

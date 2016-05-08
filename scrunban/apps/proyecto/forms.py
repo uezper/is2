@@ -219,16 +219,6 @@ class EditDevForm(forms.Form):
     username = forms.CharField(widget=forms.HiddenInput, required=False)
     hs_hombre = forms.IntegerField(widget=forms.HiddenInput, required=True)
 
-    def clean_id(self):
-
-        from apps.proyecto.models import Team
-        team = Team.objects.filter(id=self.cleaned_data['id'])
-
-        if team.count() == 0:
-            raise ValidationError('ID invalido')
-
-        return self.cleaned_data['id']
-
     def clean_hs_hombre(self):
 
         if self.cleaned_data['hs_hombre'] < 0:
@@ -241,5 +231,47 @@ class EditDevForm(forms.Form):
         from apps.proyecto.models import Team
 
         team = Team.objects.get(id=self.cleaned_data['id'])
-        team.hs_hombre = self.cleaned_data['hs_hombre']
-        team.save()
+        team.set_hsHombre(self.cleaned_data['hs_hombre'])
+
+
+class CreateSprintForm(forms.Form):
+    """
+    Formulario que se encarga de manejar la creacion de un Sprint dentro del proyecto
+
+    :param sec: Utilizado para mostrar al usuario el nombre del Sprint
+    :param estimated_time: Duracion estimada del Sprint
+    :param project: Id del proyecto al cual pertenece el Sprint
+
+    """
+    sec = forms.CharField(required=False, widget=forms.HiddenInput)
+    estimated_time = forms.IntegerField(required=True, widget=forms.HiddenInput)
+    project = forms.IntegerField(required=True, widget=forms.HiddenInput)
+
+    def clean_estimated_time(self):
+        if self.cleaned_data['estimated_time'] > 0:
+            return self.cleaned_data['estimated_time']
+        else:
+            raise ValidationError('Este campo debe ser un entero positivo mayor que cero')
+
+    def save(self):
+        from apps.proyecto.models import Sprint
+        Sprint.sprints.create(project=self.cleaned_data['project'],estimated_time=self.cleaned_data['estimated_time'])
+
+
+class EditSprintForm(CreateSprintForm):
+    """
+    Formulario que se encarga de manejar la edicion de un Sprint dentro del proyecto
+
+    :param id: Id del Sprint
+    """
+
+    id = forms.IntegerField(required=True, widget=forms.HiddenInput)
+
+    def save(self):
+        from apps.proyecto.models import Sprint
+        sprint_ = Sprint.objects.get(id=self.cleaned_data['id'])
+        sprint_.set_estimated_time(self.cleaned_data['estimated_time'])
+
+
+
+

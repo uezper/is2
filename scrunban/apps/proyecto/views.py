@@ -2,24 +2,22 @@ from django.core.urlresolvers import reverse
 from django.views.generic.list import ListView
 from django.views.generic.edit import FormView
 from django.views.generic.detail import SingleObjectMixin
+
 from apps.autenticacion.models import Role
 from apps.administracion.models import Project
-from apps.proyecto.models import Team
+from apps.proyecto.models import Team, Sprint
 
 from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
 from apps.proyecto import forms
 from django.shortcuts import get_object_or_404, HttpResponseRedirect
 
-from apps.proyecto.mixins import PermissionListMixin, UrlNamesContextMixin, UserListMixin
-from apps.autenticacion.mixins import UserPermissionContextMixin
-
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
+from apps.proyecto.mixins import PermissionListMixin, UrlNamesContextMixin, UserListMixin, ValidateSprintState
+from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin
 from scrunban.settings import base as base_settings
 
 from django.shortcuts import render
 
-class RoleListView(ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
+class RoleListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
 
     """
     Clase correspondiente a la vista que lista los roles de un proyecto
@@ -36,10 +34,6 @@ class RoleListView(ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermis
 
     section_title = 'Lista de Roles'
     left_active = 'Roles'
-
-    @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
-    def dispatch(self, *args, **kwargs):
-        return super(RoleListView, self).dispatch(*args, **kwargs)
 
     def get_queryset(self):
         self.object = self.get_object(queryset=Project.objects.all())
@@ -80,7 +74,7 @@ class RoleListView(ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermis
 
         context[self.context_object_name] = new_role_list
 
-class RoleCreateView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserListMixin, PermissionListMixin, UserPermissionContextMixin):
+class RoleCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, UrlNamesContextMixin, UserListMixin, PermissionListMixin, UserPermissionContextMixin):
     """
     Clase correspondiente a la vista que permite crear un rol dentro de un proyecto
 
@@ -95,10 +89,6 @@ class RoleCreateView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserList
 
     section_title = 'Crear Rol'
     left_active = 'Roles'
-
-    @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
-    def dispatch(self, *args, **kwargs):
-        return super(RoleCreateView, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
 
@@ -216,6 +206,7 @@ class RoleDeleteView(RoleEditView):
 
     section_title = 'Borrar Rol'
 
+
     def get(self, request, *args, **kwargs):
         form = self.form_class(self.get_initial())
         if (form.is_valid()):
@@ -259,14 +250,14 @@ def index(request, project_id):
 
 
 
-class DevListView(ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
+class DevListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
 
     """
     Clase correspondiente a la vista que lista los desarrolladores de un proyecto
 
 
     """
-    model = Role
+    model = Team
     context_object_name = 'dev_list'
     template_name = 'proyecto/project_dev_team_list'
 
@@ -276,10 +267,6 @@ class DevListView(ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermiss
 
     section_title = 'Equipo de Desarrollo'
     left_active = 'Equipo de Desarrollo'
-
-    @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
-    def dispatch(self, *args, **kwargs):
-        return super(DevListView, self).dispatch(*args, **kwargs)
 
     def get_queryset(self):
         self.object = self.get_object(queryset=Project.objects.all())
@@ -301,7 +288,7 @@ class DevListView(ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermiss
 
 
 
-class DevEditView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
+class DevEditView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
     """
     Clase correspondiente a la vista que permite editar la cantidad de hs-hombre de un usuario dentro de un proyecto
 
@@ -317,12 +304,8 @@ class DevEditView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserPermiss
     template_name = 'proyecto/project_dev_team_edit'
     left_active = 'Equipo de Desarrollo'
 
-    @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
-    def dispatch(self, *args, **kwargs):
-        return super(DevEditView, self).dispatch(*args, **kwargs)
 
     def get_initial(self):
-        project = self.get_object(queryset=Project.objects.all())
         team_id = self.kwargs.get(self.team_id_kwname)
         team = get_object_or_404(Team, id=team_id)
 
@@ -335,7 +318,29 @@ class DevEditView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserPermiss
 
         return initial
 
+    def post(self, request, *args, **kwargs):
+        from django.http.request import QueryDict
 
+        team_id = self.kwargs.get(self.team_id_kwname)
+        team = get_object_or_404(Team, id=team_id)
+
+        form_class = self.get_form_class()
+
+        data = QueryDict.dict(request.POST)
+
+        data.update({
+            'id': team.id
+        })
+
+        qdict = QueryDict('', mutable=True)
+        qdict.update(data)
+
+        form = form_class(qdict)
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):
         self.object = self.get_object(queryset=Project.objects.all())
@@ -363,11 +368,6 @@ class DevEditView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserPermiss
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form):
-        form_data = {
-            'id': form.data.get('id', ''),
-            'username': form.data.get('username', ''),
-            'hs_hombre': form.data.get('hs_hombre', ''),
-        }
 
         context = {
             'form': form
@@ -375,3 +375,182 @@ class DevEditView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserPermiss
         print(form)
 
         return super(DevEditView, self).render_to_response(self.get_context_data(**context))
+
+
+class SprintListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
+
+    """
+    Clase correspondiente a la vista que lista los Sprints de un proyecto
+
+
+    """
+    model = Sprint
+    context_object_name = 'sprint_list'
+    template_name = 'proyecto/project_sprint_list'
+
+    pk_url_kwarg = 'project_id'
+
+    paginate_by = 10
+
+    section_title = 'Sprints'
+    left_active = 'Sprints'
+
+
+    def get_queryset(self):
+        self.object = self.get_object(queryset=Project.objects.all())
+        return Sprint.sprints.filter(project=self.object)
+
+    def get_context_data(self, **kwargs):
+        context = super(SprintListView, self).get_context_data(**kwargs)
+
+        self.get_url_context(context)
+        self.get_user_permissions(context)
+
+        context['project'] = self.object
+
+        context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
+
+
+        return context
+
+
+class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
+    """
+    Clase correspondiente a la vista que permite crear un Sprint dentro de un proyecto
+
+    """
+
+    form_class = forms.CreateSprintForm
+    template_name = 'proyecto/project_sprint_create'
+
+    context_object_name = 'project'
+
+    pk_url_kwarg = 'project_id'
+
+    section_title = 'Crear Sprint'
+    left_active = 'Sprints'
+
+
+    def get_default_fields(self):
+        project = self.get_object(queryset=Project.objects.all())
+
+        data = {
+            'project': project.id
+        }
+
+        return data
+
+    def post(self, request, *args, **kwargs):
+        from django.http.request import QueryDict
+
+        form_class = self.get_form_class()
+
+        data = QueryDict.dict(request.POST)
+
+        data.update(**self.get_default_fields())
+
+        qdict = QueryDict('', mutable=True)
+        qdict.update(data)
+
+        form = form_class(qdict)
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+
+        self.object = self.get_object(queryset=Project.objects.all())
+
+        context = super(SprintCreateView, self).get_context_data(**kwargs)
+
+        self.get_url_context(context)
+        self.get_user_permissions(context)
+
+        context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
+
+        return context
+
+    def get_success_url(self):
+        project = self.get_object(queryset=Project.objects.all())
+
+        from scrunban.settings.base import PROJECT_SPRINT_LIST
+        return reverse(PROJECT_SPRINT_LIST, args=(project.id,))
+
+    def get_initial(self):
+        from apps.proyecto.models import Sprint
+        project = self.get_object(queryset=Project.objects.all())
+        sec = 0
+        sprints = Sprint.objects.filter(project=project)
+
+        if sprints.count() != 0:
+            sec = sprints.last().sec + 1
+
+
+        initial = {
+            'sec': 'Sprint ' + str(sec)
+        }
+
+        return initial
+
+    def form_valid(self, form):
+
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+
+    def form_invalid(self, form):
+
+        context = {
+            'form' : form
+        }
+
+        return super(SprintCreateView, self).render_to_response(self.get_context_data(**context))
+
+
+
+class SprintEditView(ValidateSprintState, SprintCreateView):
+    """
+    Clase correspondiente a la vista que permite editar un Sprint dentro de un proyecto
+
+    """
+
+    form_class = forms.EditSprintForm
+
+    sprint_url_kwarg = 'sprint_id'
+
+    section_title = 'Editar Sprint'
+
+
+    def get_default_fields(self):
+        from apps.proyecto.models import Sprint
+
+        project = self.get_object(queryset=Project.objects.all())
+        sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
+
+        data = {
+            'project': project.id,
+            'id': sprint.id
+        }
+
+        return data
+
+    def get_context_data(self, **kwargs):
+        context = super(SprintEditView, self).get_context_data(**kwargs)
+        context['edit_form'] = True
+
+        return context
+
+    def get_initial(self):
+        from apps.proyecto.models import Sprint
+        sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
+
+        initial = {
+            'sec': sprint.sec,
+            'estimated_time': sprint.get_estimated_time()
+        }
+
+        return initial

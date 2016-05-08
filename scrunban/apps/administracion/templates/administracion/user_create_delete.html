@@ -31,38 +31,16 @@
         {
 
 
-            username = $("#id_username").val();
-            email = $("#id_email").val();
-            direccion = $("#id_direccion").val();
-            telefono = $("#id_telefono").val();
-            first_name = $("#id_first_name").val();
-            last_name = $("#id_last_name").val();
+            fields = [ 'username', 'email', 'direccion', 'telefono', 'first_name', 'last_name' ];
+            elementos = [];
 
-            if (username != undefined)
-            {
-                $("#username").val(username);
-            }
-            if (email != undefined)
-            {
-                $("#email").val(email);
-            }
-            if (direccion != undefined)
-            {
-                $("#direccion").val(direccion);
-            }
-            if (telefono != undefined)
-            {
-                $("#telefono").val(telefono);
-            }
-            if (first_name != undefined)
-            {
-                $("#first_name").val(first_name);
-            }
-            if (last_name != undefined)
-            {
-                $("#last_name").val(last_name);
-            }
+            for (var i in fields) {
+                elementos[i] = $("#id_" + fields[i]).val();
 
+                if (elementos[i] != undefined) {
+                    $("#" + fields[i]).val(elementos[i]);
+                }
+            }
 
 
         }
@@ -85,37 +63,16 @@
 
         $("#form").submit(function(event){
 
+            fields = [ 'username', 'password', 'email', 'direccion', 'telefono', 'first_name', 'last_name' ];
+            elementos = [];
 
-		username = $("#username").val();
-		password = $("#password").val();
-		first_name = $("#first_name").val();
-		last_name = $("#last_name").val();
-		email = $("#email").val();
-		direccion = $("#direccion").val();
-		telefono = $("#telefono").val();
-    
+            for (var i in fields) {
+                elementos[i] = $("#" + fields[i]).val();
+                if (elementos[i] != undefined) {
+                    $("#id_" + fields[i]).val(elementos[i]);
+                }
+            }
 
-		if (username != undefined){
-			$("#id_username").val(username);
-		}
-		if (password != undefined){
-			$("#id_password").val(password);
-		}
-		if (first_name != undefined){
-			$("#id_first_name").val(first_name);
-		}
-		if (last_name != undefined){
-			$("#id_last_name").val(last_name);
-		}
-		if (direccion != undefined){
-			$("#id_direccion").val(direccion);
-		}
-		if (telefono != undefined){
-			$("#id_telefono").val(telefono);
-		}
-		if (email != undefined){
-			$("#id_email").val(email);
-		}
 
         });
 

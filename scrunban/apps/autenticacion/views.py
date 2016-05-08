@@ -125,6 +125,5 @@ def perfil(request):
     x.request = request
     x.get_user_permissions(context)
 
-    print(context)
 
     return render(request, 'autenticacion/perfil', context)

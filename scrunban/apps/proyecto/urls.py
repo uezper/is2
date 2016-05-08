@@ -1,6 +1,5 @@
 from django.conf.urls import url
 from scrunban.settings import base as base_settings
-from django.views.generic import TemplateView
 from . import views
 
 urlpatterns = [
@@ -18,5 +17,13 @@ urlpatterns = [
         name=base_settings.PROJECT_DEV_LIST),
     url(r'^(?P<project_id>[0-9]+)/dev/edit/(?P<team_id>[0-9]+)/$', views.DevEditView.as_view(),
         name=base_settings.PROJECT_DEV_EDIT),
+    url(r'^(?P<project_id>[0-9]+)/sprint/$', views.SprintListView.as_view(),
+        name=base_settings.PROJECT_SPRINT_LIST),
+    url(r'^(?P<project_id>[0-9]+)/sprint/create/$', views.SprintCreateView.as_view(),
+        name=base_settings.PROJECT_SPRINT_CREATE),
+    url(r'^(?P<project_id>[0-9]+)/sprint/edit/(?P<sprint_id>[0-9]+)/$$', views.SprintEditView.as_view(),
+        name=base_settings.PROJECT_SPRINT_EDIT),
+    url(r'^(?P<project_id>[0-9]+)/sprint/delete/(?P<sprint_id>[0-9]+)/$$', views.SprintCreateView.as_view(),
+        name=base_settings.PROJECT_SPRINT_DELETE),
 ]
 

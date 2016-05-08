@@ -1,7 +1,8 @@
 from django.db import models
 from apps.autenticacion.models import User, Role
+from django.dispatch import receiver
 
-class ProductBacklogManager(models.Manager):
+class BacklogManager(models.Manager):
     def create(self, **kwargs):
         """
         Wrapper of the creation function for Product Backlog
@@ -16,23 +17,90 @@ class ProductBacklogManager(models.Manager):
                 raise KeyError('{} is required.'.format(required_field))
 
         # Check if id has been taken
-        if ProductBacklog.productbacklogs.filter(id=kwargs['id']).count() == 0:
-            new_pb = ProductBacklog(kwargs['id'])
+        if Backlog.backlogs.filter(id=kwargs['id']).count() == 0:
+            new_pb = Backlog(kwargs['id'])
 
             return new_pb
         else:
             return None
 
-class ProductBacklog(models.Model):    
+class Backlog(models.Model):
     # Public fields mapped to DB columns
     id = models.AutoField(primary_key=True)
     
     # Public fields mapped to DB columns
-    productbacklogs = ProductBacklogManager()
+    backlogs = BacklogManager()
     objects = models.Manager()
 
     def __str__(self):
         return "%d" % self.id
+
+
+
+class SprintBacklog(Backlog):
+    """
+    Clase que maneja los Sprint Backlogs
+    """
+    def add_user_story(self, user_story):
+        """
+        Agrega un User Story al Sprint Backlog
+        :param user_story: Instancia de UserStory
+        """
+        if (isinstance(user_story, UserStory)):
+            user_story.sprint_backlog = self
+        else:
+            raise TypeError('user_story debe ser una instancia de UserStory')
+
+    def remove_user_story(self, user_story):
+        """
+        Quita un User Story del Sprint Backlog
+        :param user_story:  Instancia de UserStory
+        """
+        if (isinstance(user_story, UserStory)):
+            user_story.sprint_backlog = None
+        else:
+            raise TypeError('user_story debe ser una instancia de UserStory')
+
+    def get_user_stories(self):
+        """
+        Retorna los user stories del Sprint Backlog
+        :return: User stories
+        """
+
+        return UserStory.objects.filter(sprint_backlog=self)
+
+
+class ProductBacklog(Backlog):
+    """
+    Clase que maneja los Product Backlogs
+    """
+    def add_user_story(self, user_story):
+        """
+        Agrega un User Story al Product Backlog
+        :param user_story: Instancia de UserStory
+        """
+        if (isinstance(user_story, UserStory)):
+            user_story.product_backlog = self
+        else:
+            raise TypeError('user_story debe ser una instancia de UserStory')
+
+    def remove_user_story(self, user_story):
+        """
+        Quita un User Story del Product Backlog
+        :param user_story:  Instancia de UserStory
+        """
+        if (isinstance(user_story, UserStory)):
+            user_story.product_backlog = None
+        else:
+            raise TypeError('user_story debe ser una instancia de UserStory')
+
+    def get_user_stories(self):
+        """
+        Retorna los user stories del Product Backlog
+        :return: User stories
+        """
+
+        return UserStory.objects.filter(product_backlog=self)
 
 
 class ProjectManager(models.Manager):
@@ -58,7 +126,7 @@ class ProjectManager(models.Manager):
                 data[f] = kwargs[f]
 
             p = Project()
-            pb = ProductBacklog()
+            pb = Backlog()
             pb.save()
 
             p.name = data['name']
@@ -97,6 +165,7 @@ class Project(models.Model):
     :param product_owner: Product Owner del proyecto
     :param development_team: Todos los Development Teams del proyecto
     :param product_backlog: Todos los User Stories del proyecto
+    :param capacity: Capacidad del Equipo de desarrollo del proyecto
     """
     # Public fields mapped to DB columns
     id = models.AutoField(primary_key=True)
@@ -106,8 +175,8 @@ class Project(models.Model):
     scrum_master = models.ForeignKey(User, null=True, related_name='fk_project_scrum_master')
     product_owner = models.ForeignKey(User, null=True, related_name='fk_project_product_owner')
     development_team = models.ManyToManyField(User, related_name='mm_project_development_team')
-    product_backlog = models.OneToOneField(ProductBacklog)
-
+    product_backlog = models.OneToOneField(Backlog)
+    capacity = models.IntegerField(default=0)
 
     # Public fields for simplicity
     objects = models.Manager()
@@ -223,13 +292,15 @@ class Project(models.Model):
         return False
 
 
-class Sprint(models.Model):
-    id = models.AutoField(primary_key=True)
-    project = models.ForeignKey(Project, null=True)
+@receiver(models.signals.post_delete, sender=Project, dispatch_uid='project_delete_signal')
+def project_delete(sender, instance, *args, **kwargs):
+    """
+    Escucha al evento de eliminación de Project para eliminar los roles asociados
+    """
+    for rol in instance.get_roles():
+        rol.delete()
 
-    def __str__(self):
-        return "%d" % self.id
-    
+
 class UserStory(models.Model):
     """
     Modelo donde se almacena la información sobre cada actividad a realizar dentro del projecto.
@@ -242,8 +313,8 @@ class UserStory(models.Model):
     business_value = models.FloatField()
     tecnical_value = models.FloatField()
     urgency = models.FloatField()
-    # Mas adelante se generaliza ProductBacklog y SprintBacklog a Backlog y se actualiza este campo
-    backlog = models.ForeignKey(to=ProductBacklog, null=True, blank=True, on_delete=models.CASCADE)
+    product_backlog = models.ForeignKey(to=ProductBacklog, null=True, blank=True, on_delete=models.CASCADE)
+    sprint_backlog = models.ForeignKey(to=SprintBacklog, null=True, blank=True)
 
     # Public fields for simplicity
     objects = models.Manager()
@@ -252,7 +323,7 @@ class UserStory(models.Model):
         return UserStoryNote.objects.filter(user_story=self)
 
     def get_weight(self):
-        return (self.business_value + self.urgency + 2*self.tecnical_value)/4
+        return (self.business_value + self.urgency + 2 * self.tecnical_value)/4
     
     def __str__(self):
         return "{}".format(self.description)
