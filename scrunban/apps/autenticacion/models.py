@@ -291,6 +291,28 @@ class Role(models.Model):
         Adds the user to this role
         :param user: Instance of autenticacion.models.User
         """
+
+        # Caso especial: rol de proyecto con permiso para desarrollo
+        if self.get_name().split('_')[0].isdigit():
+
+            from apps.autenticacion.settings import PROJECT_US_DEVELOP
+            from apps.proyecto.models import Team
+            from apps.administracion.models import Project
+            from django.contrib.auth.models import Permission
+
+            p_ = Permission.objects.get(codename=PROJECT_US_DEVELOP[0])
+            p_id = self.get_name().split('_')[0]
+            project = Project.objects.get(id=p_id)
+
+            # Si el rol que le estamos poniendo es de desarrollo
+            # comprobamos que tenga la relacion de team y si no la tiene la creamos
+
+            if p_ in self.get_perms():
+                    team = Team.teams.filter(user=user, project=project)
+
+                    if team.count() == 0:
+                        team = Team.teams.create(user=user, project=project, hs=0)
+
         user.user.groups.add(self.group)
 
     def remove_user(self, user):
@@ -298,7 +320,33 @@ class Role(models.Model):
         Removes user from this role
         :param user: Instance of autenticacion.models.User
         """
+
         user.user.groups.remove(self.group)
+
+        # Caso especial: rol de proyecto con permiso para desarrollo
+        if self.get_name().split('_')[0].isdigit():
+
+            from apps.autenticacion.settings import PROJECT_US_DEVELOP
+            from apps.proyecto.models import Team
+            from apps.administracion.models import Project
+            from django.contrib.auth.models import Permission
+
+            p_ = Permission.objects.get(codename=PROJECT_US_DEVELOP[0])
+            p_id = self.get_name().split('_')[0]
+            project = Project.objects.get(id=p_id)
+
+            # Si el rol que le estamos quitando es de desarrollo
+            # y el usuario ya no tiene ese permiso por ningun rol dentro del proyecto
+            # le quitamos la relacion con team
+
+
+            if p_ in self.get_perms():
+                if not (p_ in project.get_user_perms(user)):
+                    team = Team.teams.filter(user=user, project=project)
+
+                    if not(team.count() == 0):
+                        team[0].delete()
+
 
     def add_perm(self, permission):
         """
@@ -316,6 +364,7 @@ class Role(models.Model):
 
         :param permission: Instancia de contrib.auth.models.Permission
         """
+
         self.group.permissions.remove(permission)
 
     def get_perms(self):

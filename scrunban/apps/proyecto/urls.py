@@ -14,5 +14,9 @@ urlpatterns = [
         name=base_settings.PROJECT_ROLE_EDIT),
     url(r'^(?P<project_id>[0-9]+)/roles/delete/(?P<rol_id>[0-9]+)/$', views.RoleDeleteView.as_view(),
         name=base_settings.PROJECT_ROLE_DELETE),
+    url(r'^(?P<project_id>[0-9]+)/dev/$', views.DevListView.as_view(),
+        name=base_settings.PROJECT_DEV_LIST),
+    url(r'^(?P<project_id>[0-9]+)/dev/edit/(?P<team_id>[0-9]+)/$', views.DevEditView.as_view(),
+        name=base_settings.PROJECT_DEV_EDIT),
 ]
 

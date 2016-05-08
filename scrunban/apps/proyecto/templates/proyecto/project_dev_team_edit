@@ -1,0 +1,122 @@
+{% extends "proyecto/project_base" %}
+
+{% block "include" %}
+<script>
+    $(document).ready(function(){
+
+
+        cargar_datos();
+
+
+        if ($("#errors").children().length > 0)
+        {
+            $("#errors").show();
+        }
+        else
+        {
+            $("#errors").hide();
+        }
+
+
+
+        function cargar_datos() {
+            username = $("#id_username").val();
+            hs_hombre = $("#id_hs_hombre").val();
+
+            if (username != undefined) {
+                $("#username").val(username);
+            }
+            if (hs_hombre != undefined) {
+                $("#hs_hombre").val(hs_hombre);
+            }
+        }
+
+        $("#form").submit(function(event){
+
+
+            username = $("#username").val();
+            hs_hombre = $("#hs_hombre").val();
+
+            if (username != undefined){
+                $("#id_username").val(username);
+            }
+            if (hs_hombre != undefined){
+                $("#id_hs_hombre").val(hs_hombre);
+            }
+
+        });
+
+
+    });
+</script>
+
+{% endblock %}
+
+
+{% block "working_path" %}
+	{{ block.super }}
+	<li><a href="{% url URL_NAMES.PROJECT_DEV_LIST project.id %}">Equipo de Desarrollo</a></li>
+	<li class="active">{{ section_title }}</li>
+{% endblock %}
+
+{% block "content" %}
+
+	<div class="panel panel-default">
+
+		<div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>{{ section_title }}</h3>
+                    <hr />
+
+                    <form class="form-horizontal" method="post" action="#" id="form">
+                        {% csrf_token %}
+
+
+                        {{ form.id }}
+                        {{ form.username }}
+                        {{ form.hs_hombre }}
+
+                      <div class="form-group">
+                        <label for="rowUsername" class="col-sm-2 control-label">Usuario:</label>
+
+                            <div class="row" id="rowUsername">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" id="username" aria-describedby="helpBlock1" readonly>
+                                     <span id="helpBlock1" class="help-block">{{form.username.errors}}</span>
+                                </div>
+
+                            </div>
+
+                      </div>
+
+
+                        <div class="form-group {% if form.hs_hombre.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowHsHombre" class="col-sm-2 control-label">Horas Hombre:</label>
+
+                            <div class="row" id="rowHsHombre">
+                                <div class="col-md-4">
+                                    <input type="number" class="form-control" id="hs_hombre" placeholder="Cantidad de Hs Hombre" aria-describedby="helpBlock2" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock2" class="help-block">{{form.hs_hombre.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+                      <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-default" id="save">Guardar</button>
+                        </div>
+                      </div>
+                    </form>
+
+
+                </div>
+            </div>
+
+		</div>
+	</div>
+
+{% endblock %}

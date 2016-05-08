@@ -4,6 +4,7 @@ from django.views.generic.edit import FormView
 from django.views.generic.detail import SingleObjectMixin
 from apps.autenticacion.models import Role
 from apps.administracion.models import Project
+from apps.proyecto.models import Team
 
 from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
 from apps.proyecto import forms
@@ -250,3 +251,127 @@ def index(request, project_id):
     }
 
     return render(request, 'proyecto/project_index', context)
+
+
+
+
+
+
+
+
+class DevListView(ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
+
+    """
+    Clase correspondiente a la vista que lista los desarrolladores de un proyecto
+
+
+    """
+    model = Role
+    context_object_name = 'dev_list'
+    template_name = 'proyecto/project_dev_team_list'
+
+    pk_url_kwarg = 'project_id'
+
+    paginate_by = 10
+
+    section_title = 'Equipo de Desarrollo'
+    left_active = 'Equipo de Desarrollo'
+
+    @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
+    def dispatch(self, *args, **kwargs):
+        return super(DevListView, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        self.object = self.get_object(queryset=Project.objects.all())
+        return Team.teams.filter(project=self.object)
+
+    def get_context_data(self, **kwargs):
+        context = super(DevListView, self).get_context_data(**kwargs)
+
+        self.get_url_context(context)
+        self.get_user_permissions(context)
+
+        context['project'] = self.object
+
+        context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
+
+
+        return context
+
+
+
+class DevEditView(FormView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
+    """
+    Clase correspondiente a la vista que permite editar la cantidad de hs-hombre de un usuario dentro de un proyecto
+
+    """
+
+    form_class = forms.EditDevForm
+
+    section_title = 'Editar Cantidad de Horas Hombre'
+
+    team_id_kwname = 'team_id'
+    context_object_name = 'project'
+    pk_url_kwarg = 'project_id'
+    template_name = 'proyecto/project_dev_team_edit'
+    left_active = 'Equipo de Desarrollo'
+
+    @method_decorator(login_required(login_url=base_settings.LOGIN_NAME))
+    def dispatch(self, *args, **kwargs):
+        return super(DevEditView, self).dispatch(*args, **kwargs)
+
+    def get_initial(self):
+        project = self.get_object(queryset=Project.objects.all())
+        team_id = self.kwargs.get(self.team_id_kwname)
+        team = get_object_or_404(Team, id=team_id)
+
+        initial = {
+            'id': team.id,
+            'username': team.user.get_first_name() + ' ' + team.user.get_last_name(),
+            'hs_hombre': team.hs_hombre
+        }
+
+
+        return initial
+
+
+
+    def get_context_data(self, **kwargs):
+        self.object = self.get_object(queryset=Project.objects.all())
+
+        context = super(DevEditView, self).get_context_data(**kwargs)
+
+        self.get_url_context(context)
+        self.get_user_permissions(context)
+
+        context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
+
+
+        return context
+
+    def get_success_url(self):
+        project = self.get_object(queryset=Project.objects.all())
+
+        from scrunban.settings.base import PROJECT_DEV_LIST
+        return reverse(PROJECT_DEV_LIST, args=(project.id,))
+
+
+    def form_valid(self, form):
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        form_data = {
+            'id': form.data.get('id', ''),
+            'username': form.data.get('username', ''),
+            'hs_hombre': form.data.get('hs_hombre', ''),
+        }
+
+        context = {
+            'form': form
+        }
+        print(form)
+
+        return super(DevEditView, self).render_to_response(self.get_context_data(**context))
