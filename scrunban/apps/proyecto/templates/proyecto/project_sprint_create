@@ -1,0 +1,132 @@
+{% extends "proyecto/project_base" %}
+
+{% block "include" %}
+<script>
+    $(document).ready(function(){
+
+
+        cargar_datos();
+
+
+        if ($("#errors").children().length > 0)
+        {
+            $("#errors").show();
+        }
+        else
+        {
+            $("#errors").hide();
+        }
+
+
+
+        function cargar_datos() {
+
+            fields = [ 'estimated_time', 'sec'];
+            elementos = [];
+
+            for (var i in fields) {
+                elementos[i] = $("#id_" + fields[i]).val();
+
+                if (elementos[i] != undefined) {
+                    $("#" + fields[i]).val(elementos[i]);
+                }
+            }
+
+        }
+
+        $("#form").submit(function(event){
+
+
+            fields = [ 'estimated_time' ];
+            elementos = [];
+
+            for (var i in fields) {
+                elementos[i] = $("#" + fields[i]).val();
+
+                if (elementos[i] != undefined) {
+                    $("#id_" + fields[i]).val(elementos[i]);
+                }
+            }
+
+        });
+
+
+    });
+</script>
+
+{% endblock %}
+
+
+{% block "working_path" %}
+	{{ block.super }}
+	<li><a href="{% url URL_NAMES.PROJECT_SPRINT_LIST project.id %}">Sprints</a></li>
+	<li class="active">{{ section_title }}</li>
+{% endblock %}
+
+{% block "content" %}
+
+	<div class="panel panel-default">
+
+		<div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>{{ section_title }}</h3>
+                    <hr />
+
+                    <form class="form-horizontal" method="post" action="#" id="form">
+                        {% csrf_token %}
+
+
+                        {{ form.sec }}
+                        {{ form.estimated_time }}
+
+                      <div class="form-group">
+                        <label for="rowSprint" class="col-sm-2 control-label">Sprint:</label>
+
+                            <div class="row" id="rowSprint">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" id="sec" aria-describedby="helpBlock1" readonly>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+                        <div class="form-group {% if form.estimated_time.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowEstimatedTime" class="col-sm-2 control-label">Tiempo estimado:</label>
+
+                            <div class="row" id="rowEstimatedTime">
+                                <div class="col-md-4">
+                                    <input type="number" class="form-control" id="estimated_time" placeholder="En dias" aria-describedby="helpBlock2" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock2" class="help-block">{{form.estimated_time.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+                      <div class="form-group">
+                          <div class="col-sm-offset-2 col-sm-10">
+                                {% if delete_form %}
+                                    <button type="submit" class="btn btn-default" id="delete">Borrar</button>
+                                    <a href="{% url URL_NAMES.PROJECT_SPRINT_EDIT project.id sprint.id %}">
+                                    <button type="button" class="btn btn-default" id="edit">Editar</button>
+                                    </a>
+                                {% elif edit_form %}
+                                    <button type="submit" class="btn btn-default" id="save">Guardar</button>
+                                {% else %}
+                                    <button type="button" class="btn btn-default" id="create">Crear</button>
+                                {% endif %}
+                          </div>
+                      </div>
+                    </form>
+
+
+                </div>
+            </div>
+
+		</div>
+	</div>
+
+{% endblock %}

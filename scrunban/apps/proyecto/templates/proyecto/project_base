@@ -12,7 +12,7 @@
 
     <li {% if left_active == 'Roles' %} class="active" {% endif %}><a href="{% url URL_NAMES.PROJECT_ROLE_LIST project.id %}">Roles</a></li>
     <li {% if left_active == 'Equipo de Desarrollo' %} class="active" {% endif %}><a href="{% url URL_NAMES.PROJECT_DEV_LIST project.id %}">Equipo de Desarrollo</a></li>
-
+    <li {% if left_active == 'Sprints' %} class="active" {% endif %}><a href="{% url URL_NAMES.PROJECT_SPRINT_LIST project.id %}">Sprints</a></li>
 {% endblock %}
 
 {% block "working_path" %}

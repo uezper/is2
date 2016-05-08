@@ -18,33 +18,41 @@
 
 			<table class="table table-striped">
 				<thead>
-					<tr>  <th>Usuario</th> <th class="text-center">Hs Hombre diarias</th></tr>
+					<tr>  <th>Sprint</th> <th class="text-center">Estado</th>
+                        <th class="text-right">
+                            <a href="{% url URL_NAMES.PROJECT_SPRINT_CREATE project.id %}">
+							<button type="button" class="btn btn-default btn-sm">
+								<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+							</button></a>
+                        </th>
+                    </tr>
 				</thead>
-				{% if dev_list|length == 0 %}
+				{% if sprint_list|length == 0 %}
 				<tbody>
-					<tr class="danger">  <td colspan="3">Actualmente no hay desarrolladores</td> </tr>
+					<tr class="danger">  <td colspan="3">Actualmente no hay Sprints</td> </tr>
 				</tbody>
 				{% else %}
 				<tbody>
-					{% for dev in dev_list %}
+					{% for sprint in sprint_list %}
 					<tr>
-						<td><a href="{% url URL_NAMES.PROJECT_DEV_EDIT project.id dev.id %}">{{dev.user.user.first_name}} {{dev.user.user.last_name}}</a></td>
-						<td class="text-center">{{dev.hs_hombre}}</td>
+						<td><a href="#">{{sprint}}</a></td>
+						<td class="text-center">{{sprint.state}}</td>
 						<td class="text-right">
-
-							<a href="{% url URL_NAMES.PROJECT_DEV_EDIT project.id dev.id %}">
+							{% if sprint.state == 'Pendiente' %}
+							<a href="#">
+							<button type="button" class="btn btn-default btn-sm">
+								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+							</button></a>
+							<a href="{% url URL_NAMES.PROJECT_SPRINT_EDIT project.id sprint.id %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
 							</button>
 							</a>
+							{% endif %}
+
 						</td>
 					</tr>
 					{% endfor %}
-					<tr>
-                        <td class="text-right"><b>Capacidad del Equipo:</b></td>
-                        <td class="text-center">{{project.capacity}}</td>
-                        <td></td>
-                    </tr>
 				</tbody>
 			{% endif %}
 			</table>

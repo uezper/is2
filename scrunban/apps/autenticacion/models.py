@@ -345,6 +345,7 @@ class Role(models.Model):
                     team = Team.teams.filter(user=user, project=project)
 
                     if not(team.count() == 0):
+                        team[0].set_hsHombre(0)
                         team[0].delete()
 
 
@@ -419,3 +420,4 @@ def role_delete(sender, instance, *args, **kwargs):
     Escucha al evento de eliminación de Role para eliminar el Group de Django asociado.
     """
     instance.group.delete()
+

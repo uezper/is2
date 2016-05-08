@@ -1,5 +1,7 @@
-from scrunban.settings.base import URL_NAMES
+from scrunban.settings.base import URL_NAMES, PROJECT_SPRINT_LIST
 from apps.autenticacion.models import User
+from apps.autenticacion.mixins import ValidateTestMixin
+from django.core.urlresolvers import reverse
 
 class UrlNamesContextMixin(object):
     """
@@ -63,4 +65,23 @@ class UserListMixin(object):
         """
         return User.objects.all()
 
+class ValidateSprintState(ValidateTestMixin):
+    """
+    Mixin que valida que el estado de un Sprint sea Pendiente antes de entrar en una vista
+    """
 
+    def get_redirect_url(self, request, *args, **kwargs):
+        from apps.administracion.models import Project
+        from django.shortcuts import get_object_or_404
+
+        project = get_object_or_404(Project, id=kwargs.get(self.pk_url_kwarg))
+
+        return reverse(PROJECT_SPRINT_LIST, args=(project.id,))
+
+    def validate_tests(self, request, *args, **kwargs):
+        from apps.proyecto.models import Sprint
+        from django.shortcuts import get_object_or_404
+
+        sprint = get_object_or_404(Sprint, id=kwargs.get(self.sprint_url_kwarg))
+
+        return sprint.get_state() == Sprint.state_choices[0][0]

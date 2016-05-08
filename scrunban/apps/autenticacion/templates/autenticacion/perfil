@@ -22,9 +22,15 @@
 		
 		<div class="panel-body">	
 			<div class="row">
+                        <div class="col-md-1"></div>
 		                <div class="col-md-10">
 		                    <h3>Mi Perfil</h3>
 				    		<hr />
+                        </div>
+            </div>
+            <div class="row">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10">
 		                    <p><strong>Nombres: </strong> {{ user.first_name }} </p>
 		                    <p><strong>Apellidos: </strong> {{ user.last_name }} </p>
 		                    <p><strong>Telefono: </strong> {{ user.user.telefono }} </p>
@@ -33,7 +39,8 @@
 		                </div>
 			</div>
 			<div class="row">
-		                <div class="col-md-10">
+		                <div class="col-md-1"></div>
+                        <div class="col-md-10">
 		                    <h3>Mis Proyectos</h3>
 				    		<hr />
 		                     <table class="table table-striped" id="tableProjects">

@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
 from django.utils import timezone
 from apps.autenticacion.models import User, Role
-from apps.administracion.models import Project, ProductBacklog, UserStory, UserStoryNote
+from apps.administracion.models import Project, Backlog, UserStory, UserStoryNote
 import time
 
 
@@ -276,7 +276,7 @@ class AutenticacionModelsTests(TestCase):
                         'id' : 155
                 }
 
-                pb = ProductBacklog.productbacklogs.create(**data)
+                pb = Backlog.backlogs.create(**data)
 
                 self.assertNotEqual(pb, None)
 
