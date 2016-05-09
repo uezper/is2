@@ -253,6 +253,9 @@ class CreateSprintForm(forms.Form):
         else:
             raise ValidationError('Este campo debe ser un entero positivo mayor que cero')
 
+    def clean_project(self):
+        return Project.objects.get(id=self.cleaned_data['project'])
+
     def save(self):
         from apps.proyecto.models import Sprint
         Sprint.sprints.create(project=self.cleaned_data['project'],estimated_time=self.cleaned_data['estimated_time'])
@@ -272,6 +275,13 @@ class EditSprintForm(CreateSprintForm):
         sprint_ = Sprint.objects.get(id=self.cleaned_data['id'])
         sprint_.set_estimated_time(self.cleaned_data['estimated_time'])
 
+class DeleteSprintForm(EditSprintForm):
+    """
+    Formulario que se encarga de manejar la eliminacion de un Sprint dentro del proyecto
 
+    """
 
-
+    def save(self):
+        from apps.proyecto.models import Sprint
+        sprint_ = Sprint.objects.get(id=self.cleaned_data['id'])
+        sprint_.delete()

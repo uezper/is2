@@ -11,7 +11,7 @@ from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
 from apps.proyecto import forms
 from django.shortcuts import get_object_or_404, HttpResponseRedirect
 
-from apps.proyecto.mixins import PermissionListMixin, UrlNamesContextMixin, UserListMixin, ValidateSprintState
+from apps.proyecto.mixins import PermissionListMixin, UrlNamesContextMixin, UserListMixin, ValidateSprintStatePending
 from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin
 from scrunban.settings import base as base_settings
 
@@ -422,7 +422,7 @@ class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, Ur
     """
 
     form_class = forms.CreateSprintForm
-    template_name = 'proyecto/project_sprint_create'
+    template_name = 'proyecto/project_sprint_create_edit_delete'
 
     context_object_name = 'project'
 
@@ -446,6 +446,8 @@ class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, Ur
 
         form_class = self.get_form_class()
 
+        # Recibe la peticion enviada por POST
+        # y actualiza agregando los campos por defecto basados en la vista
         data = QueryDict.dict(request.POST)
 
         data.update(**self.get_default_fields())
@@ -512,7 +514,7 @@ class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, Ur
 
 
 
-class SprintEditView(ValidateSprintState, SprintCreateView):
+class SprintEditView(ValidateSprintStatePending, SprintCreateView):
     """
     Clase correspondiente a la vista que permite editar un Sprint dentro de un proyecto
 
@@ -541,16 +543,63 @@ class SprintEditView(ValidateSprintState, SprintCreateView):
     def get_context_data(self, **kwargs):
         context = super(SprintEditView, self).get_context_data(**kwargs)
         context['edit_form'] = True
+        context['sprint'] = self.sprint
 
         return context
 
     def get_initial(self):
         from apps.proyecto.models import Sprint
-        sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
+        self.sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
 
         initial = {
+            'sec': 'Sprint ' + str(self.sprint.sec),
+            'estimated_time': self.sprint.get_estimated_time()
+        }
+
+        return initial
+
+class SprintDeleteView(SprintEditView):
+    """
+    Clase correspondiente a la vista que permite eliminar un Sprint dentro de un proyecto
+
+    """
+
+    form_class = forms.DeleteSprintForm
+
+    section_title = 'Eliminar Sprint'
+
+
+    def get_default_fields(self):
+        from apps.proyecto.models import Sprint
+
+        project = self.get_object(queryset=Project.objects.all())
+        sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
+
+        data = {
+            'project': project.id,
+            'id': sprint.id,
             'sec': sprint.sec,
             'estimated_time': sprint.get_estimated_time()
+        }
+
+        return data
+
+    def get_context_data(self, **kwargs):
+        context = super(SprintDeleteView, self).get_context_data(**kwargs)
+        context['delete_form'] = True
+        context['no_editable'] = True
+        context['sprint'] = self.sprint
+
+        return context
+
+    def get_initial(self):
+        from apps.proyecto.models import Sprint
+        self.sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
+
+        initial = {
+            'id': self.sprint.id,
+            'sec': 'Sprint ' + str(self.sprint.sec),
+            'estimated_time': self.sprint.get_estimated_time()
         }
 
         return initial

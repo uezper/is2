@@ -39,7 +39,7 @@
 						<td class="text-center">{{sprint.state}}</td>
 						<td class="text-right">
 							{% if sprint.state == 'Pendiente' %}
-							<a href="#">
+							<a href="{% url URL_NAMES.PROJECT_SPRINT_DELETE project.id sprint.id %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 							</button></a>

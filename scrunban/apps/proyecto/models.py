@@ -198,7 +198,7 @@ class Sprint(models.Model):
 
 
     def __str__(self):
-        return "Sprint %d" % self.id
+        return "Sprint %d" % self.sec
 
     def get_name(self):
         """

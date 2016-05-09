@@ -23,7 +23,7 @@ urlpatterns = [
         name=base_settings.PROJECT_SPRINT_CREATE),
     url(r'^(?P<project_id>[0-9]+)/sprint/edit/(?P<sprint_id>[0-9]+)/$$', views.SprintEditView.as_view(),
         name=base_settings.PROJECT_SPRINT_EDIT),
-    url(r'^(?P<project_id>[0-9]+)/sprint/delete/(?P<sprint_id>[0-9]+)/$$', views.SprintCreateView.as_view(),
+    url(r'^(?P<project_id>[0-9]+)/sprint/delete/(?P<sprint_id>[0-9]+)/$$', views.SprintDeleteView.as_view(),
         name=base_settings.PROJECT_SPRINT_DELETE),
 ]
 
