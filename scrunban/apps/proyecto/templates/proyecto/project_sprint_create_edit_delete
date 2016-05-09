@@ -74,6 +74,13 @@
                     <h3>{{ section_title }}</h3>
                     <hr />
 
+                    {% if delete_form %}
+                    <div class="alert alert-danger" role="alert" id="errors">
+                        <p class="warning"> Estas seguro de que quieres borrar?</p>
+
+                    </div>
+                    {% endif %}
+
                     <form class="form-horizontal" method="post" action="#" id="form">
                         {% csrf_token %}
 
@@ -115,8 +122,11 @@
                                     </a>
                                 {% elif edit_form %}
                                     <button type="submit" class="btn btn-default" id="save">Guardar</button>
+                                    <a href="{% url URL_NAMES.PROJECT_SPRINT_DELETE project.id sprint.id %}">
+                                    <button type="button" class="btn btn-default" id="delete">Borrar</button>
+                                    </a>
                                 {% else %}
-                                    <button type="button" class="btn btn-default" id="create">Crear</button>
+                                    <button type="submit" class="btn btn-default" id="create">Crear</button>
                                 {% endif %}
                           </div>
                       </div>

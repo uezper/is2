@@ -65,7 +65,7 @@ class UserListMixin(object):
         """
         return User.objects.all()
 
-class ValidateSprintState(ValidateTestMixin):
+class ValidateSprintStatePending(ValidateTestMixin):
     """
     Mixin que valida que el estado de un Sprint sea Pendiente antes de entrar en una vista
     """
