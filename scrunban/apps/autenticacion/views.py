@@ -21,7 +21,7 @@ def login(request):
     """
     
     if request.user.is_active:
-        return HttpResponseRedirect(reverse(base_settings.PERFIL_NAME))
+        return HttpResponseRedirect(reverse(base_settings.PERFIL_NAME, args=[request.user.user.id]))
 
     # For cookie-based sessions
     request.session.set_test_cookie()
@@ -100,21 +100,58 @@ def deauthenticate_user(request):
     djLogout(request)
     return HttpResponseRedirect(reverse(base_settings.LOGIN_NAME))
 
-@login_required()
-def perfil(request):
+
+def perfil(request, user_id):
     """
-    Retorna la vista correspondiente al perfil del usuario
+    Retorna la vista correspondiente al perfil de un usuario
 
     :param request: Los datos de la solicitud
 
-    :returns: Un 'renderizado' del template perfil.
+    :returns: Un 'renderizado' del template profile_detail.
 
     """
+
+    if not(request.user.is_active):
+        return HttpResponseRedirect(reverse(base_settings.LOGIN_NAME))
+
+    from django.shortcuts import get_object_or_404
+    from apps.autenticacion.models import User
+
+    profile_user = get_object_or_404(User, id=user_id)
 
 
     context = {
         'URL_NAMES': base_settings.URL_NAMES,
-        'user_projects' : []
+        'user_projects' : [],
+        'left_active': 'Visualizar',
+        'profile_user': profile_user
+    }
+
+    for p in profile_user.get_projects():
+        if request.user.user.id != user_id:
+            active_user_perms = p[0].get_user_perms(request.user.user)
+            if len(active_user_perms) == 0:
+                continue
+
+        names = [r.desc_larga for r in p[1]]
+        context['user_projects'].append((p[0], ', '.join(names)))
+
+    x = UserPermissionContextMixin()
+    x.request = request
+    x.get_user_permissions(context)
+
+
+    return render(request, 'autenticacion/profile_detail', context)
+
+def profile_projects(request):
+    """
+    Retorna la vista correspondiente a la lista de proyectos del usuario activo
+    """
+    context = {
+        'URL_NAMES': base_settings.URL_NAMES,
+        'user_projects': [],
+        'left_active': 'Mis Proyectos',
+        'section_title': 'Mis Proyectos'
     }
 
     for p in request.user.user.get_projects():
@@ -125,5 +162,5 @@ def perfil(request):
     x.request = request
     x.get_user_permissions(context)
 
+    return render(request, 'autenticacion/profile_project_list', context)
 
-    return render(request, 'autenticacion/perfil', context)

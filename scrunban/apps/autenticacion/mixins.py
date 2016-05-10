@@ -31,7 +31,7 @@ class ValidateTestMixin(object):
     """
 
     def get_redirect_url(self, request, *args, **kwargs):
-        return reverse_lazy(PERFIL_NAME)
+        return reverse_lazy(PERFIL_NAME, args=[request.user.user.id])
 
     def validate_tests(self, request, *args, **kwargs):
         return True

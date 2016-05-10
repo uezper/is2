@@ -23,5 +23,6 @@ urlpatterns = [
     url(r'^deauthenticate_user/$', views.deauthenticate_user, name=base_settings.DEAUTH_NAME),
     
 
-    url(r'^perfil/$', views.perfil, name=base_settings.PERFIL_NAME),
+    url(r'^profile/(?P<user_id>[0-9]+)/$', views.perfil, name=base_settings.PERFIL_NAME),
+    url(r'^my_projects/$', views.profile_projects, name=base_settings.PERFIL_PROJECTS),
 ]
