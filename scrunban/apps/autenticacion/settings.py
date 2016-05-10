@@ -5,6 +5,12 @@ from apps.administracion.models import Project
 __user_contenttype = ContentType.objects.get_for_model(User)
 __project_contenttype = ContentType.objects.get_for_model(Project)
 
+# Comentar las dos lineas anteriores cuando se tiene problemas con las migraciones y el contenttype
+# Descomentar las dos lineas siguientes,
+# Realizar las migraciones correspondientes y volver a poner como estaba
+#__user_contenttype = ''
+#__project_contenttype = ''
+
 ADMIN_PROJECT_CREATION = ('admin_create_project', 'Creacion de proyectos', __user_contenttype)
 ADMIN_ROLE_MANAGEMENT = ('admin_create_admin', 'Asignacion de roles administrativos', __user_contenttype)
 ADMIN_USER_MANAGEMENT = ('admin_manage_user', 'Administracion de usuarios', __user_contenttype)
