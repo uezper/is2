@@ -6,9 +6,12 @@ class AutenticacionConfig(AppConfig):
     # Llamar a este metodo para poblar la base de datos con los permisos por defecto del sistema
     # Pero antes deben estar aplicado las migraciones
     def get_ready(self):
-        from apps.autenticacion.models import Role
+        from apps.autenticacion.models import Role, User
         from apps.autenticacion import settings
         from django.contrib.auth.models import Permission
+        from django.contrib.contenttypes.models import ContentType
+
+        __user_contenttype = ContentType.objects.get_for_model(User)
 
         for def_perm in settings.DEFAULT_PERMISSIONS:
             perm = Permission.objects.filter(codename=def_perm[0])
@@ -16,7 +19,7 @@ class AutenticacionConfig(AppConfig):
                 permission_data = {
                     'name': def_perm[1],
                     'codename': def_perm[0],
-                    'content_type': def_perm[2]
+                    'content_type': __user_contenttype
                 }
                 perm = Permission.objects.create(**permission_data)
 
