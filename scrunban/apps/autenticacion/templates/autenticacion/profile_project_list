@@ -1,0 +1,64 @@
+{% extends "autenticacion/profile_base" %}
+
+{% block "working_path" %}
+	{{ block.super }}
+	<li class="active">{{ section_title }}</li>
+{% endblock %}
+
+{% block "content" %}
+
+	<div class="panel panel-default">
+
+		<div class="panel-body">
+
+		<div class="row">
+		                <div class="col-md-12">
+		                    <h3>{{ section_title }}</h3>
+				    <hr />
+
+			          <table class="table table-striped" id="tableProjects">
+                                <thead>
+                                <tr> <th>Proyecto</th><th>Estado</th></th> <th>Rol</th></tr>
+                                </thead>
+                            {% if user_projects|length == 0 %}
+                                <tbody>
+                                    <tr class="alert">  <td colspan="3">No estas relacionado con ningun proyecto</td> </tr>
+                                </tbody>
+                            {% else %}
+                                <tbody>
+                                    {% for row in user_projects %}
+                                    <tr>
+                                    <td><a href="{% url URL_NAMES.PROJECT_INDEX row.0.id %}">{{row.0.name}}</a></td>
+                                    <td>-</td>
+                                    <td>{{row.1}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            {% endif %}
+					    </table>
+
+			<span class="step-links">
+				{% if page_obj.has_previous %}
+					<a href="?page={{ page_obj.previous_page_number }}"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>
+				{% endif %}
+
+				<span class="current">
+					Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+				</span>
+
+				{% if page_obj.has_next %}
+					<a href="?page={{ page_obj.next_page_number }}"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a>
+				{% endif %}
+			</span>
+
+		</div>
+
+		</div>
+
+		</div>
+	</div>
+
+
+
+
+{% endblock %}

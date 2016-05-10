@@ -1,19 +1,14 @@
-{% extends "base" %}
+{% extends "autenticacion/profile_base" %}
 
-{% block "include" %}{% endblock %}
-
-{% block "title" %} {{ block.super }} | Perfil {% endblock %}
-
-{% block "left_menu_title" %} Mi Perfil {% endblock %}
-
-{% block "left_menu_options" %} 
-	<li class="active"><a href="#">Visualizar</a></li>						
-{% endblock %}
 
 {% block "working_path" %}		
-	<li></li>
-	<li>Mi Perfil</li>
-	<li class="active">Visualizar</li>
+	{{ block.super }}
+	<li>Visualizar</li>
+    {% if user.id == profile_user.user.id %}
+    <li class="active">Mi Perfil</li>
+    {% else %}
+    <li class="active">{{ profile_user.user.username }}</li>
+    {% endif %}
 {% endblock %}
 
 {% block "content" %}
@@ -24,24 +19,32 @@
 			<div class="row">
                         <div class="col-md-1"></div>
 		                <div class="col-md-10">
+                            {% if user.id == profile_user.user.id %}
 		                    <h3>Mi Perfil</h3>
+                            {% else %}
+                            <h3>Perfil</h3>
+                            {% endif %}
 				    		<hr />
                         </div>
             </div>
             <div class="row">
                         <div class="col-md-1"></div>
                         <div class="col-md-10">
-		                    <p><strong>Nombres: </strong> {{ user.first_name }} </p>
-		                    <p><strong>Apellidos: </strong> {{ user.last_name }} </p>
-		                    <p><strong>Telefono: </strong> {{ user.user.telefono }} </p>
-		                    <p><strong>Email: </strong> {{ user.email }} </p>
-		                    <p><strong>Direccion: </strong> {{ user.user.direccion }} </p>
+		                    <p><strong>Nombres: </strong> {{ profile_user.user.first_name }} </p>
+		                    <p><strong>Apellidos: </strong> {{ profile_user.user.last_name }} </p>
+		                    <p><strong>Telefono: </strong> {{ profile_user.telefono }} </p>
+		                    <p><strong>Email: </strong> {{ profile_user.user.email }} </p>
+		                    <p><strong>Direccion: </strong> {{ profile_user.direccion }} </p>
 		                </div>
 			</div>
 			<div class="row">
 		                <div class="col-md-1"></div>
                         <div class="col-md-10">
+                            {% if user.id == profile_user.user.id %}
 		                    <h3>Mis Proyectos</h3>
+                            {% else %}
+                            <h3>Proyectos en comun</h3>
+                            {% endif %}
 				    		<hr />
 		                     <table class="table table-striped" id="tableProjects">
                                 <thead>
@@ -49,7 +52,11 @@
                                 </thead>
                             {% if user_projects|length == 0 %}
                                 <tbody>
+                                {% if user.id == profile_user.user.id %}
                                     <tr class="alert">  <td colspan="3">No estas relacionado a ningun proyecto</td> </tr>
+                                {% else %}
+                                    <tr class="alert">  <td colspan="3">No tienen proyectos en comun</td> </tr>
+                                {% endif %}
                                 </tbody>
                             {% else %}
                                 <tbody>
