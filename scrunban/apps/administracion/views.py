@@ -47,20 +47,17 @@ def crear_proyecto(request):
         form = ProjectForm(request.POST)
         context['form'] = form
         if form.is_valid():
-            p = Project()
-            p.name = form.cleaned_data['name']
-            p.date_start = form.cleaned_data['date_start']
-            p.date_end = form.cleaned_data['date_end']
-            sm = User.users.filter(username=form.cleaned_data['scrum_master']).get()
-            p.scrum_master = sm
-            po = User.users.filter(username=form.cleaned_data['product_owner']).get()
-            p.product_owner = po
-            pb = Backlog()
-            pb.save()
-            p.product_backlog = pb
 
-            try:
-                p.save()
+            data = {
+                'name': form.cleaned_data['name'],
+                'date_start': form.cleaned_data['date_start'],
+                'date_end': form.cleaned_data['date_end'],
+                'scrum_master': User.users.filter(username=form.cleaned_data['scrum_master']).get(),
+                'product_owner': User.users.filter(username=form.cleaned_data['product_owner']).get()
+            }
+
+            p = Project.projects.create(**data)
+            if not(p == None):
 
                 # Crea roles por defecto
                 from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
@@ -88,8 +85,7 @@ def crear_proyecto(request):
 
 
 
-            except IntegrityError as e:
-                print(e)
+            else:
                 form.add_error('name', 'Project name already exist')
                 return render(request, 'administracion/proyectoCrear.html', context)
             return render(request, 'administracion/proyectoCrearExitoso.html', context)

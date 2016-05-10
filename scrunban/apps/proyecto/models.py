@@ -314,15 +314,12 @@ class SprintManager(models.Manager):
         if not(sprints.count() == 0):
             sec = sprints.last().sec
 
-        sb = SprintBacklog()
-        sb.save()
 
         sprint_ = Sprint()
         sprint_.sec = sec + 1
         sprint_.project = kwargs['project']
         sprint_.estimated_time = kwargs['estimated_time']
         sprint_.state = sprint_.state_choices[0][0]
-        sprint_.sprint_backlog = sb
         sprint_.real_time = 0
         sprint_.save()
 
@@ -363,7 +360,6 @@ class Sprint(models.Model):
     :param estimated_time: Tiempo estimado para la finalizacion del Sprint, en dias
     :param real_time: Duracion real del Sprint
     :start_date: Fecha de inicio de ejecucion del Sprint
-    :param sprint_backlog: Sprint Backlog
 
     """
     state_choices = (
@@ -457,9 +453,3 @@ class Sprint(models.Model):
         self.start_date = fecha
         self.save()
 
-    def get_sprint_backlog(self):
-        """
-        Retorna el Sprint Backlog
-        :returns: Sprint Backlog
-        """
-        return self.sprint_backlog
