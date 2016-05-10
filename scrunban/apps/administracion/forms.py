@@ -57,11 +57,22 @@ class UserCreateForm(UserForm):
 
 class UserEditForm(UserForm):
     id = forms.CharField(max_length=4, required=True, widget=forms.HiddenInput)
+    check_password = forms.CharField(max_length=128, required=False, widget=forms.HiddenInput)
+
 
     def clean_id(self):
-        if len(User.objects.filter(id=self.cleaned_data['id'])):
+        if len(User.objects.filter(id=self.cleaned_data['id'])) == 0:
             raise ValidationError('El usuario especificado no existe')
         return self.cleaned_data['id']
+
+    def clean_check_password(self):
+
+        if self.cleaned_data.get('password','') != '' and self.cleaned_data.get('password','') != self.cleaned_data['check_password']:
+            raise ValidationError('Ambos campos deben coincidir')
+        return self.cleaned_data['check_password']
+
+    def clean_username(self):
+        return self.cleaned_data['username']
 
     def save(self):
         data = {
@@ -70,6 +81,7 @@ class UserEditForm(UserForm):
             'last_name': self.cleaned_data.get('last_name', ''),
             'direccion': self.cleaned_data.get('direccion', ''),
             'telefono': self.cleaned_data.get('telefono', ''),
+            'password': self.cleaned_data.get('password', '')
         }
 
         user = User.objects.filter(id=self.cleaned_data['id'])[0]
@@ -89,6 +101,10 @@ class UserEditForm(UserForm):
         if (data['telefono'] != ''):
             user.set_telefono(data['telefono'])
 
+        if (data['password'] != ''):
+            user.user.set_password(data['password'])
+
+        user.user.save()
         user.save()
 
 

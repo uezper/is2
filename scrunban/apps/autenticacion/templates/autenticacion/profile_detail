@@ -70,6 +70,11 @@
                                 </tbody>
                             {% endif %}
                             </table>
+                            {% if user.id == profile_user.user.id %}
+                                <a href="{% url URL_NAMES.PERFIL_EDIT %}">
+                                    <button type="button" class="btn btn-default" id="edit">Editar</button>
+                                </a>
+                            {% endif %}
 		                </div>
 			</div>
 		</div>

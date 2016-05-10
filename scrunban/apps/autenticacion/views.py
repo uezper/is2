@@ -1,14 +1,21 @@
 import json
-from django.core.urlresolvers import reverse
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 from django.contrib.auth import authenticate as djAuthenticate
 from django.contrib.auth import login as djLogin
 from django.contrib.auth import logout as djLogout
-from scrunban.settings import base as base_settings
-from apps.autenticacion.decorators import login_required
 
-from apps.autenticacion.mixins import UserPermissionContextMixin
+
+from django.core.urlresolvers import reverse
+from django.views.generic.edit import FormView
+
+from apps.administracion.models import Project
+from apps.administracion.forms import UserEditForm
+from django.shortcuts import HttpResponseRedirect
+
+from apps.proyecto.mixins import UrlNamesContextMixin, ValidateSprintStatePending
+from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin
+from scrunban.settings import base as base_settings
 
 
 def login(request):
@@ -164,3 +171,90 @@ def profile_projects(request):
 
     return render(request, 'autenticacion/profile_project_list', context)
 
+
+
+class ProfileEditView(UserIsAuthenticatedMixin, FormView, UrlNamesContextMixin, UserPermissionContextMixin):
+    """
+    Clase correspondiente a la vista que permite editar el perfil
+
+    """
+
+    form_class = UserEditForm
+    template_name = 'autenticacion/profile_edit'
+
+    section_title = 'Editar perfil'
+    left_active = 'Editar perfil'
+
+    def get_default_fields(self):
+        data = {
+            'id': self.request.user.user.id
+        }
+
+        return data
+
+    def post(self, request, *args, **kwargs):
+        from django.http.request import QueryDict
+
+        form_class = self.get_form_class()
+
+        # Recibe la peticion enviada por POST
+        # y actualiza agregando los campos por defecto basados en la vista
+        data = QueryDict.dict(request.POST)
+
+        data.update(**self.get_default_fields())
+
+        qdict = QueryDict('', mutable=True)
+        qdict.update(data)
+
+        form = form_class(qdict)
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+
+        context = super(ProfileEditView, self).get_context_data(**kwargs)
+
+        self.get_url_context(context)
+        self.get_user_permissions(context)
+
+        context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
+        context['edit_form'] = True
+
+        return context
+
+    def get_success_url(self):
+        from scrunban.settings.base import PERFIL_NAME
+        return reverse(PERFIL_NAME, args=(self.request.user.user.id,))
+
+    def get_initial(self):
+        from apps.autenticacion.models import User
+        user = User.objects.get(id=self.request.user.user.id)
+
+
+        initial = {
+            'username': user.get_username(),
+            'telefono': user.get_telefono(),
+            'first_name': user.get_first_name(),
+            'last_name': user.get_last_name(),
+            'direccion': user.get_direccion(),
+            'email': user.get_email(),
+        }
+
+        return initial
+
+    def form_valid(self, form):
+
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form):
+
+        context = {
+            'form': form
+        }
+
+        return super(ProfileEditView, self).render_to_response(self.get_context_data(**context))
