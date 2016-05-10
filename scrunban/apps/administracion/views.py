@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from .forms import ProjectForm
-from .models import Backlog
 from apps.autenticacion.models import User
 from apps.autenticacion.decorators import login_required
 from django.db.utils import IntegrityError
@@ -10,7 +9,7 @@ from django.db.utils import IntegrityError
 from django.core.urlresolvers import reverse
 from django.views.generic.list import ListView
 from django.views.generic.edit import FormView
-from apps.administracion.models import Project
+from apps.proyecto.models import Project
 
 from apps.administracion import forms
 from django.shortcuts import get_object_or_404, HttpResponseRedirect

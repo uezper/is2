@@ -9,17 +9,11 @@ from django.contrib.contenttypes.models import ContentType
 import time
 
 class AutenticacionViewsTests(TestCase):
-
-
         def authenticate(self, client):
-
                 u = User.users.create(username='Test_client_user', password='client')
                 client.login(username='Test_client_user', password='client')
 
-
-
         def create_project(self, nombre='Testing project'):
-
                 u = User.users.create(username='Test_user', password='dummy password')
 
                 data = {
@@ -31,7 +25,6 @@ class AutenticacionViewsTests(TestCase):
                 }
 
                 return Project.projects.create(**data)
-
 
         def test_list_rol_view_invalid_project_id(self):
                 c = self.client
@@ -87,7 +80,6 @@ class AutenticacionViewsTests(TestCase):
                 }
 
                 self.assertEqual(len(c.post(path, data=data).context_data['form'].errors), 2)
-
 
         def test_create_rol_view_valid_data(self):
                 c = self.client
