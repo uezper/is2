@@ -9,7 +9,6 @@ from django.contrib.auth import logout as djLogout
 from django.core.urlresolvers import reverse
 from django.views.generic.edit import FormView
 
-from apps.administracion.models import Project
 from apps.administracion.forms import UserEditForm
 from django.shortcuts import HttpResponseRedirect
 

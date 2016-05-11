@@ -57,35 +57,7 @@ def crear_proyecto(request):
             }
 
             p = Project.projects.create(**data)
-            if not(p == None):
-
-                # Crea roles por defecto
-                from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
-                from django.contrib.auth.models import Permission
-
-                for rol in DEFAULT_PROJECT_ROLES:
-                    role_data = {
-                        'name': rol[0],
-                        'desc_larga':  rol[1]
-                    }
-
-                    new_rol = p.add_rol(**role_data)
-                    for perm_ in rol[2]:
-                        perm = Permission.objects.get(codename=perm_[0])
-                        new_rol.add_perm(perm)
-
-
-                p_id = p.id
-                for rol in p.get_roles():
-                    if rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[0][0]:
-                        rol.add_user(User.users.get(username=form.cleaned_data['scrum_master']))
-                    elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
-                        rol.add_user(User.users.get(username=form.cleaned_data['product_owner']))
-
-
-
-
-            else:
+            if p == None:
                 form.add_error('name', 'Project name already exist')
                 return render(request, 'administracion/proyectoCrear.html', context)
             return render(request, 'administracion/proyectoCrearExitoso.html', context)
