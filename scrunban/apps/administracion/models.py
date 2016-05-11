@@ -2,6 +2,7 @@ from django.db import models
 from django.dispatch import receiver
 from apps.autenticacion.models import User, Role
 from apps.proyecto.models import Sprint, Project
+from django.utils import timezone
 
 class UserStory(models.Model):
     """
@@ -30,26 +31,32 @@ class UserStory(models.Model):
     
     def __str__(self):
         return "{}".format(self.description)
-    
-class Note(models.Model):
-    """
-    Modelo para almacenar notas sobre un User Story
-    """
-    # Public fields mapped to DB columns
-    note = models.TextField()
-    user_story = models.ForeignKey(UserStory, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    # Public fields for simplicity
-    notes = models.Manager() # Alias
-    objects = models.Manager()
 
 # TODO Add unit tests and extend model!
 class Grained(models.Model):
     # Public fields mapped to DB columns
     user_story = models.ForeignKey(UserStory)
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE)
+    # TODO activity = ...
+    # TODO state = ...
 
     # Public fields for simplicity
+    graineds = models.Manager() # Alias
     objects = models.Manager()
+    
+class Note(models.Model):
+    """
+    Modelo para almacenar notas sobre un User Story
+    """
+    # Public fields mapped to DB columns
+    date = models.DateTimeField(default=timezone.now)
+    note = models.TextField()
+    grained = models.ForeignKey(Grained, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    work_load = models.PositiveIntegerField(default=0)
+    aproved = models.BooleanField(default=False)
+    aproved_note = models.TextField(default='[Unaproved]')
 
+    # Public fields for simplicity
+    notes = models.Manager() # Alias
+    objects = models.Manager()
