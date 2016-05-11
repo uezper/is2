@@ -23,4 +23,5 @@ scrunban/staticfiles
 scrunban/statics
 
 # Ignorar migraciones
-**/migrations
+**/migrations/
+migrations/
