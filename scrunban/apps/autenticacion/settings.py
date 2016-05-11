@@ -1,32 +1,19 @@
-from django.contrib.contenttypes.models import ContentType
-from apps.autenticacion.models import User
-from apps.administracion.models import Project
-
-__user_contenttype = ContentType.objects.get_for_model(User)
-__project_contenttype = ContentType.objects.get_for_model(Project)
-
-# Comentar las dos lineas anteriores cuando se tiene problemas con las migraciones y el contenttype
-# Descomentar las dos lineas siguientes,
-# Realizar las migraciones correspondientes y volver a poner como estaba
-#__user_contenttype = ''
-#__project_contenttype = ''
-
-ADMIN_PROJECT_CREATION = ('admin_create_project', 'Creacion de proyectos', __user_contenttype)
-ADMIN_ROLE_MANAGEMENT = ('admin_create_admin', 'Asignacion de roles administrativos', __user_contenttype)
-ADMIN_USER_MANAGEMENT = ('admin_manage_user', 'Administracion de usuarios', __user_contenttype)
-PROJECT_ROL_MANAGEMENT = ('project_rol_management', 'Creacion y modificacion de roles de proyecto',__project_contenttype)
-PROJECT_ROL_ASSIGNMENT = ('project_rol_assignment', 'Asignacion de roles de proyectos',__project_contenttype)
-PROJECT_FLUJO_MANAGEMENT = ('project_flujo_management', 'Administracion de Flujos',__project_contenttype)
-PROJECT_FLUJO_WATCH = ('project_flujo_watch', 'Visualizacion de Flujos',__project_contenttype)
-PROJECT_DEV_MANAGEMENT = ('project_dev_management', 'Administracion de Equipo de Desarrollo',__project_contenttype)
-PROJECT_SPRINT_MANAGEMENT = ('project_sprint_management', 'Administracion de Sprints',__project_contenttype)
-PROJECT_TUS_MANAGEMENET = ('project_tus_management', 'Administracion de Flujos de User Stories',__project_contenttype)
-PROJECT_INFO_MANAGEMENT = ('project_info_management', 'Administracion del Proyecto',__project_contenttype)
-PROJECT_US_MANAGEMENT = ('project_us_management', 'Administracion de User Stories',__project_contenttype)
-PROJECT_US_DEVELOP = ('project_us_develop', 'Desarrollo de User Stories',__project_contenttype)
-PROJECT_KANBAN_WATCH = ('project_kanban_watch', 'Visualizacion del Kanban',__project_contenttype)
-PROJECT_PB_WATCH = ('project_pb_watch', 'Visualizacion del Product Backlog',__project_contenttype)
-PROJECT_SB_WATCH = ('project_sb_watch', 'Visualizacion del Sprint Backlog',__project_contenttype)
+ADMIN_PROJECT_CREATION = ('admin_create_project', 'Creacion de proyectos')
+ADMIN_ROLE_MANAGEMENT = ('admin_create_admin', 'Asignacion de roles administrativos')
+ADMIN_USER_MANAGEMENT = ('admin_manage_user', 'Administracion de usuarios')
+PROJECT_ROL_MANAGEMENT = ('project_rol_management', 'Creacion y modificacion de roles de proyecto')
+PROJECT_ROL_ASSIGNMENT = ('project_rol_assignment', 'Asignacion de roles de proyectos')
+PROJECT_FLUJO_MANAGEMENT = ('project_flujo_management', 'Administracion de Flujos')
+PROJECT_FLUJO_WATCH = ('project_flujo_watch', 'Visualizacion de Flujos')
+PROJECT_DEV_MANAGEMENT = ('project_dev_management', 'Administracion de Equipo de Desarrollo')
+PROJECT_SPRINT_MANAGEMENT = ('project_sprint_management', 'Administracion de Sprints')
+PROJECT_TUS_MANAGEMENET = ('project_tus_management', 'Administracion de Flujos de User Stories')
+PROJECT_INFO_MANAGEMENT = ('project_info_management', 'Administracion del Proyecto')
+PROJECT_US_MANAGEMENT = ('project_us_management', 'Administracion de User Stories')
+PROJECT_US_DEVELOP = ('project_us_develop', 'Desarrollo de User Stories')
+PROJECT_KANBAN_WATCH = ('project_kanban_watch', 'Visualizacion del Kanban')
+PROJECT_PB_WATCH = ('project_pb_watch', 'Visualizacion del Product Backlog')
+PROJECT_SB_WATCH = ('project_sb_watch', 'Visualizacion del Sprint Backlog')
 
 
 DEFAULT_PERMISSIONS = [

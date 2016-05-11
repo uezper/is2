@@ -158,7 +158,5 @@ el nombre en codigo del permiso, de esta manera:
 ### Sobre población de la base de datos
 Ejecutar
 ```
-python manager.py loaddata users.json    # Para agregar usuarios de autenticacion/fixtures/users.json
-python manager.py loaddata projects.json # Para agregar projectos de administracion/fixtures/projects.json
-python manager.py loadperms              # Para cargas los permisos por defecto
+python manager.py populatedb              # Para poblar la base de datos (permisos, usuarios, proyectos)
 ```

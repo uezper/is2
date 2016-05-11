@@ -28,7 +28,7 @@
 				<tbody>
 					{% for dev in dev_list %}
 					<tr>
-						<td><a href="{% url URL_NAMES.PERFIL_NAME dev.id %}">{{dev.user.user.first_name}} {{dev.user.user.last_name}}</a></td>
+						<td><a href="{% url URL_NAMES.PERFIL_NAME dev.user.id %}">{{dev.user.user.first_name}} {{dev.user.user.last_name}}</a></td>
 						<td class="text-center">{{dev.hs_hombre}}</td>
 						<td class="text-right">
 

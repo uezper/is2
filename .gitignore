@@ -19,8 +19,9 @@ scrunban/scrunban/settings/secret_config.py
 *.sqlite3
 
 # Ignorar collect de statics
-*/staticfiles/*
-*/statics/
+scrunban/staticfiles
+scrunban/statics
 
 # Ignorar migraciones
-*/migrations/*
+**/migrations/
+migrations/

@@ -24,5 +24,6 @@ urlpatterns = [
     
 
     url(r'^profile/(?P<user_id>[0-9]+)/$', views.perfil, name=base_settings.PERFIL_NAME),
+    url(r'^profile/edit/$', views.ProfileEditView.as_view(), name=base_settings.PERFIL_EDIT),
     url(r'^my_projects/$', views.profile_projects, name=base_settings.PERFIL_PROJECTS),
 ]

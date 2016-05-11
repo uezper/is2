@@ -41,7 +41,3 @@ class ValidateTestMixin(object):
             return HttpResponseRedirect(self.get_redirect_url(request, *args, **kwargs))
 
         return super(ValidateTestMixin, self).dispatch(request, *args, **kwargs)
-
-
-
-

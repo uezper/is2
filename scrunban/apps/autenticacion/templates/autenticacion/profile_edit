@@ -1,0 +1,251 @@
+{% extends "autenticacion/profile_base" %}
+
+{% block "include" %}
+<script>
+    $(document).ready(function(){
+
+
+        cargar_datos();
+        check_create();
+
+        if ($("#errors").children().length > 0)
+        {
+            $("#errors").show();
+        }
+        else
+        {
+            $("#errors").hide();
+        }
+
+
+        $("#username").keyup(function () {
+           check_create();
+        });
+
+
+        $("#password").keyup(function () {
+           check_create();
+        });
+
+        $("#check_password").keyup(function () {
+           check_create();
+        });
+
+        function cargar_datos()
+        {
+
+
+            fields = [ 'username', 'email', 'direccion', 'telefono', 'first_name', 'last_name' ];
+            elementos = [];
+
+            for (var i in fields) {
+                elementos[i] = $("#id_" + fields[i]).val();
+
+                if (elementos[i] != undefined) {
+                    $("#" + fields[i]).val(elementos[i]);
+                }
+            }
+
+
+        }
+
+        function check_create()
+        {
+
+
+            if ($("#username").val() != '' && $("#username").val() != undefined)
+
+            {
+                $("#save").prop("disabled", false);
+            }
+            else
+            {
+                $("#save").prop("disabled", true);
+            }
+
+            if ($("#password").val() != '' && $("#password").val() != undefined)
+            {
+                if ($("#check_password").val() == '' || $("#check_password").val() == undefined)
+                {
+                    $("#save").prop("disabled", true);
+                }
+            }
+
+        }
+
+        $("#form").submit(function(event){
+
+
+
+            fields = [ 'password', 'check_password','email', 'direccion', 'telefono', 'first_name', 'last_name' ];
+            elementos = [];
+
+            for (var i in fields) {
+                elementos[i] = $("#" + fields[i]).val();
+                if (elementos[i] != undefined) {
+                    $("#id_" + fields[i]).val(elementos[i]);
+                }
+            }
+
+
+        });
+
+
+    });
+</script>
+
+{% endblock %}
+
+
+{% block "working_path" %}
+	{{ block.super }}
+	<li class="active">{{ section_title }}</li>
+{% endblock %}
+
+{% block "content" %}
+
+	<div class="panel panel-default">
+
+		<div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>{{ section_title }}</h3>
+                    <hr />
+
+                    <form class="form-horizontal" method="post" action="#" id="form">
+                        {% csrf_token %}
+
+
+                        {{ form.id }}
+                        {{ form.username }}
+                        {{ form.check_password }}
+                        {{ form.password }}
+                        {{ form.email }}
+                        {{ form.direccion }}
+                        {{ form.telefono }}
+                        {{ form.first_name }}
+                        {{ form.last_name }}
+
+                      <div class="form-group {% if form.username.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowUsername" class="col-sm-2 control-label">CI:</label>
+
+                            <div class="row" id="rowUsername">
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="username" placeholder="Numero de cedula" aria-describedby="helpBlock1" readonly>
+                                     <span id="helpBlock1" class="help-block">{{form.username.errors}}</span>
+                                </div>
+
+                            </div>
+
+                      </div>
+
+
+                        <div class="form-group {% if form.first_name.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowFirst_name" class="col-sm-2 control-label">Nombres:</label>
+
+                            <div class="row" id="rowFirst_name">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="first_name" placeholder="Nombres" aria-describedby="helpBlock2" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock2" class="help-block">{{form.first_name.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+
+                        <div class="form-group {% if form.last_name.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowLast_name" class="col-sm-2 control-label">Apellidos:</label>
+
+
+                            <div class="row" id="rowLast_name">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="last_name" placeholder="Apellidos" aria-describedby="helpBlock3" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock3" class="help-block">{{form.last_name.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+                        <div class="form-group {% if form.check_password.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowPassword" class="col-sm-2 control-label">New Password:</label>
+
+                            <div class="row" id="rowPassword">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="password" class="form-control" id="password" placeholder="Password" aria-describedby="helpBlock4" pattern="[A-Za-z0-9_-]*" title="Caracteres alfanumericos, guion y gion bajo" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock4_1" class="help-block">Deja en blanco si no quieres cambiar</span>
+
+                                </div>
+                            </div>
+
+
+                        <label for="rowPassword" class="col-sm-2 control-label">Confirm Password:</label>
+
+                            <div class="row" id="rowPassword2">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="password" class="form-control" id="check_password" placeholder="Password" aria-describedby="helpBlock4" pattern="[A-Za-z0-9_-]*" title="Caracteres alfanumericos, guion y gion bajo" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock4" class="help-block">{{form.check_password.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+
+                        <div class="form-group {% if form.email.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowEmail" class="col-sm-2 control-label">Email:</label>
+
+                            <div class="row" id="rowEmail">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="email" class="form-control" id="email" placeholder="Direccion de email" aria-describedby="helpBlock5" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock5" class="help-block">{{form.email.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+
+                        <div class="form-group {% if form.direccion.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowDireccion" class="col-sm-2 control-label">Direccion:</label>
+
+                            <div class="row" id="rowDireccion">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="direccion" placeholder="Direccion" aria-describedby="helpBlock6" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock6" class="help-block">{{form.direccion.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+                          <div class="form-group {% if form.telefono.errors|length > 0 %} has-error {% endif %}">
+                        <label for="rowTelefono" class="col-sm-2 control-label">Telefono:</label>
+
+                            <div class="row" id="rowTelefono">
+                                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    <input type="text" class="form-control" id="telefono" placeholder="Telefono" aria-describedby="helpBlock7" {% if no_editable %} readonly {% endif %}>
+                                    <span id="helpBlock7" class="help-block">{{form.telefono.errors}}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+
+                      <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-default" id="save">Guardar</button>
+                        </div>
+                      </div>
+                    </form>
+
+
+                </div>
+            </div>
+
+		</div>
+	</div>
+
+{% endblock %}
