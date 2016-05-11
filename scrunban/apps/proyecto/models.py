@@ -33,7 +33,32 @@ class ProjectManager(models.Manager):
             p.date_end = data['date_end']
             p.scrum_master = data['scrum_master']
             p.product_owner = data['product_owner']
+
             p.save()
+
+            # Crea roles por defecto
+            from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
+            from django.contrib.auth.models import Permission
+
+            for rol in DEFAULT_PROJECT_ROLES:
+                role_data = {
+                    'name': rol[0],
+                    'desc_larga': rol[1]
+                }
+
+                new_rol = p.add_rol(**role_data)
+                for perm_ in rol[2]:
+                    perm = Permission.objects.get(codename=perm_[0])
+                    new_rol.add_perm(perm)
+
+            p_id = p.id
+            for rol in p.get_roles():
+                if rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[0][0]:
+                    rol.add_user(data['scrum_master'])
+                elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
+                    rol.add_user(data['product_owner'])
+
+
 
             return p
         else:

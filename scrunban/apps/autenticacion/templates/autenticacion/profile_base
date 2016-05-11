@@ -8,6 +8,7 @@
 
 {% block "left_menu_options" %}
     <li {% if left_active == 'Visualizar' %} class="active" {% endif %}><a href="{% url URL_NAMES.PERFIL_NAME user.user.id %}">Visualizar</a></li>
+    <li {% if left_active == 'Editar perfil' %} class="active" {% endif %}><a href="{% url URL_NAMES.PERFIL_EDIT %}">Editar Perfil</a></li>
     <li {% if left_active == 'Mis Proyectos' %} class="active" {% endif %}><a href="{% url URL_NAMES.PERFIL_PROJECTS %}">Mis Proyectos</a></li>
 {% endblock %}
 
