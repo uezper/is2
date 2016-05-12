@@ -335,7 +335,7 @@ class SprintManager(models.Manager):
 
         sprints = Sprint.objects.filter(project=kwargs['project'])
 
-        sec = 0
+        sec = 1
         if not(sprints.count() == 0):
             sec = sprints.last().sec
 
@@ -436,7 +436,7 @@ class Sprint(models.Model):
         Modifica el estado del Sprint
         :param state: Nuevo estado. Puede ser uno de los siguientes: 'Pendiente', 'Ejecuciom', 'Finalizado' o 'Cancelado'
         """
-        if state in self.state_choices:
+        if state in [st[0] for st in self.state_choices]:
             self.state = state
             self.save()
 

@@ -4,6 +4,10 @@
 <script>
     $(document).ready(function(){
 
+        sb = [];
+        _demanda = 0;
+        _capacity = 0;
+
 
         cargar_datos();
 
@@ -18,10 +22,282 @@
         }
 
 
+        $( "table" ).on( "click", ".addUS", function() {
+
+            $this = $(this);
+
+            add_user_story($this.parent().parent());
+
+            $("#selectUS").modal("hide");
+            $("#selectUsers").modal({
+                show: true
+            });
+
+        });
+
+
+        $("#selectUsers").on('show.bs.modal', function(e){
+
+
+              us_id = $("#id_us").html();
+
+              $("input[name='checkboxUser']").prop("checked", false);
+
+            $.each(sb, function(index, value){
+               if (value[0] == us_id)
+               {
+                   $("#selectUsers").find("p:first").find("span:first").html(value[3]);
+
+                   dev_users = value[4];
+
+                   $.each(dev_users, function(index, value){
+                        $("input[value='"+ value +"']").prop("checked", true);
+                   });
+               }
+            });
+
+
+        });
+
+        $("#selectUsers").on('hidden.bs.modal', function(e){
+
+              dev_users = [];
+              us_id = $("#id_us").html();
+              _dem = Number($("#selectUsers").find("p:first").find("span:first").html());
+              _cap = 0;
+
+
+              $("input[name='checkboxUser']:checked").each(function (index, val) {
+                  _id = $(val).attr('value');
+                  dev_users.push(_id);
+              });
+
+            $.each(sb, function(index, value){
+               if (value[0] == us_id)
+               {
+                   value[4] = dev_users;
+                   $("#"+ us_id).find(".text-center:last").html(dev_users.length);
+               }
+            });
+
+
+            check_capacity();
+
+        });
+
+        $("#estimated_time").change(function (){
+           check_capacity();
+        });
+
+
+        $( "table" ).on( "click", ".editUS", function() {
+            _id = $(this).parent().parent().prop('id');
+
+
+             $("#id_us").html(_id);
+             $("#selectUsers").modal({
+                show: true
+             });
+
+        });
+        $( "table" ).on( "click", ".removeUS", function() {
+
+                _id = $(this).parent().parent().prop('id');
+                _index = -1;
+
+                $.each(sb ,function (index, value) {
+                    if (value[0] == _id)
+                    {
+                        _index = index;
+                    }
+                });
+
+
+                _desc = sb[_index][1];
+                _prior = sb[_index][2];
+                _est = sb[_index][3];
+
+                _html = "<tr id='"+ _id +"'>" +
+                        "<td><a href='#'>" + _desc + "</a></td>" +
+                        "<td class='text-center'>"+_prior+"</td>" +
+                        "<td class='text-center'>"+ _est +"</td>" +
+                        "<td class='text-right'>" +
+                        "<button type='button' class='btn btn-default btn-sm addUS'>" +
+                        "<span class='glyphicon glyphicon-plus' aria-hidden='true'></span>" +
+                        "</button></td></tr>";
+
+                $(this).parent().parent().remove();
+                sb.splice(_index, 1);
+                $("#pb").append(_html);
+                ordenar_pb();
+
+                check_capacity();
+            });
+
+
+        function check_capacity()
+        {
+            _estimated = 0;
+            if (_estimated != undefined) {
+                _estimated = Number($("#estimated_time").val());
+            }
+
+            _demanda = 0;
+            _errors = 0;
+
+            _capacity = 0;
+            _devs = [];
+
+
+            $.each(sb, function(index, value){
+                _demanda += Number(value[3]);
+                _us_dem = Number(value[3]);
+                _us_cap = 0;
+
+                $.each(value[4], function(i, dev){
+                    if (dev != "") {
+                        _us_cap += $("#dev_" + dev).find(".text-center").html() * _estimated;
+
+                        x = _devs.indexOf(dev);
+                        if (x == -1) {
+                            _devs.push(dev);
+                            _capacity += $("#dev_" + dev).find(".text-center").html() * _estimated;
+                        }
+                    }
+                });
+
+                if (_us_cap < _us_dem)
+                {
+                    $("#" + value[0]).addClass("danger");
+                    _errors++;
+                }
+                else
+                {
+                    $("#" + value[0]).removeClass("danger");
+                }
+
+            });
+
+
+
+            $("#capacity").val(_capacity);
+            $("#demmand").val(_demanda);
+
+            if (_demanda > _capacity) {
+                $("#rowDemanda").parent().addClass("has-error");
+                $("#helpBlock4").html('La demanda es mayor que la capacidad. Extiende el tiempo, agrega mas desarrolladores o quita User Stories');
+                _errors++;
+            }
+            else
+            {
+                $("#rowDemanda").parent().removeClass("has-error");
+                $("#helpBlock4").html('');
+            }
+
+            if (_errors > 0)
+            {
+                $("#create").prop("disabled", true);
+            }
+            else
+            {
+                $("#create").prop("disabled", false);
+            }
+
+
+        }
+
+        function add_user_story(us_element) {
+
+
+            us_id = $(us_element).prop('id');
+            us_desc = $(us_element).find('a').text();
+            us_prior = $(us_element).find('.text-center:first').text();
+            us_est = $(us_element).find('.text-center:last').text();
+
+            sb.push([us_id, us_desc, us_prior, us_est, []]);
+
+            $(us_element).remove();
+
+            _demanda += parseInt(us_est);
+            $("#demmand").val(_demanda);
+
+            $("#id_us").html(us_id);
+
+
+
+
+            $("#sb").append("<tr id='"+us_id+"'>" +
+                    "<td><a href='#'>" + us_desc + "</a> </td>" +
+                    "<td class='text-center'>" + us_prior + "</td>" +
+                    "<td class='text-center'>" + us_est + "</td>" +
+                    "<td class='text-center'>0</td>" +
+                    "<td class='text-right'>" +
+                            {% if delete_form %} {% else %}
+                    "<button type='button' class='btn btn-default btn-sm removeUS'> <span class='glyphicon glyphicon-minus-sign' aria-hidden='true'></span> </button>" +
+                            {% endif %}
+                    "<button type='button' class='btn btn-default btn-sm editUS'> <span class='glyphicon glyphicon-pencil' aria-hidden='true'></span> </button>" +
+                    "</td>" +
+                    "</tr>");
+
+            ordenar_sb();
+
+
+        }
+
+        function ordenar_sb()
+        {
+            $sb_tr = $("#sb").children('tr');
+
+            $sb_tr.sort(function (a, b) {
+
+                // convert to integers from strings
+                a = Number($(a).find(".text-center:first").text());
+                b = Number($(b).find(".text-center:first").text());
+
+                // compare
+                if(a < b) {
+                    return 1;
+                } else if(a > b) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
+
+            $sb_tr.detach();
+            $("#sb").append($sb_tr);
+
+        }
+
+        function ordenar_pb()
+        {
+            $pb_tr = $("#pb").children('tr');
+
+            $pb_tr.sort(function (a, b) {
+
+                // convert to integers from strings
+                a = Number($(a).find(".text-center:first").text());
+                b = Number($(b).find(".text-center:first").text());
+
+                // compare
+                if(a < b) {
+                    return 1;
+                } else if(a > b) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
+
+            $pb_tr.detach();
+            $("#pb").append($pb_tr);
+
+        }
+
 
         function cargar_datos() {
 
-            fields = [ 'estimated_time', 'sec'];
+            fields = [ 'estimated_time', 'sec', 'demmand', 'capacity'];
             elementos = [];
 
             for (var i in fields) {
@@ -32,6 +308,40 @@
                 }
             }
 
+            sb_str_ = $("#id_sprint_backlog").val();
+            if (sb_str_ != undefined && sb_str_ != '')
+            {
+                sb_ = sb_str_.split(",");
+                $.each(sb_, function(index, value){
+                    us_ = value.split(":");
+                    us_id = us_[0];
+                    us_devs = us_[1].split("_");
+                    cargar_sb(us_id, us_devs);
+                });
+
+
+                check_capacity();
+            }
+
+
+        }
+
+        function cargar_sb(us, us_devs)
+        {
+
+            $us_element = $("#pb").find("tr[id='"+us+"']:first");
+            add_user_story($us_element);
+
+            $.each(sb, function(index, value)
+            {
+               if (value[0] == us)
+               {
+                   value[4] = us_devs;
+               }
+            });
+            if (us_devs != "")
+                $("#"+ us).find(".text-center:last").html(us_devs.length);
+
         }
 
         $("#form").submit(function(event){
@@ -40,6 +350,16 @@
             fields = [ 'estimated_time' ];
             elementos = [];
 
+            sb_ = [];
+
+            $.each(sb, function(index, us)
+            {
+                sb_.push(us[0] + ":" + us[4].join("_"));
+            });
+
+            sb_str = sb_.join(",");
+
+
             for (var i in fields) {
                 elementos[i] = $("#" + fields[i]).val();
 
@@ -47,6 +367,7 @@
                     $("#id_" + fields[i]).val(elementos[i]);
                 }
             }
+            $("#id_sprint_backlog").val(sb_str);
 
         });
 
@@ -87,6 +408,9 @@
 
                         {{ form.sec }}
                         {{ form.estimated_time }}
+                        {{ form.sprint_backlog }}
+                        {{ form.capacity }}
+                        {{ form.demmand }}
 
                       <div class="form-group">
                         <label for="rowSprint" class="col-sm-2 control-label">Sprint:</label>
@@ -101,16 +425,66 @@
 
 
                         <div class="form-group {% if form.estimated_time.errors|length > 0 %} has-error {% endif %}">
-                        <label for="rowEstimatedTime" class="col-sm-2 control-label">Tiempo estimado:</label>
+                        <label for="rowEstimatedTime" class="col-sm-2 control-label">Tiempo estimado (dias):</label>
 
                             <div class="row" id="rowEstimatedTime">
                                 <div class="col-md-4">
-                                    <input type="number" class="form-control" id="estimated_time" placeholder="En dias" aria-describedby="helpBlock2" {% if no_editable %} readonly {% endif %}>
+                                    <input type="number" class="form-control" id="estimated_time"  aria-describedby="helpBlock2" {% if no_editable %} readonly {% endif %}>
                                     <span id="helpBlock2" class="help-block">{{form.estimated_time.errors}}</span>
                                 </div>
                             </div>
 
                       </div>
+
+                        <div class="form-group">
+                        <label for="rowCapacity" class="col-sm-2 control-label">Capacidad:</label>
+
+                            <div class="row" id="rowCapacity">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" id="capacity" aria-describedby="helpBlock3" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group {% if form.demmand.errors|length > 0 %} has-error {% endif %}"">
+                        <label for="rowDemanda" class="col-sm-2 control-label">Demanda:</label>
+
+                            <div class="row" id="rowDemanda">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" id="demmand" aria-describedby="helpBlock4" readonly>
+                                    <span id="helpBlock4" class="help-block">{{ form.demmand.errors }}</span>
+                                </div>
+                            </div>
+
+                      </div>
+
+                        <div class="form-group {% if form.sprint_backlog.errors|length > 0 %} has-error {% endif %}">
+                            <label for="tableUserStories" class="col-sm-2 control-label">Sprint Backlog:</label>
+
+                            <div class="row" id="tableUserStories">
+                                <div class="col-md-8">
+                                    <table class="table table-hover" id="tableSB">
+                                        <thead>
+                                        <tr> <th>User Story</th></th><th class="text-center">Prioridad</th><th class="text-center">Tiempo estimado</th><th class="text-center">Desarrolladores</th>
+                                            <th class="text-right">
+                                            {% if delete_form %}
+                                                {% else %}
+                                                <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#selectUS">
+                                                    <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                                                </button>
+                                                {% endif %}
+                                            </th>
+                                        </tr>
+                                        </thead>
+
+                                        <tbody id="sb">
+                                        </tbody>
+                                    </table>
+                                    <span id="helpBlock7" class="help-block">{{ form.sprint_backlog.errors }}</span>
+                                </div>
+                            </div>
+
+                        </div>
 
 
                       <div class="form-group">
@@ -126,17 +500,107 @@
                                     <button type="button" class="btn btn-default" id="delete">Borrar</button>
                                     </a>
                                 {% else %}
-                                    <button type="submit" class="btn btn-default" id="create">Crear</button>
+                                    <button type="submit" class="btn btn-default" id="create" disabled="true">Crear</button>
                                 {% endif %}
                           </div>
                       </div>
                     </form>
-
 
                 </div>
             </div>
 
 		</div>
 	</div>
+
+
+<div class="modal fade" tabindex="-1" id="selectUS"  role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Selecciona un User Story</h4>
+      </div>
+      <div class="modal-body" style="max-height: 500px; overflow-y: auto">
+            <table class="table table-hover">
+                    <thead>
+                        <tr>  <th>User Story</th> <th class="text-center">Prioridad</th><th>Tiempo estimado</th><th></th>
+                        </tr>
+                    </thead>
+                    {% if user_stories|length == 0 %}
+                    <tbody>
+                        <tr class="danger">  <td colspan="4">Actualmente no hay User Stories en el Product Backlog</td> </tr>
+                    </tbody>
+                    {% else %}
+                    <tbody id="pb">
+                        {% for row in user_stories %}
+                        <tr id="{{ row.0.id }}">
+                            <td><a href="#">{{row.0.description}}</a></td>
+                            <td class="text-center">{{row.1}}</td>
+                            <td class="text-center">{{row.0.estimated_time}}</td>
+                            <td class="text-right">
+                                <button type="button" class="btn btn-default btn-sm addUS">
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                </button>
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+                    </tbody>
+                {% endif %}
+                </table>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div class="modal fade" tabindex="-1" id="selectUsers"  role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Selecciona desarrolladores:</h4>
+      </div>
+      <div class="modal-body" style="max-height: 500px; overflow-y: auto">
+          <span id="id_us" style="display: none;"></span>
+          <p><b>Demanda del User Story:</b> <span></span></p>
+            <table class="table table-hover">
+                    <thead>
+                        <tr>  <th>Desarrollador</th> <th class="text-center">Hs-Hombre</th>
+                        </tr>
+                    </thead>
+                    {% if dev_list|length == 0 %}
+                    <tbody>
+                        <tr class="danger">  <td colspan="2">Actualmente no hay desarrolladores</td> </tr>
+                    </tbody>
+                    {% else %}
+                    <tbody>
+                        {% for dev in dev_list %}
+                        <tr id="dev_{{ dev.id }}">
+                            <td>{{dev.user}}</td>
+                            <td class="text-center">{{dev.hs_hombre}}</td>
+                            <td class="text-right">
+                                <input type="checkbox" name="checkboxUser" {% if delete_form %} disabled {% endif %} value="{{dev.id}}" />
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+                    </tbody>
+                {% endif %}
+                </table>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Aceptar</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
 
 {% endblock %}

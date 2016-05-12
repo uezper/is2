@@ -13,6 +13,30 @@ class StringListField(forms.CharField):
         return value.split(',')
 
 
+class SprintBacklogField(StringListField):
+    default_error_messages = {
+        'is_required': u'Debe introducir al menos un User Story en el Sprint Backlog'
+    }
+
+    def validate(self, value):
+
+        us_list = list(value)
+
+        if (len(us_list) == 0):
+            raise ValidationError(self.error_messages['is_required'])
+
+        x = 0
+
+        new_values = []
+        for us in us_list:
+            if us == '':
+                continue
+            new_values.append(us)
+
+        if (len(new_values) == 0):
+            raise ValidationError(self.error_messages['is_required'])
+
+
 class PermissionListField(StringListField):
     default_error_messages = {
         'is_required': u'Debe introducir al menos un permiso',

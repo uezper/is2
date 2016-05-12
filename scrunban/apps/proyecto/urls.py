@@ -25,5 +25,7 @@ urlpatterns = [
         name=base_settings.PROJECT_SPRINT_EDIT),
     url(r'^(?P<project_id>[0-9]+)/sprint/delete/(?P<sprint_id>[0-9]+)/$$', views.SprintDeleteView.as_view(),
         name=base_settings.PROJECT_SPRINT_DELETE),
+    url(r'^(?P<project_id>[0-9]+)/sprint/details/(?P<sprint_id>[0-9]+)/$$', views.SprintDetailView.as_view(),
+        name=base_settings.PROJECT_SPRINT_DETAIL),
 ]
 
