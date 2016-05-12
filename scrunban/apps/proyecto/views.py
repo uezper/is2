@@ -1,6 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.views.generic.list import ListView
 from django.views.generic.edit import FormView
+from django.views.generic import TemplateView
 from django.views.generic.detail import SingleObjectMixin
 
 from apps.autenticacion.models import Role
@@ -16,6 +17,8 @@ from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenti
 from scrunban.settings import base as base_settings
 
 from django.shortcuts import render
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class RoleListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
 
@@ -244,12 +247,6 @@ def index(request, project_id):
     return render(request, 'proyecto/project_index', context)
 
 
-
-
-
-
-
-
 class DevListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
 
     """
@@ -436,7 +433,9 @@ class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, Ur
         project = self.get_object(queryset=Project.objects.all())
 
         data = {
-            'project': project.id
+            'project': project.id,
+            'capacity': 0,
+            'demmand': 0
         }
 
         return data
@@ -473,6 +472,19 @@ class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, Ur
 
         context['section_title'] = self.section_title
         context['left_active'] = self.left_active
+        context['user_stories'] = []
+
+        from apps.administracion.models import UserStory, Grained
+        from apps.proyecto.models import Team
+
+        for us in UserStory.objects.filter(project=self.object):
+            if (len(Grained.objects.filter(user_story=us)) == 0):
+                context['user_stories'].append((us, us.get_weight()))
+
+        context['user_stories'].sort(key=lambda x: -x[1])
+        temp = [ (x[0], "{0:.2f}".format(x[1])) for x in context['user_stories'] ]
+        context['user_stories'] = temp
+        context['dev_list'] = Team.objects.filter(project=self.object)
 
         return context
 
@@ -485,7 +497,7 @@ class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, Ur
     def get_initial(self):
         from apps.proyecto.models import Sprint
         project = self.get_object(queryset=Project.objects.all())
-        sec = 0
+        sec = 1
         sprints = Sprint.objects.filter(project=project)
 
         if sprints.count() != 0:
@@ -493,7 +505,10 @@ class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, Ur
 
 
         initial = {
-            'sec': 'Sprint ' + str(sec)
+            'sec': 'Sprint ' + str(sec),
+            'estimated_time': 1,
+            'capacity': 0,
+            'demmand': 0
         }
 
         return initial
@@ -510,6 +525,7 @@ class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, Ur
             'form' : form
         }
 
+        print(form)
         return super(SprintCreateView, self).render_to_response(self.get_context_data(**context))
 
 
@@ -531,11 +547,13 @@ class SprintEditView(ValidateSprintStatePending, SprintCreateView):
         from apps.proyecto.models import Sprint
 
         project = self.get_object(queryset=Project.objects.all())
-        sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
+        self.sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
 
         data = {
             'project': project.id,
-            'id': sprint.id
+            'id': self.sprint.id,
+            'capacity': 0,
+            'demmand': 0
         }
 
         return data
@@ -545,15 +563,41 @@ class SprintEditView(ValidateSprintStatePending, SprintCreateView):
         context['edit_form'] = True
         context['sprint'] = self.sprint
 
+        from apps.administracion.models import Grained, UserStory
+
+        context['user_stories'] = []
+        for us in UserStory.objects.filter(project=self.object):
+            if (len(Grained.objects.filter(user_story=us)) == 0):
+                context['user_stories'].append((us, us.get_weight()))
+
+        for g in Grained.objects.filter(sprint=self.sprint):
+            context['user_stories'].append((g.user_story, g.user_story.get_weight()))
+
+        context['user_stories'].sort(key=lambda x: -x[1])
+
+        temp = [(x[0], "{0:.2f}".format(x[1])) for x in context['user_stories']]
+        context['user_stories'] = temp
+
         return context
 
     def get_initial(self):
         from apps.proyecto.models import Sprint
+        from apps.administracion.models import Grained
+
         self.sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
+
+        sb = []
+        for grain in Grained.objects.filter(sprint=self.sprint):
+            us_id = grain.user_story.id
+            us_devs = '_'.join([str(g.id) for g in grain.developers.all()])
+            sb.append(str(us_id) + ':' + us_devs)
+
+        sb_string = ','.join(sb)
 
         initial = {
             'sec': 'Sprint ' + str(self.sprint.sec),
-            'estimated_time': self.sprint.get_estimated_time()
+            'estimated_time': self.sprint.get_estimated_time(),
+            'sprint_backlog': sb_string
         }
 
         return initial
@@ -569,21 +613,6 @@ class SprintDeleteView(SprintEditView):
     section_title = 'Eliminar Sprint'
 
 
-    def get_default_fields(self):
-        from apps.proyecto.models import Sprint
-
-        project = self.get_object(queryset=Project.objects.all())
-        sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
-
-        data = {
-            'project': project.id,
-            'id': sprint.id,
-            'sec': sprint.sec,
-            'estimated_time': sprint.get_estimated_time()
-        }
-
-        return data
-
     def get_context_data(self, **kwargs):
         context = super(SprintDeleteView, self).get_context_data(**kwargs)
         context['delete_form'] = True
@@ -592,14 +621,98 @@ class SprintDeleteView(SprintEditView):
 
         return context
 
-    def get_initial(self):
-        from apps.proyecto.models import Sprint
-        self.sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
 
-        initial = {
-            'id': self.sprint.id,
-            'sec': 'Sprint ' + str(self.sprint.sec),
-            'estimated_time': self.sprint.get_estimated_time()
-        }
 
-        return initial
+class SprintDetailView(UserIsAuthenticatedMixin, TemplateView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
+
+    """
+    Clase correspondiente a la vista que muestra la informacion sobre un Sprint de un proyecto
+
+
+    """
+
+    template_name = 'proyecto/project_sprint_detail_view'
+
+    pk_url_kwarg = 'project_id'
+    sprint_url_kwarg = 'sprint_id'
+
+    user_story_paginate_by = 10
+    dev_paginate_by = 10
+
+    section_title = 'Detalles del Sprint'
+    left_active = 'Sprints'
+
+    us_page_name = 'sb_page'
+    dev_page_name = 'dev_page'
+
+    def get_context_data(self, **kwargs):
+        self.object = self.get_object(queryset=Project.objects.all())
+        context = super(SprintDetailView, self).get_context_data(**kwargs)
+
+        self.sprint = get_object_or_404(Sprint, id=kwargs.get(self.sprint_url_kwarg, ''))
+
+        self.get_url_context(context)
+        self.get_user_permissions(context)
+
+        context['project'] = self.object
+        context['sprint'] = self.sprint
+
+        context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
+
+        context['sprint_data'] = self.get_context_sprint_data()
+
+        return context
+
+    def get_context_sprint_data(self):
+        from apps.administracion.models import Grained
+
+        sprint = self.sprint
+
+        capacity = 0
+        demmand = 0
+
+        user_stories = []
+        devs = []
+
+        # Obtiene los desarrolladores del Sprint, sus user stories, su capacidad y su demanda
+        for grain in Grained.objects.filter(sprint=sprint):
+
+            user_stories.append((grain.user_story, grain.developers.all()))
+            demmand += grain.user_story.estimated_time
+
+            for dev in grain.developers.all():
+                if not(dev in devs):
+                    devs.append(dev)
+                    capacity += dev.hs_hombre * sprint.estimated_time
+
+        # Paginacion
+
+        us_paginator = Paginator(user_stories, self.user_story_paginate_by)
+        us_page = self.request.GET.get(self.us_page_name, 1)
+        try:
+            user_stories_paginated = us_paginator.page(us_page)
+        except PageNotAnInteger:
+            user_stories_paginated = us_paginator.page(1)
+        except EmptyPage:
+            user_stories_paginated = us_paginator.page(us_paginator.num_pages)
+
+        dev_paginator = Paginator(devs, self.dev_paginate_by)
+        dev_page = self.request.GET.get(self.dev_page_name, 1)
+        try:
+            dev_paginated = dev_paginator.page(dev_page)
+        except PageNotAnInteger:
+            dev_paginated = dev_paginator.page(1)
+        except EmptyPage:
+            dev_paginated = dev_paginator.page(dev_paginator.num_pages)
+
+        # Prepara el context
+
+        sprint_data = {}
+        sprint_data['capacity'] = capacity
+        sprint_data['demmand'] = demmand
+        sprint_data['user_stories_list'] = user_stories_paginated
+        sprint_data['dev_list'] = dev_paginated
+
+        return sprint_data
+

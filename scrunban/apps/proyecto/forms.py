@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Permission
 from apps.autenticacion.models import User
 from apps.administracion.models import Project
-from apps.proyecto.fields import PermissionListField, UserListField
+from apps.proyecto.fields import PermissionListField, UserListField, SprintBacklogField
 
 
 class CreateRolForm(forms.Form):
@@ -241,11 +241,20 @@ class CreateSprintForm(forms.Form):
     :param sec: Utilizado para mostrar al usuario el nombre del Sprint
     :param estimated_time: Duracion estimada del Sprint
     :param project: Id del proyecto al cual pertenece el Sprint
+    :param sprint_backlog: Lista de user stories con sus respectivos desarrolladores
+    :param capacity: Capacidad del Sprint
+    :param demmand: Demanda del Sprint
 
     """
     sec = forms.CharField(required=False, widget=forms.HiddenInput)
     estimated_time = forms.IntegerField(required=True, widget=forms.HiddenInput)
     project = forms.IntegerField(required=True, widget=forms.HiddenInput)
+    sprint_backlog = SprintBacklogField(required=True, widget=forms.HiddenInput)
+    capacity = forms.IntegerField(required=False, widget=forms.HiddenInput)
+    demmand = forms.IntegerField(required=False, widget=forms.HiddenInput)
+
+    _capacity = 0
+    _demmand = 0
 
     def clean_estimated_time(self):
         if self.cleaned_data['estimated_time'] > 0:
@@ -253,12 +262,79 @@ class CreateSprintForm(forms.Form):
         else:
             raise ValidationError('Este campo debe ser un entero positivo mayor que cero')
 
+    def clean_sprint_backlog(self):
+
+        from apps.administracion.models import UserStory
+        from apps.proyecto.models import Team
+
+
+        new_sb = []
+        devs = []
+
+        for reg in self.cleaned_data['sprint_backlog']:
+            us = reg.split(':')
+            us_id = us[0]
+            us_devs = us[1].split('_')
+
+
+            us_ = UserStory.objects.filter(id=us_id)
+            if len(us_) == 0:
+                raise ValidationError('Ha ingresado un US invalido: ' + us_id)
+            else:
+                #Todo! Agregar validacion de estado y flujo cuando esten
+
+                if len(us_devs) == 0:
+                    raise ValidationError('No ha ingresado desarrolladores para el US ' + us_[0].description)
+                else:
+                    new_devs = []
+                    for dev in us_devs:
+                        if dev == '':
+                            continue
+
+                        team_ = Team.objects.filter(id=dev)
+                        if len(team_) == 0:
+                            raise ValidationError('No existe el desarrollador: ' + dev)
+                        else:
+                            new_devs.append(team_[0])
+                            if not(dev in devs):
+                                self._capacity += team_[0].hs_hombre * self.cleaned_data.get('estimated_time', 0)
+                                devs.append(dev)
+
+                    self._demmand += us_[0].estimated_time
+                    if len(new_devs) == 0:
+                        raise ValidationError('No ha ingresado desarrolladores para el US ' + us_[0].description)
+                    new_sb.append((us_[0], new_devs))
+        print(self._capacity)
+        return new_sb
+
+    def clean_capacity(self):
+        return self._capacity
+
+    def clean_demmand(self):
+        self.data['demmand'] = self._demmand
+        self.data['capacity'] = self._capacity
+        if self._demmand > self._capacity:
+            raise ValidationError('La demanda es mayor que la capacidad del Sprint')
+        return self._demmand
+
     def clean_project(self):
         return Project.objects.get(id=self.cleaned_data['project'])
 
     def save(self):
         from apps.proyecto.models import Sprint
-        Sprint.sprints.create(project=self.cleaned_data['project'],estimated_time=self.cleaned_data['estimated_time'])
+        sprint = Sprint.sprints.create(project=self.cleaned_data['project'],estimated_time=self.cleaned_data['estimated_time'])
+
+        from apps.administracion.models import Grained
+
+        for us in self.cleaned_data['sprint_backlog']:
+            grain = Grained()
+            grain.user_story = us[0]
+            grain.sprint = sprint
+            grain.save()
+            for dev in us[1]:
+                grain.developers.add(dev)
+            grain.save()
+
 
 
 class EditSprintForm(CreateSprintForm):
@@ -272,8 +348,28 @@ class EditSprintForm(CreateSprintForm):
 
     def save(self):
         from apps.proyecto.models import Sprint
+        from apps.administracion.models import Grained
+
         sprint_ = Sprint.objects.get(id=self.cleaned_data['id'])
         sprint_.set_estimated_time(self.cleaned_data['estimated_time'])
+
+        for us in self.cleaned_data['sprint_backlog']:
+            grain = Grained.objects.filter(sprint=sprint_, user_story=us[0])
+            if len(grain) == 0:
+                grain = Grained()
+                grain.user_story = us[0]
+                grain.sprint = sprint_
+                grain.save()
+
+            else:
+                grain = grain[0]
+
+                for dev in grain.developers.all():
+                    grain.developers.remove(dev)
+
+            for dev in us[1]:
+                grain.developers.add(dev)
+            grain.save()
 
 class DeleteSprintForm(EditSprintForm):
     """
@@ -281,7 +377,15 @@ class DeleteSprintForm(EditSprintForm):
 
     """
 
+    def clean_demmand(self):
+        return self._demmand
+
+    def clean_sprint_backlog(self):
+        return self.cleaned_data['sprint_backlog']
+
     def save(self):
         from apps.proyecto.models import Sprint
         sprint_ = Sprint.objects.get(id=self.cleaned_data['id'])
+
+
         sprint_.delete()

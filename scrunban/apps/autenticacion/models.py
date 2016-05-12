@@ -201,8 +201,8 @@ class User(models.Model):
         return res
 
     def __str__(self):
-        username = self.user.get_username()
-        return "{}".format(username)
+        name = self.get_first_name() + ' ' + self.get_last_name()
+        return "{}".format(name)
 
 @receiver(models.signals.post_delete, sender=User, dispatch_uid='user_delete_signal')
 def user_delete(sender, instance, *args, **kwargs):

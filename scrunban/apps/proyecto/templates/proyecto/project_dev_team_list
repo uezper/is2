@@ -49,19 +49,26 @@
 			{% endif %}
 			</table>
 
-			<span class="step-links">
-				{% if page_obj.has_previous %}
-					<a href="?page={{ page_obj.previous_page_number }}"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>
-				{% endif %}
+			<nav class="text-center">
+			  <ul class="pagination">
+				  {% if page_obj.has_previous %}
+				<li><a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+					<span aria-hidden="true">&laquo;</span>
+				  </a></li>
+				  {% else %}
+				  <li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+				  {% endif %}
 
-				<span class="current">
-					Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-				</span>
-
-				{% if page_obj.has_next %}
-					<a href="?page={{ page_obj.next_page_number }}"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></a>
-				{% endif %}
-			</span>
+				<li class="active"><a href="#">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
+				  {% if page_obj.has_next %}
+				<li><a href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+					<span aria-hidden="true">&raquo;</span>
+				  </a></li>
+				  {% else %}
+				  <li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">&raquo;</span></a></li>
+				  {% endif %}
+			  </ul>
+			</nav>
 
 		</div>
 
