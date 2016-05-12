@@ -1,7 +1,7 @@
 from django.db import models
 from django.dispatch import receiver
 from apps.autenticacion.models import User, Role
-from apps.proyecto.models import Sprint, Project
+from apps.proyecto.models import Sprint, Project, Team
 
 class UserStory(models.Model):
     """
@@ -11,7 +11,7 @@ class UserStory(models.Model):
     description = models.CharField(max_length=140) # Twetter..?? XD
     details = models.TextField()
     acceptance_requirements = models.TextField()
-    deadline = models.DateTimeField()
+    estimated_time = models.IntegerField() # tiempo para su finalizacion en horas
     business_value = models.FloatField()
     tecnical_value = models.FloatField()
     urgency = models.FloatField()
@@ -49,6 +49,7 @@ class Grained(models.Model):
     # Public fields mapped to DB columns
     user_story = models.ForeignKey(UserStory)
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE)
+    developers = models.ManyToManyField(Team)
 
     # Public fields for simplicity
     objects = models.Manager()
