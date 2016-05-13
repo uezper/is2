@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .forms import ProjectForm
+from .forms import ProjectForm, UserStoryCreateForm
 from apps.autenticacion.models import User
 from apps.autenticacion.decorators import login_required
 from django.db.utils import IntegrityError
@@ -19,8 +19,6 @@ from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenti
 
 from scrunban.settings import base as base_settings
 
-
-# Create your views here.
 def index(request):
     """
     menu
@@ -232,3 +230,21 @@ class UserDeleteView(UserCreateView):
             context['user_projects'].append((p[0], ', '.join(names)))
 
         return context
+
+@login_required()
+def user_story_create(request):
+    if request.method == 'POST':
+        form = UserStoryCreateForm(request.POST)
+        if form.is_valid():
+            print(form)
+            return HttpResponseRedirect('administracion/user_story/summary')
+    else:
+        context = {
+            'URL_NAMES': base_settings.URL_NAMES,
+            'form': UserStoryCreateForm()
+        }
+        return render(request, 'administracion/user_story/create', context)
+
+@login_required()
+def user_story_summary(request):
+    return render(request, 'administracion/user_story/summary')

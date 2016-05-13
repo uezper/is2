@@ -43,11 +43,22 @@ class Grained(models.Model):
     # Public fields for simplicity
     graineds = models.Manager() # Alias
     objects = models.Manager()
+
+"""    
+# TODO Add unit tests and extend model!
+class Grained(models.Model):
+    # Public fields mapped to DB columns
+    user_story = models.ForeignKey(UserStory)
+    sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE)
+    #developers = models.ManyToManyField(Team)
+
+    # Public fields for simplicity
+    objects = models.Manager()
     
 class Note(models.Model):
-    """
+   \"""
     Modelo para almacenar notas sobre un User Story
-    """
+    \"""
     # Public fields mapped to DB columns
     date = models.DateTimeField(default=timezone.now)
     note = models.TextField()
@@ -60,17 +71,4 @@ class Note(models.Model):
     # Public fields for simplicity
     notes = models.Manager() # Alias
     objects = models.Manager()
-<<<<<<< HEAD
-=======
-
-# TODO Add unit tests and extend model!
-class Grained(models.Model):
-    # Public fields mapped to DB columns
-    user_story = models.ForeignKey(UserStory)
-    sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE)
-    developers = models.ManyToManyField(Team)
-
-    # Public fields for simplicity
-    objects = models.Manager()
-
->>>>>>> 17606a97b6fe7247a49f61ba5368496828a76b8a
+"""

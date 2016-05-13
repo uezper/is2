@@ -1,0 +1,17 @@
+{% extends "administracion/admin_base" %}
+
+{% block "working_path" %}
+{{ block.super }}
+<li>Proyecto</li>
+{% endblock %}
+
+{% block "content" %}
+<div class='panel panel-default'>
+  <div class='panel-body'>
+
+  {% block "user_story_content" %}
+  {% endblock %}
+
+  </div>
+</div>
+{% endblock %}

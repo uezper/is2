@@ -1,0 +1,6 @@
+{% extend "admin_base" %}
+
+{% block  %}
+
+{% endblock %}
+

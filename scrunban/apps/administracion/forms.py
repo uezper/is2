@@ -122,3 +122,13 @@ class UserDeleteForm(UserForm):
         u = User.objects.filter(id=self.cleaned_data['id'])[0]
         u.delete()
 
+class UserStoryCreateForm(forms.Form):
+    description = forms.CharField(label='Descripción corta', max_length=140)
+    details = forms.CharField(label='Detalles de implementación')
+    acceptance_requirements = forms.CharField(label='Requisitos para aceptación')
+    estimated_time = forms.IntegerField(label='Tiempo estimado')
+    business_value = forms.FloatField(label='Valor de negocio')
+    tecnical_value = forms.FloatField(label='Valor técnico')
+    urgency = forms.FloatField(label='Urgencia')
+
+    #allowed_developers
