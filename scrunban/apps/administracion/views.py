@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import ProjectForm, UserStoryCreateForm
 from apps.autenticacion.models import User
@@ -279,3 +279,12 @@ def user_story_list(request, project):
         'user_stories': UserStory.user_stories.filter(project=project_instance)
     }
     return render(request, 'administracion/user_story/list', context)
+
+@login_required()
+def user_story_delete(reques, project, user_story):
+    # TODO Check permissions
+    # TODO Check project and us
+    us = UserStory.user_stories.get(pk=user_story)
+    us.delete()
+    return redirect(base_settings.ADM_US_LIST, project=project)
+
