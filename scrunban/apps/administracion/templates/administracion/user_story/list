@@ -1,0 +1,30 @@
+{% extends "administracion/user_story/base" %}
+
+{% block "user_story_content" %}
+<h3>Lista de User Stories de {{ project }}</h3>
+<hr></hr>
+<table class="table table-striped">
+  <thead>
+    <td>Descripción</td>
+    <td>Detalles</td>
+    <td class="text-right">
+      <a href="{% url URL_NAMES.ADM_US_CREATE project.pk %}">
+	NEW
+      </a>
+    </td>
+  </thead>
+  <tbody>
+  {% for user_story in user_stories %}
+  <tr>
+    <td><a href="{% url URL_NAMES.ADM_US_SUMMARY project.pk user_story.pk %}">{{ user_story.description }}</a></td>
+    <td>{{ user_story.details }}</td>
+    <td class="text-right">
+      <a href="">
+	DELETE
+      </a>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock "user_story_content" %}

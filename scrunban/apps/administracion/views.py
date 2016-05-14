@@ -240,7 +240,6 @@ def user_story_create(request, project):
             # Create new user story
             data = form.cleaned_data
             data['project'] = Project.projects.get(pk=project)
-            print(data)
             us = UserStory.user_stories.create(**data)
             # Redirect to the new user story summary page!
             context = {
@@ -261,8 +260,6 @@ def user_story_create(request, project):
 
 @login_required()
 def user_story_summary(request, project, user_story):
-    print(project)
-    print(user_story)
     # TODO Check user permissions
     # TODO Check project id
     # TODO Check userstory id
@@ -272,3 +269,13 @@ def user_story_summary(request, project, user_story):
         'user_story': UserStory.user_stories.get(pk=user_story)
     }
     return render(request, 'administracion/user_story/summary', context)
+
+@login_required()
+def user_story_list(request, project):
+    project_instance = Project.projects.get(pk=project)
+    context = {
+        'URL_NAMES': base_settings.URL_NAMES,
+        'project': project_instance,
+        'user_stories': UserStory.user_stories.filter(project=project_instance)
+    }
+    return render(request, 'administracion/user_story/list', context)

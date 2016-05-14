@@ -5,6 +5,10 @@
 <li class='active'>{{ user_story }}<li>
 {% endblock "working_path" %}
 
+{% comment "TODOs"%}
+1. reducir codigo redundante: {% for ?? in ?? %}...
+{% endcomment %}
+
 {% block "user_story_content" %}
 <h1>Detalles de User Story</h1>
 <table>
