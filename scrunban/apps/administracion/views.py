@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 from django.views.generic.list import ListView
 from django.views.generic.edit import FormView
 from apps.proyecto.models import Project
-
+from apps.administracion.models import UserStory
 from apps.administracion import forms
 from django.shortcuts import get_object_or_404, HttpResponseRedirect
 
@@ -232,19 +232,31 @@ class UserDeleteView(UserCreateView):
         return context
 
 @login_required()
-def user_story_create(request):
+def user_story_create(request, project):
     if request.method == 'POST':
         form = UserStoryCreateForm(request.POST)
         if form.is_valid():
             print(form)
             return HttpResponseRedirect('administracion/user_story/summary')
     else:
+        # TODO Check project id
         context = {
             'URL_NAMES': base_settings.URL_NAMES,
+            'project': Project.projects.get(pk=project),
             'form': UserStoryCreateForm()
         }
         return render(request, 'administracion/user_story/create', context)
 
 @login_required()
-def user_story_summary(request):
-    return render(request, 'administracion/user_story/summary')
+def user_story_summary(request, project, user_story):
+    print(project)
+    print(user_story)
+    # TODO Check user permissions
+    # TODO Check project id
+    # TODO Check userstory id
+    context = {
+        'URL_NAMES': base_settings.URL_NAMES,
+        'project': Project.projects.get(pk=project),
+        'user_story': UserStory.user_stories.get(pk=user_story)
+    }
+    return render(request, 'administracion/user_story/summary', context)

@@ -29,12 +29,12 @@ class login_required():
             Un envolvente de la vista para proteger de usuarios sin autentificación.
         """
 
-        def view_wrapper(request):
+        def view_wrapper(request, *args, **kwargs):
 
             if not request.user.is_authenticated():
                 # El hashtag (#) es necesario para poder utilizar $location.search() en el script.
                 return HttpResponseRedirect( "{}#?next={}".format( reverse( base_settings.LOGIN_NAME ), request.path_info ) )
             else:
-                return view(request)
+                return view(request, *args, **kwargs)
         
         return view_wrapper

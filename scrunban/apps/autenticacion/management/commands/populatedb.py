@@ -26,6 +26,15 @@ class Command(BaseCommand):
     def create_users(self):
         usuarios = [
             (
+                '1',
+                'pass',
+                'Carlos Federico',
+                'Gaona Ruiz Diaz',
+                'cgaona@scrunban.com',
+                '123 456789',
+                'Paraguay',
+            ),
+            (
                 '1478963',
                 'user123',
                 'Kishan',
@@ -75,10 +84,7 @@ class Command(BaseCommand):
         for reg in usuarios:
             User.users.create(username=reg[0],password=reg[1],first_name=reg[2],last_name=reg[3],email=reg[4],telefono=reg[5],direccion=reg[6])
 
-
     def create_projects(self):
-
-
         proyecots = [
             (
                 'Drugdul Project',
@@ -135,7 +141,6 @@ class Command(BaseCommand):
 
 
     def create_user_story(self, project):
-
         user_stories = [
             (
                 'Creacion de login',

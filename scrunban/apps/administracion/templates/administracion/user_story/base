@@ -2,8 +2,12 @@
 
 {% block "working_path" %}
 {{ block.super }}
-<li>Proyecto</li>
-{% endblock %}
+<li>{{ project }}</li>
+{% endblock "working_path" %}
+
+{% block "left_menu_options" %}
+<li href=""><a>Detalles del Proyecto</a></li>
+{% endblock "left_menu_options" %}
 
 {% block "content" %}
 <div class='panel panel-default'>
@@ -14,4 +18,4 @@
 
   </div>
 </div>
-{% endblock %}
+{% endblock "content" %}
