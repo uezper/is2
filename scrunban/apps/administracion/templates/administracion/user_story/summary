@@ -15,7 +15,7 @@
     </tr>
     <tr>
       <th><label for="id_details">Detalles de implentación:</label></th>
-      <td>{{ user_story.description }}</td>
+      <td>{{ user_story.details }}</td>
     </tr>
     <tr>
       <th><label for="id_acceptance_requirements">Requisitos para aceptación:</label></th>

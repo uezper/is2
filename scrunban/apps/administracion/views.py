@@ -236,8 +236,20 @@ def user_story_create(request, project):
     if request.method == 'POST':
         form = UserStoryCreateForm(request.POST)
         if form.is_valid():
-            print(form)
-            return HttpResponseRedirect('administracion/user_story/summary')
+            # TODO Validate project!
+            # Create new user story
+            data = form.cleaned_data
+            data['project'] = Project.projects.get(pk=project)
+            print(data)
+            us = UserStory.user_stories.create(**data)
+            # Redirect to the new user story summary page!
+            context = {
+                'URL_NAMES': base_settings.URL_NAMES,
+                'project': us.project,
+                'user_story': us
+            }
+            #return HttpResponseRedirect('administracion/user_story/summary')
+            return render(request, 'administracion/user_story/summary', context)
     else:
         # TODO Check project id
         context = {
