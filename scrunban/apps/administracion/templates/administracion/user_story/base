@@ -2,12 +2,18 @@
 
 {% block "working_path" %}
 {{ block.super }}
-<li>{{ project }}</li>
+<li>
+  <a href="{% url URL_NAMES.PROJECT_INDEX project.pk %}">{{ project.name }}</a>
+</li>
 {% endblock "working_path" %}
 
+
 {% block "left_menu_options" %}
-<li href=""><a>Detalles del Proyecto</a></li>
+<li>
+  <a href="{% url URL_NAMES.PROJECT_INDEX project.pk %}">Detalles del Proyecto</a>
+</li>
 {% endblock "left_menu_options" %}
+
 
 {% block "content" %}
 <div class='panel panel-default'>
