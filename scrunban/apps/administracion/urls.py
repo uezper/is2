@@ -3,8 +3,11 @@ from scrunban.settings import base as base_settings
 from . import views
 
 urlpatterns = [
-    url(r'^proyecto/nuevo', views.crear_proyecto, name=base_settings.ADM_PROJECT_CREATE),
-    url(r'^proyecto/eliminar', views.eliminar_proyecto, name=base_settings.ADM_PROJECT_DELETE),
+    url(r'^project/$', views.ProjectListView.as_view(), name=base_settings.ADM_PROJECT_LIST),
+    url(r'^project/new/$', views.ProjectCreateViewTest.as_view(), name=base_settings.ADM_PROJECT_CREATE),
+    url(r'^project/edit/(?P<pk>[0-9]+)/$', views.ProjectModifyView.as_view(), name=base_settings.ADM_PROJECT_MODIFY),
+    url(r'^project/delete/(?P<pk>[0-9]+)/$', views.ProjectDeleteView.as_view(), name=base_settings.ADM_PROJECT_DELETE),
+
     url(r'^proyecto/(?P<project>\d+)/userstory/$', views.user_story_list, name=base_settings.ADM_US_LIST),
     url(r'^proyecto/(?P<project>\d+)/userstory/create$', views.user_story_create, name=base_settings.ADM_US_CREATE),
     url(r'^proyecto/(?P<project>\d+)/userstory/(?P<user_story>\d+)/delete$', views.user_story_delete, name=base_settings.ADM_US_DELETE),

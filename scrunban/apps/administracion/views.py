@@ -19,78 +19,135 @@ from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenti
 
 from scrunban.settings import base as base_settings
 
-import pdb
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
-def index(request):
-    """
-    menu
-    """
-    return HttpResponse("<html><body><h1>Main Menu</h1><a href='http://localhost:8000/adm/proyecto/nuevo'>Nuevo Proyecto</a><br>"
-                        "<a href='http://localhost:8000/adm/proyecto/eliminar'>Eliminar Proyecto</a></body></html>")
+class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, UserPermissionContextMixin):
+    model = Project
+    context_object_name = 'project_list'
+    template_name = 'administracion/project_list.html'
+    allow_empty = True
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super(ProjectListView, self).get_context_data(**kwargs)
+        self.get_url_context(context)
+        self.get_user_permissions(context)
+        context['section_title'] = 'Proyectos'
+        context['left_active'] = 'Proyectos'
+        return context
 
 
-@login_required()
-def crear_proyecto(request):
-    """
-    Retorna la vista correspondiente a la página de creacion de proyecto.
 
-    :param request: Los datos de la solicitud
+class ProjectCreateViewTest(UserIsAuthenticatedMixin, CreateView, UrlNamesContextMixin, UserPermissionContextMixin):
+    template_name = 'administracion/project_new.html'
+    model = Project
+    context_object_name = 'project'
+    fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
 
-    :returns: Un 'renderizado' del template correspondiente.
-    """
-    context = {
-        'user_list': User.objects.all(),
-        'URL_NAMES' : base_settings.URL_NAMES,
-        'left_active': 'Nuevo Proyecto'
-    }
-    if request.method == 'POST':
-        form = ProjectForm(request.POST)
-        context['form'] = form
-        if form.is_valid():
+    lastForm = forms.ProjectForm()
 
-            data = {
-                'name': form.cleaned_data['name'],
-                'date_start': form.cleaned_data['date_start'],
-                'date_end': form.cleaned_data['date_end'],
-                'scrum_master': User.users.filter(username=form.cleaned_data['scrum_master']).get(),
-                'product_owner': User.users.filter(username=form.cleaned_data['product_owner']).get()
+    def get_success_url(self):
+        return reverse(base_settings.ADM_PROJECT_LIST)
+
+    def form_valid(self, form):
+        p = form.save()
+        # Crea roles por defecto
+        from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
+        from django.contrib.auth.models import Permission
+        for rol in DEFAULT_PROJECT_ROLES:
+            role_data = {
+                'name': rol[0],
+                'desc_larga':  rol[1]
             }
+            new_rol = p.add_rol(**role_data)
+            for perm_ in rol[2]:
+                (perm_[0])
+                perm = Permission.objects.get(codename=perm_[0])
+                new_rol.add_perm(perm)
+        p_id = p.id
+        for rol in p.get_roles():
+            if rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[0][0]:
+                rol.add_user(form.cleaned_data['scrum_master'])
+            elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
+                rol.add_user(form.cleaned_data['product_owner'])
+        return HttpResponseRedirect(self.get_success_url())
 
-            p = Project.projects.create(**data)
-            if p == None:
-                form.add_error('name', 'Project name already exist')
-                return render(request, 'administracion/proyectoCrear.html', context)
-            return render(request, 'administracion/proyectoCrearExitoso.html', context)
-    else:
-        form = ProjectForm()
-        context['form'] = form
-    return render(request, 'administracion/proyectoCrear.html', context)
+    def dispatch(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            self.lastForm = forms.ProjectForm(request.POST)
+        return super(ProjectCreateViewTest, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(ProjectCreateViewTest, self).get_context_data(**kwargs)
+        self.get_url_context(context)
+        self.get_user_permissions(context)
+        context['form'] = self.lastForm
+        context['user_list'] = User.objects.all()
+        context['section_title'] = 'Crear Proyecto'
+        context['left_active'] = 'Proyectos'
+        return context
 
 
-@login_required()
-def eliminar_proyecto(request):
-    """
+class ProjectModifyView(UserIsAuthenticatedMixin, UpdateView, UrlNamesContextMixin, UserPermissionContextMixin):
+    template_name = 'administracion/project_modify.html'
+    model = Project
+    context_object_name = 'project'
+    fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
 
-    Retorna la vista correspondiente a la pagina de creacion de proyecto.
+    def get_success_url(self):
+        return reverse(base_settings.ADM_PROJECT_LIST)
 
-    :param request: Los datos de la solicitud
+    def form_valid(self, form):
+        p = form.save()
+        # Crea roles por defecto
+        from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
+        from django.contrib.auth.models import Permission
+        for rol in DEFAULT_PROJECT_ROLES:
+            role_data = {
+                'name': rol[0],
+                'desc_larga':  rol[1]
+            }
+            new_rol = p.add_rol(**role_data)
+            for perm_ in rol[2]:
+                (perm_[0])
+                perm = Permission.objects.get(codename=perm_[0])
+                new_rol.add_perm(perm)
+        p_id = p.id
+        for rol in p.get_roles():
+            if rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[0][0]:
+                rol.add_user(form.cleaned_data['scrum_master'])
+            elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
+                rol.add_user(form.cleaned_data['product_owner'])
+        return HttpResponseRedirect(self.get_success_url())
 
-    :returns: Un 'renderizado' del template correspondiente.
 
-    """
-    context = {
-        "project_list": Project.objects.all(),
-        'URL_NAMES': base_settings.URL_NAMES,
-        'left_active': 'Eliminar Proyecto'
-    }
-    if request.method == 'POST':
-        try:
-            p = Project.objects.get(name=request.POST['project'])
-            p.delete()
-        except KeyError:
-            x = None
-        return render(request, 'administracion/proyectoEliminar.html', context)
-    return render(request, 'administracion/proyectoEliminar.html', context)
+    def get_context_data(self, **kwargs):
+        context = super(ProjectModifyView, self).get_context_data(**kwargs)
+        self.get_url_context(context)
+        self.get_user_permissions(context)
+        context['user_list'] = User.objects.all()
+        context['section_title'] = 'Modificar Proyecto'
+        context['left_active'] = 'Proyectos'
+        return context
+
+
+class ProjectDeleteView(UserIsAuthenticatedMixin, DeleteView, UrlNamesContextMixin, UserPermissionContextMixin):
+    template_name = 'administracion/project_delete.html'
+    model = Project
+    context_object_name = 'project'
+
+    def get_success_url(self):
+        return reverse(base_settings.ADM_PROJECT_LIST)
+
+    def get_context_data(self, **kwargs):
+        context = super(ProjectDeleteView, self).get_context_data(**kwargs)
+        self.get_url_context(context)
+        self.get_user_permissions(context)
+        context['form'] = forms.ProjectForm(instance=Project.objects.get(id=self.kwargs['pk']))
+        context['user_list'] = User.objects.all()
+        context['section_title'] = 'Eliminar Proyecto'
+        context['left_active'] = 'Proyectos'
+        return context
 
 
 class UserCreateView(UserIsAuthenticatedMixin, FormView, UrlNamesContextMixin, UserPermissionContextMixin):
