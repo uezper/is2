@@ -150,3 +150,5 @@ class UserStoryTypeCreateForm(forms.Form):
             choices=self.choices
         )
 
+class FlowCreateForm(forms.Form):
+    name = forms.CharField(label='Nombre del Flujo', max_length=140)
