@@ -144,7 +144,7 @@ def perfil(request, user_id):
 
     x = UserPermissionContextMixin()
     x.request = request
-    x.get_user_permissions(context)
+    x.get_user_permissions_context(context)
 
 
     return render(request, 'autenticacion/profile_detail', context)
@@ -166,7 +166,7 @@ def profile_projects(request):
 
     x = UserPermissionContextMixin()
     x.request = request
-    x.get_user_permissions(context)
+    x.get_user_permissions_context(context)
 
     return render(request, 'autenticacion/profile_project_list', context)
 
@@ -217,7 +217,7 @@ class ProfileEditView(UserIsAuthenticatedMixin, FormView, UrlNamesContextMixin, 
         context = super(ProfileEditView, self).get_context_data(**kwargs)
 
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
 
         context['section_title'] = self.section_title
         context['left_active'] = self.left_active

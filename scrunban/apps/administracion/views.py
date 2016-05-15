@@ -111,7 +111,7 @@ class UserCreateView(UserIsAuthenticatedMixin, FormView, UrlNamesContextMixin, U
         context = super(UserCreateView, self).get_context_data(**kwargs)
 
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
 
         context['section_title'] = self.section_title
         context['left_active'] = self.left_active
@@ -160,7 +160,7 @@ class UserListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, Use
         context = super(UserListView, self).get_context_data(**kwargs)
 
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
 
         context['section_title'] = self.section_title
         context['left_active'] = self.left_active

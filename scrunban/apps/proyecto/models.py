@@ -181,7 +181,7 @@ class Project(models.Model):
 
         Obtiene una lista de todos los permisos de un Usuario asociados al proyecto a traves de algun rol
 
-        :param user: Instancia de usuario
+        :param user: Instancia de usuario (autenticacion.models.User)
         :returns: Lista de permisos
         """
         p_id = self.id
@@ -199,7 +199,7 @@ class Project(models.Model):
 
         Verifica si un usuario tiene un permiso dado dentro de un proyecto
 
-        :param user: Instancia de usuario que se va a verificar que tenga el permiso
+        :param user: Instancia de usuario que se va a verificar que tenga el permiso (autenticacion.models.User)
         :param perm: Permiso que se desea verificar en su nombre en codigo
         :return:
         """

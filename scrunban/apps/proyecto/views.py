@@ -13,7 +13,7 @@ from apps.proyecto import forms
 from django.shortcuts import get_object_or_404, HttpResponseRedirect
 
 from apps.proyecto.mixins import PermissionListMixin, UrlNamesContextMixin, UserListMixin, ValidateSprintStatePending
-from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin
+from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin, ValidateHasPermission
 from scrunban.settings import base as base_settings
 
 from django.shortcuts import render
@@ -38,6 +38,9 @@ class RoleListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlNam
     section_title = 'Lista de Roles'
     left_active = 'Roles'
 
+    def get_project(self):
+        return self.get_object(queryset=Project.objects.all())
+
     def get_queryset(self):
         self.object = self.get_object(queryset=Project.objects.all())
         return self.object.get_roles()
@@ -47,7 +50,7 @@ class RoleListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlNam
 
         self.get_role_info(context)
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
 
         context['project'] = self.object
 
@@ -93,6 +96,9 @@ class RoleCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, UrlN
     section_title = 'Crear Rol'
     left_active = 'Roles'
 
+    def get_project(self):
+        return self.get_object(queryset=Project.objects.all())
+
     def get_context_data(self, **kwargs):
 
         self.object = self.get_object(queryset=Project.objects.all())
@@ -102,7 +108,7 @@ class RoleCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, UrlN
         self.get_url_context(context)
         self.get_user_list_context(context)
         self.get_permission_list_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
 
 
         context['section_title'] = self.section_title
@@ -265,6 +271,9 @@ class DevListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlName
     section_title = 'Equipo de Desarrollo'
     left_active = 'Equipo de Desarrollo'
 
+    def get_project(self):
+        return self.get_object(queryset=Project.objects.all())
+
     def get_queryset(self):
         self.object = self.get_object(queryset=Project.objects.all())
         return Team.teams.filter(project=self.object)
@@ -273,7 +282,7 @@ class DevListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlName
         context = super(DevListView, self).get_context_data(**kwargs)
 
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
 
         context['project'] = self.object
 
@@ -301,6 +310,8 @@ class DevEditView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, UrlName
     template_name = 'proyecto/project_dev_team_edit'
     left_active = 'Equipo de Desarrollo'
 
+    def get_project(self):
+        return self.get_object(queryset=Project.objects.all())
 
     def get_initial(self):
         team_id = self.kwargs.get(self.team_id_kwname)
@@ -345,7 +356,7 @@ class DevEditView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, UrlName
         context = super(DevEditView, self).get_context_data(**kwargs)
 
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
 
         context['section_title'] = self.section_title
         context['left_active'] = self.left_active
@@ -392,6 +403,8 @@ class SprintListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlN
     section_title = 'Sprints'
     left_active = 'Sprints'
 
+    def get_project(self):
+        return self.get_object(queryset=Project.objects.all())
 
     def get_queryset(self):
         self.object = self.get_object(queryset=Project.objects.all())
@@ -401,7 +414,7 @@ class SprintListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlN
         context = super(SprintListView, self).get_context_data(**kwargs)
 
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
 
         context['project'] = self.object
 
@@ -412,7 +425,7 @@ class SprintListView(UserIsAuthenticatedMixin, ListView, SingleObjectMixin, UrlN
         return context
 
 
-class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
+class SprintCreateView(UserIsAuthenticatedMixin, ValidateHasPermission, FormView, SingleObjectMixin, UrlNamesContextMixin, UserPermissionContextMixin):
     """
     Clase correspondiente a la vista que permite crear un Sprint dentro de un proyecto
 
@@ -428,6 +441,22 @@ class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, Ur
     section_title = 'Crear Sprint'
     left_active = 'Sprints'
 
+    def get_fail_permission_url(self, request, *args, **kwargs):
+        return reverse(base_settings.PROJECT_INDEX, args=(kwargs[self.pk_url_kwarg],))
+
+    def get_required_permissions(self):
+        from apps.autenticacion.settings import PROJECT_SPRINT_MANAGEMENT
+        from django.contrib.auth.models import Permission
+
+        required = []
+        required.append(PROJECT_SPRINT_MANAGEMENT)
+
+        res = [Permission.objects.get(codename=p[0]) for p in required]
+
+        return res
+
+    def get_project(self):
+        return self.get_object(queryset=Project.objects.all())
 
     def get_default_fields(self):
         project = self.get_object(queryset=Project.objects.all())
@@ -468,7 +497,7 @@ class SprintCreateView(UserIsAuthenticatedMixin, FormView, SingleObjectMixin, Ur
         context = super(SprintCreateView, self).get_context_data(**kwargs)
 
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
 
         context['section_title'] = self.section_title
         context['left_active'] = self.left_active
@@ -652,7 +681,7 @@ class SprintDetailView(UserIsAuthenticatedMixin, TemplateView, SingleObjectMixin
         self.sprint = get_object_or_404(Sprint, id=kwargs.get(self.sprint_url_kwarg, ''))
 
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
 
         context['project'] = self.object
         context['sprint'] = self.sprint
