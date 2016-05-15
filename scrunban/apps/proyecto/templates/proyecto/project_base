@@ -21,10 +21,13 @@ Proyecto
   <a href="{% url URL_NAMES.PROJECT_SPRINT_LIST project.id %}">Sprints</a>
 </li>
 <li>
-  <a href="{% url URL_NAMES.ADM_US_LIST project.pk %}">User Stories</a>
+  <a href="{% url URL_NAMES.ADM_FLW_LIST project.pk %}">Flujos</a>
 </li>
 <li>
   <a href="{% url URL_NAMES.ADM_UST_LIST project.pk %}">Tipos de User Story</a>
+</li>
+<li>
+  <a href="{% url URL_NAMES.ADM_US_LIST project.pk %}">User Stories</a>
 </li>
 {% endblock %}
 

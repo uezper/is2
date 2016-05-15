@@ -1,0 +1,17 @@
+{% extends "administracion/flow/base" %}
+
+{% block "working_path" %}
+{{ block.super }}
+<li class='active'>Nuevo Flujo</li>
+{% endblock "working_path" %}
+
+{% block "flow_content" %}
+    <h1>Crear Flujo</h1>
+    <form class="form-horizontal" action='' method='post' id="form">
+      {% csrf_token %}
+      <table>
+	{{ form.as_table }}
+      </table>
+      <input type='submit' value='Crear'>
+    </form>
+{% endblock "flow_content" %}
