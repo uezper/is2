@@ -4,7 +4,7 @@ from django.contrib.auth.models import Permission
 from django.utils import timezone
 from apps.autenticacion.models import User, Role
 from apps.administracion.models import UserStory, Note
-from apps.proyecto.models import Project
+from apps.proyecto.models import Project, Sprint
 import time
 
 class AutenticacionModelsTests(TestCase):
@@ -20,6 +20,34 @@ class AutenticacionModelsTests(TestCase):
                         'product_owner': product_owner
                 }
                 return Project.projects.create(**prj_data)
+
+        def helper_create_sprint(self, project):
+                data = {
+                        'project': project,
+                        'seq': 1,
+                        'estimated_time': 1
+                }
+                return Sprint.sprints.create(**data)
+
+        def helper_create_user_story(self, project, developers):
+                us_data = {
+                        'description': 'Main Page',
+                        'details': 'Make it like google',
+                        'acceptance_requirements': 'Has to be blue',
+                        'deadline': timezone.now(),
+                        'business_value': 153.1,
+                        'tecnical_value': 45.8,
+                        'urgency': 80,
+                        'project': prj
+                }
+                us = UserStory.user_stories.create(**us_data)
+                try:
+                        for developer in developers:
+                                us.allowed_developers.add(developer)
+                except:
+                        us.allowed_delevelopers.add(developers)
+                               
+                return us
         
         def test_userstory_create_delete(self):
                 user1 = self.helper_create_user('user1')
@@ -114,8 +142,22 @@ class AutenticacionModelsTests(TestCase):
                 prj2.delete()
                 user1.delete()
                 user2.delete()
+
+        def test_grained_create_delete(self):
+                usr1 = self.helper_create_user('user1')
+                prj = self.helper_create_project('Dummy', usr1, usr1)
+                spr = self.helper_create_sprint(prj)
+                us = self.helper_create_user_story(prj, usr1)
                 
-        def test_note_create_delete(self):
+                data = {
+                        'sprint': spr,
+                        'user_story': us
+                }
+                g = Grained.graineds.create(**data)
+                self.assertNotEqual(g, None)
+                g.delete()
+                
+        def no_test_note_create_delete(self):
                 user1 = self.helper_create_user('user1')
                 prj1 = self.helper_create_project('Dummy1', user1, user1)
 
@@ -136,7 +178,6 @@ class AutenticacionModelsTests(TestCase):
                 
                 usn_data = {
                         'note': 'This is a note about an user story',
-                        'user_story': us,
                         'user': user1
                 }
 

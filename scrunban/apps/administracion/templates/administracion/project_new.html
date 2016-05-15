@@ -1,0 +1,205 @@
+{% extends "administracion/admin_base" %}
+
+{% block "working_path" %}
+	{{ block.super }}
+	<li><a href="{% url URL_NAMES.ADM_PROJECT_LIST %}">Proyectos</a></li>
+	<li class="active">{{ section_title }}</li>
+{% endblock %}
+
+{% block "content" %}
+
+<script>
+    window.onload = function() {
+        {% for user in user_list %}
+            if("{{ form.scrum_master.value }}" == "{{ user.id }}"){
+                document.getElementById("{{ form.scrum_master.auto_id }}-friendly").value = "{{ user.get_username }} - {{ user.get_first_name }} {{ user.get_last_name }}"
+            }
+            if("{{ form.product_owner.value }}" == "{{ user.id }}"){
+                document.getElementById("{{ form.product_owner.auto_id }}-friendly").value = "{{ user.get_username }} - {{ user.get_first_name }} {{ user.get_last_name }}"
+            }
+        {% endfor %}
+    };
+</script>
+
+
+	<div class="panel panel-default">
+
+		<div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>{{ section_title }}</h3>
+                    <hr />
+                    <form id="form" class="form-horizontal" action="#" method="post">
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label for="row_{{ form.name.auto_id }}" class="col-sm-2 control-label">Nombre:</label>
+                            <div class="row" id="row_{{ form.name.auto_id }}">
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="{{ form.name.auto_id }}" placeholder="Nombre" aria-describedby="helpBlock-{{ form.name.auto_id }}" name="{{ form.name.name }}" value="{% if form.name.value %}{{ form.name.value }}{% endif %}">
+                                    <span id="helpBlock-{{ form.name.auto_id }}" class="help-block">{{form.name.errors}}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="row_{{ form.date_start.auto_id }}" class="col-sm-2 control-label">Fecha de inicio:</label>
+                            <div class="row" id="row_{{ form.date_start.auto_id }}">
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="{{ form.date_start.auto_id }}" placeholder="AAAA-MM-DD" aria-describedby="helpBlock-{{ form.date_start.auto_id }}" name="{{ form.date_start.name }}" value="{% if form.date_start.value %}{{ form.date_start.value }}{% endif %}">
+                                    <span id="helpBlock-{{ form.date_start.auto_id }}" class="help-block">{{form.date_start.errors}}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="row_{{ form.date_end.auto_id }}" class="col-sm-2 control-label">Fecha de finalizacion:</label>
+                            <div class="row" id="row_{{ form.date_end.auto_id }}">
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="{{ form.date_end.auto_id }}" placeholder="AAAA-MM-DD" aria-describedby="helpBlock-{{ form.date_end.auto_id }}" name="{{ form.date_end.name }}" value="{% if form.date_end.value %}{{ form.date_end.value }}{% endif %}">
+                                    <span id="helpBlock-{{ form.date_end.auto_id }}" class="help-block">{{form.date_end.errors}}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="text" hidden="True" id="{{ form.scrum_master.auto_id }}" name="{{ form.scrum_master.name }}" value="{% if form.scrum_master.value %}{{ form.scrum_master.value }}{% endif %}">
+                        <div class="form-group">
+                            <label for="row_{{ form.scrum_master.auto_id }}-friendly" class="col-sm-2 control-label">Scrum Master:</label>
+                            <div class="row" id="row_{{ form.scrum_master.auto_id }}-friendly">
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="{{ form.scrum_master.auto_id }}-friendly" placeholder="Scrum Master" aria-describedby="helpBlock-{{ form.scrum_master.auto_id }}" name="{{ form.scrum_master.name }}-friendly" readonly>
+                                    <span id="helpBlock-{{ form.scrum_master.auto_id }}" class="help-block">{{form.scrum_master.errors}}</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="button" class="btn btn-default" data-toggle="modal" data-target=".scrum_master-popup">Selecionar un Usuario</button>
+                            </div>
+                        </div>
+
+                        <input type="text" hidden="True" id="{{ form.product_owner.auto_id }}" name="{{ form.product_owner.name }}"  value="{% if form.product_owner.value %}{{ form.product_owner.value }}{% endif %}">
+                        <div class="form-group">
+                            <label for="row_{{ form.product_owner.auto_id }}-friendly" class="col-sm-2 control-label">Product Owner:</label>
+                            <div class="row" id="row_{{ form.product_owner.auto_id }}-friendly">
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control" id="{{ form.product_owner.auto_id }}-friendly" placeholder="Product Owner" aria-describedby="helpBlock-{{ form.product_owner.auto_id }}" name="{{ form.product_owner.name }}-friendly" readonly>
+                                    <span id="helpBlock-{{ form.product_owner.auto_id }}" class="help-block">{{form.product_owner.errors}}</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="button" class="btn btn-default" data-toggle="modal" data-target=".product_owner-popup">Selecionar un Usuario</button>
+                            </div>
+                        </div>
+
+
+                    </form>
+
+                    <script>
+                        function submit(){
+                            document.getElementById("form").submit()
+                        }
+                    </script>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <a href="{% url URL_NAMES.ADM_PROJECT_LIST %}"><button type="button" class="btn btn-default"> Cancelar </button></a>
+                            <button class="btn btn-primary" id="create" onclick="submit()"> Crear </button>
+                        </div>
+                    </div>
+
+                    <!-- popup box modal starts here -->
+                    <div class="modal fade scrum_master-popup" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h3 class="modal-title">
+                                        Seleccione un usuario para Scrum Master
+                                    </h3>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        {% if not user_list %}
+                                        <tbody>
+                                            <tr class="danger">  <td colspan="3">Actualmente no hay usuarios</td> </tr>
+                                        </tbody>
+                                        {% else %}
+                                        <tbody>
+                                            {% for user in user_list %}
+                                            <tr>
+                                                <td>
+                                                    <a data-dismiss="modal" id='addScrumMaster{{ forloop.counter }}' href='#'> {{ user.get_username }} - {{ user.get_first_name }} {{ user.get_last_name }} </a><br>
+                                                    <script>
+                                                        document.getElementById('addScrumMaster{{ forloop.counter }}').addEventListener('click', function(){
+                                                            document.getElementById("{{ form.scrum_master.auto_id }}-friendly").value = "{{ user.get_username }} - {{ user.get_first_name }} {{ user.get_last_name }}"
+                                                            document.getElementById("{{ form.scrum_master.auto_id }}").value = "{{ user.id }}"
+                                                        });
+                                                    </script>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        {% endif %}
+                                    </table>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div><!-- /.modal-->
+                    <!-- popup box modal ends -->
+
+                    <!-- popup box modal starts here -->
+                    <div class="modal fade product_owner-popup" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h3 class="modal-title">
+                                        Seleccione un usuario para Product Owner
+                                    </h3>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        {% if not user_list %}
+                                        <tbody>
+                                            <tr class="danger">  <td colspan="3">Actualmente no hay usuarios</td> </tr>
+                                        </tbody>
+                                        {% else %}
+                                        <tbody>
+                                            {% for user in user_list %}
+                                            <tr>
+                                                <td>
+                                                    <a data-dismiss="modal" id='addProductOwner{{ forloop.counter }}' href='#'> {{ user.get_username }} - {{ user.get_first_name }} {{ user.get_last_name }} </a><br>
+                                                    <script>
+                                                        document.getElementById('addProductOwner{{ forloop.counter }}').addEventListener('click', function(){
+                                                            document.getElementById("{{ form.product_owner.auto_id }}-friendly").value = "{{ user.get_username }} - {{ user.get_first_name }} {{ user.get_last_name }}"
+                                                            document.getElementById("{{ form.product_owner.auto_id }}").value = "{{ user.id }}"
+                                                        });
+                                                    </script>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        {% endif %}
+                                    </table>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal-dialog -->
+                    </div><!-- /.modal-->
+                    <!-- popup box modal ends -->
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

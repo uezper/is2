@@ -1,0 +1,53 @@
+{% extends "administracion/user_story_type/base" %}
+
+{% block "user_story_type_content" %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Lista de Tipos de User Stories de {{ project.name }}</h3>
+    <hr></hr>
+    <table class="table table-striped">
+      <thead>
+	<td><strong>Descripción</strong></td>
+	<td><strong>Detalles</strong></td>
+	<td class="text-right">
+	  <a href="{% url URL_NAMES.ADM_UST_CREATE project.pk %}">
+	    <button type="button" class="btn btn-default btn-sm">
+	      <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+	    </button>
+	  </a>
+	</td>
+      </thead>
+      <tbody>
+	{% for user_story_type in user_story_types %}
+	<tr>
+	  <td>
+	    <a href="">{{ user_story_type.name }}</a>
+	  </td>
+	  <td>
+	    <ul>
+	      {% for flow in user_story_type.flows.get_queryset %}
+	      <li>
+		<a href="">{{flow.name}}</a>
+	      </li>
+	      {% endfor %}
+	    </ul>
+	  </td>
+	  
+	  <td class="text-right">
+	    <a href="{% url URL_NAMES.ADM_UST_DELETE project.pk user_story_type.pk %}">
+	      <button type="button" class="btn btn-default btn-sm">
+		<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+	      </button>
+	    </a>
+	  </td>
+	</tr>
+	{% empty %}
+	<tr class="danger">
+	  <td colspan="3">Actualmente no hay Tipos de User Stories</td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock "user_story_type_content" %}
