@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from apps.administracion.models import UserStory
+from apps.administracion.models import UserStory, UserStoryType, Flow
 from apps.autenticacion.models import User
 from apps.proyecto.models import Project
 
@@ -25,6 +25,15 @@ class Command(BaseCommand):
 
     def create_users(self):
         usuarios = [
+            (
+                '1',
+                'pass',
+                'Carlos Federico',
+                'Gaona Ruiz Diaz',
+                'cgaona@scrunban.com',
+                '123 456789',
+                'Paraguay',
+            ),
             (
                 '1478963',
                 'user123',
@@ -75,10 +84,7 @@ class Command(BaseCommand):
         for reg in usuarios:
             User.users.create(username=reg[0],password=reg[1],first_name=reg[2],last_name=reg[3],email=reg[4],telefono=reg[5],direccion=reg[6])
 
-
     def create_projects(self):
-
-
         proyecots = [
             (
                 'Drugdul Project',
@@ -128,14 +134,20 @@ class Command(BaseCommand):
             product_owner = User.users.filter(username=reg[4])[0]
 
             p = Project.projects.create(name=reg[0], date_start=reg[1], date_end=reg[2], scrum_master=scrum_master, product_owner=product_owner)
+            
+            default_flow = Flow.flows.create(name='Flujo por defecto', project=p)
+            default_user_story_type = UserStoryType.types.create(name='UST por defecto')
+            default_user_story_type.flows.add(default_flow)
+
+            default_empty_flow = Flow.flows.create(name='Flujo vacio', project=p)
 
             # Crea User Stories
             if p != None:
                 self.create_user_story(p)
+                self.stdout.write('Creado projecto {}'.format(p.name))
 
 
     def create_user_story(self, project):
-
         user_stories = [
             (
                 'Creacion de login',

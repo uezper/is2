@@ -17,6 +17,6 @@ sys.path.append(
     )
 )
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "scrunban.settings.prod")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "scrunban.settings.dev")
 
 application = get_wsgi_application()

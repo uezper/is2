@@ -6,82 +6,88 @@
 {% endblock %}
 
 {% block "content" %}
-
 	<div class="panel panel-default">
-
-		<div class="panel-body">
-
-		<div class="row">
-		                <div class="col-md-12">
-		                    <h3>{{section_title}}</h3>
-				    <hr />
-
-			<table class="table table-striped">
-				<thead>
-
-					<tr>  <th>CI</th> <th>Nombre</th>
-						<th class="text-right">
+	  <div class="panel-body">
+	    <div class="row">
+	      <div class="col-md-12">
+		<h3>{{section_title}}</h3>
+		<hr />
+		<table class="table table-striped">
+		  <thead>
+		    <tr>
+		      <th>CI</th>
+		      <th>Nombre</th>
+		      <th class="text-right">
                         <a href="{% url URL_NAMES.ADM_USER_CREATE %}">
-							<button type="button" class="btn btn-default btn-sm">
-								<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
-							</button></a>
-						</th>
-					</tr>
-				</thead>
-				{% if user_list|length == 0 %}
-				<tbody>
-					<tr class="danger">  <td colspan="3">Actualmente no hay usuarios</td> </tr>
-				</tbody>
-				{% else %}
-				<tbody>
-					{% for us in user_list %}
-					<tr>
-						<td>{{us.user.username}}</td>
-						<td>{{us.user.first_name}} {{us.user.last_name}}</td>
-						<td class="text-right">
-
-							{% if us.user.id != user.id %}
-							<a href="{% url URL_NAMES.ADM_USER_DELETE us.id %}">
-							<button type="button" class="btn btn-default btn-sm">
-								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-							</button></a>
-							{% endif %}
-						</td>
-					</tr>
-					{% endfor %}
-				</tbody>
+			  <button type="button" class="btn btn-default btn-sm">
+			    <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+			  </button>
+			</a>
+		      </th>
+		    </tr>
+		    
+		  </thead>
+		  {% if user_list|length == 0 %}
+		  
+		  <tbody>
+		    <tr class="danger">
+		      <td colspan="3">Actualmente no hay usuarios</td>
+		    </tr>
+		  </tbody>
+		  
+		  {% else %}
+		  
+		  <tbody>
+		    
+		    {% for us in user_list %}
+		    <tr>
+		      <td>{{us.user.username}}</td>
+		      <td>{{us.user.first_name}} {{us.user.last_name}}</td>
+		      <td class="text-right">
+			
+			{% if us.user.id != user.id %}
+			<a href="{% url URL_NAMES.ADM_USER_DELETE us.id %}">
+			  <button type="button" class="btn btn-default btn-sm">
+			    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+			  </button>
+			</a>
 			{% endif %}
-			</table>
+			
+		      </td>
+		    </tr>
+		    {% endfor %}
+		    
+		  </tbody>
+		  {% endif %}
+		</table>
+		
+		<nav class="text-center">
+		  <ul class="pagination">
+		    {% if page_obj.has_previous %}
+		    <li>
+		      <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+			<span aria-hidden="true">&laquo;</span>
+		      </a>
+		    </li>
+		    {% else %}
+		    <li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+		    {% endif %}
 
-			<nav class="text-center">
-			  <ul class="pagination">
-				  {% if page_obj.has_previous %}
-				<li><a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-					<span aria-hidden="true">&laquo;</span>
-				  </a></li>
-				  {% else %}
-				  <li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-				  {% endif %}
-
-				<li class="active"><a href="#">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
-				  {% if page_obj.has_next %}
-				<li><a href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-					<span aria-hidden="true">&raquo;</span>
-				  </a></li>
-				  {% else %}
-				  <li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">&raquo;</span></a></li>
-				  {% endif %}
-			  </ul>
-			</nav>
-
-		</div>
-
-		</div>
-
-		</div>
+		    <li class="active"><a href="#">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
+		    {% if page_obj.has_next %}
+		    <li>
+		      <a href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+			<span aria-hidden="true">&raquo;</span>
+		      </a>
+		    </li>
+		    {% else %}
+		    <li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">&raquo;</span></a></li>
+		    {% endif %}
+		  </ul>
+		</nav>
+		
+	      </div>
+	    </div>
+	  </div>
 	</div>
-
-
-
-
 {% endblock %}
