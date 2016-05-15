@@ -31,7 +31,7 @@ class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, 
     def get_context_data(self, **kwargs):
         context = super(ProjectListView, self).get_context_data(**kwargs)
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
         context['section_title'] = 'Proyectos'
         context['left_active'] = 'Proyectos'
         return context
@@ -80,7 +80,7 @@ class ProjectCreateViewTest(UserIsAuthenticatedMixin, CreateView, UrlNamesContex
     def get_context_data(self, **kwargs):
         context = super(ProjectCreateViewTest, self).get_context_data(**kwargs)
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
         context['form'] = self.lastForm
         context['user_list'] = User.objects.all()
         context['section_title'] = 'Crear Proyecto'
@@ -124,7 +124,7 @@ class ProjectModifyView(UserIsAuthenticatedMixin, UpdateView, UrlNamesContextMix
     def get_context_data(self, **kwargs):
         context = super(ProjectModifyView, self).get_context_data(**kwargs)
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
         context['user_list'] = User.objects.all()
         context['section_title'] = 'Modificar Proyecto'
         context['left_active'] = 'Proyectos'
@@ -142,7 +142,7 @@ class ProjectDeleteView(UserIsAuthenticatedMixin, DeleteView, UrlNamesContextMix
     def get_context_data(self, **kwargs):
         context = super(ProjectDeleteView, self).get_context_data(**kwargs)
         self.get_url_context(context)
-        self.get_user_permissions(context)
+        self.get_user_permissions_context(context)
         context['form'] = forms.ProjectForm(instance=Project.objects.get(id=self.kwargs['pk']))
         context['user_list'] = User.objects.all()
         context['section_title'] = 'Eliminar Proyecto'
@@ -292,6 +292,7 @@ class UserDeleteView(UserCreateView):
 
 @login_required()
 def user_story_create(request, project):
+    context = {}
     if request.method == 'POST':
         form = UserStoryCreateForm(request.POST)
         if form.is_valid():
@@ -349,6 +350,10 @@ def user_story_delete(request, project, user_story):
 
 @login_required()
 def user_story_type_create(request, project):
+    context = {
+        'URL_NAMES': base_settings.URL_NAMES,
+        'project': Project.projects.get(pk=project),
+    }
     if request.method == 'POST':
         # TODO Check project and flow (if belongs to project)
         p = Project.projects.get(pk=project)
@@ -358,14 +363,14 @@ def user_story_type_create(request, project):
             for flow in form.cleaned_data['flows']:
                 ust.flows.add(Flow.flows.get(pk=flow))
             return redirect(base_settings.ADM_UST_LIST, project=project)
+        else:
+            context['form'] = form
+
     else:
         # TODO Check project
         p = Project.projects.get(pk=project)
-        context = {
-            'URL_NAMES': base_settings.URL_NAMES,
-            'project': p,
-            'form': UserStoryTypeCreateForm(p)
-        }
+        context['form'] = UserStoryTypeCreateForm(p)
+
     return render(request, 'administracion/user_story_type/create', context)
 
 @login_required()
@@ -386,6 +391,10 @@ def user_story_type_delete(request, project, user_story_type):
 
 @login_required()
 def flow_create(request, project):
+    context = {
+        'URL_NAMES': base_settings.URL_NAMES,
+        'project': Project.projects.get(pk=project),
+    }
     if request.method == 'POST':
         form = FlowCreateForm(request.POST)
         if form.is_valid():
@@ -397,11 +406,7 @@ def flow_create(request, project):
             return redirect(base_settings.ADM_FLW_LIST, project=project)
     else:
         # TODO Check project
-        context = {
-            'URL_NAMES': base_settings.URL_NAMES,
-            'project': Project.projects.get(pk=project),
-            'form': FlowCreateForm()
-        }
+        context['form'] = FlowCreateForm()
     return render(request, 'administracion/flow/create', context)
 
 @login_required()
