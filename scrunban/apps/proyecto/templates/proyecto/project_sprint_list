@@ -20,10 +20,12 @@
 				<thead>
 					<tr>  <th>Sprint</th> <th class="text-center">Estado</th>
                         <th class="text-right">
+							{% if user_permissions.project_sprint_management %}
                             <a href="{% url URL_NAMES.PROJECT_SPRINT_CREATE project.id %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
 							</button></a>
+							{% endif %}
                         </th>
                     </tr>
 				</thead>
@@ -38,7 +40,7 @@
 						<td><a href="{% url URL_NAMES.PROJECT_SPRINT_DETAIL project.id sprint.id %}">{{sprint}}</a></td>
 						<td class="text-center">{{sprint.state}}</td>
 						<td class="text-right">
-							{% if sprint.state == 'Pendiente' %}
+							{% if sprint.state == 'Pendiente' and user_permissions.project_sprint_management %}
 							<a href="{% url URL_NAMES.PROJECT_SPRINT_DELETE project.id sprint.id %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>

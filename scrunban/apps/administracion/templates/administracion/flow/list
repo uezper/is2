@@ -3,7 +3,7 @@
 {% block "flow_content" %}
 <div class="row">
   <div class="col-md-12">
-    <h3>Lista de Flujos de {{ project.name }}</h3>
+    <h3>Lista de Flujos</h3>
     <hr></hr>
     <table class="table table-striped">
       <thead>
