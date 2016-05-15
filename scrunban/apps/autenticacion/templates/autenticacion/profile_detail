@@ -2,85 +2,91 @@
 
 
 {% block "working_path" %}		
-	{{ block.super }}
-	<li>Visualizar</li>
-    {% if user.id == profile_user.user.id %}
-    <li class="active">Mi Perfil</li>
-    {% else %}
-    <li class="active">{{ profile_user.user.username }}</li>
-    {% endif %}
+{{ block.super }}
+<li>Visualizar</li>
+{% if user.id == profile_user.user.id %}
+ <li class="active">Mi Perfil</li>
+{% else %}
+ <li class="active">{{ profile_user.user.username }}</li>
+{% endif %}
 {% endblock %}
+ 
 
-{% block "content" %}
-	
-	<div class="panel panel-default">
-		
-		<div class="panel-body">	
-			<div class="row">
-                        <div class="col-md-1"></div>
-		                <div class="col-md-10">
-                            {% if user.id == profile_user.user.id %}
-		                    <h3>Mi Perfil</h3>
-                            {% else %}
-                            <h3>Perfil</h3>
-                            {% endif %}
-				    		<hr />
-                        </div>
-            </div>
-            <div class="row">
-                        <div class="col-md-1"></div>
-                        <div class="col-md-10">
-		                    <p><strong>Nombres: </strong> {{ profile_user.user.first_name }} </p>
-		                    <p><strong>Apellidos: </strong> {{ profile_user.user.last_name }} </p>
-		                    <p><strong>Telefono: </strong> {{ profile_user.telefono }} </p>
-		                    <p><strong>Email: </strong> {{ profile_user.user.email }} </p>
-		                    <p><strong>Direccion: </strong> {{ profile_user.direccion }} </p>
-		                </div>
-			</div>
-			<div class="row">
-		                <div class="col-md-1"></div>
-                        <div class="col-md-10">
-                            {% if user.id == profile_user.user.id %}
-		                    <h3>Mis Proyectos</h3>
-                            {% else %}
-                            <h3>Proyectos en comun</h3>
-                            {% endif %}
-				    		<hr />
-		                     <table class="table table-striped" id="tableProjects">
-                                <thead>
-                                <tr> <th>Proyecto</th><th>Estado</th></th> <th>Rol</th></tr>
-                                </thead>
-                            {% if user_projects|length == 0 %}
-                                <tbody>
-                                {% if user.id == profile_user.user.id %}
-                                    <tr class="alert">  <td colspan="3">No estas relacionado a ningun proyecto</td> </tr>
-                                {% else %}
-                                    <tr class="alert">  <td colspan="3">No tienen proyectos en comun</td> </tr>
-                                {% endif %}
-                                </tbody>
-                            {% else %}
-                                <tbody>
-                                    {% for row in user_projects %}
-                                    <tr>
-                                    <td><a href="{% url URL_NAMES.PROJECT_INDEX row.0.id %}">{{row.0.name}}</a></td>
-                                    <td>-</td>
-                                    <td>{{row.1}}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            {% endif %}
-                            </table>
-                            {% if user.id == profile_user.user.id %}
-                                <a href="{% url URL_NAMES.PERFIL_EDIT %}">
-                                    <button type="button" class="btn btn-default" id="edit">Editar</button>
-                                </a>
-                            {% endif %}
-		                </div>
-			</div>
-		</div>
-	</div>
-
-
-
-	
+{% block "content" %}	
+ <div class="panel panel-default">
+   <div class="panel-body">
+     
+     <div class="row">
+       <div class="col-md-1"></div>
+       <div class="col-md-10">
+         {% if user.id == profile_user.user.id %}
+	 <h3>Mi Perfil</h3>
+         {% else %}
+         <h3>Perfil</h3>
+         {% endif %}
+	 <hr />
+       </div>
+     </div>
+     
+     <div class="row">
+       <div class="col-md-1"></div>
+       <div class="col-md-10">
+	 <p><strong>Nombres: </strong> {{ profile_user.user.first_name }} </p>
+	 <p><strong>Apellidos: </strong> {{ profile_user.user.last_name }} </p>
+	 <p><strong>Telefono: </strong> {{ profile_user.telefono }} </p>
+	 <p><strong>Email: </strong> {{ profile_user.user.email }} </p>
+	 <p><strong>Direccion: </strong> {{ profile_user.direccion }} </p>
+       </div>
+     </div>
+     
+     <div class="row">
+       <div class="col-md-1"></div>
+       <div class="col-md-10">
+         {% if user.id == profile_user.user.id %}
+	 <h3>Mis Proyectos</h3>
+         {% else %}
+         <h3>Proyectos en comun</h3>
+         {% endif %}
+	 <hr />
+	 
+	 <table class="table table-striped" id="tableProjects">
+           <thead>
+             <tr>
+	       <th>Proyecto</th>
+	       <th>Estado</th>
+	       <th>Rol</th>
+	     </tr>
+	   </thead>
+           {% if user_projects|length == 0 %}
+           <tbody>
+             {% if user.id == profile_user.user.id %}
+             <tr class="alert">  <td colspan="3">No estas relacionado a ningun proyecto</td> </tr>
+             {% else %}
+             <tr class="alert">  <td colspan="3">No tienen proyectos en comun</td> </tr>
+             {% endif %}
+           </tbody>
+           {% else %}
+           <tbody>
+             {% for row in user_projects %}
+             <tr>
+               <td>
+		 <a href="{% url URL_NAMES.PROJECT_INDEX row.0.id %}">{{row.0.name}}</a>
+	       </td>
+               <td>-</td>
+               <td>{{row.1}}</td>
+             </tr>
+             {% endfor %}
+           </tbody>
+           {% endif %}
+         </table>
+	 
+         {% if user.id == profile_user.user.id %}
+         <a href="{% url URL_NAMES.PERFIL_EDIT %}">
+           <button type="button" class="btn btn-default" id="edit">Editar</button>
+         </a>
+         {% endif %}
+       </div>
+     </div>
+   </div>
+ </div>	
 {% endblock %}

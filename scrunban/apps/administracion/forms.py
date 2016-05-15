@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from apps.administracion.models import Flow
 from apps.autenticacion.models import User
 
 class ProjectForm(forms.Form):
@@ -130,5 +131,22 @@ class UserStoryCreateForm(forms.Form):
     business_value = forms.FloatField(label='Valor de negocio')
     tecnical_value = forms.FloatField(label='Valor técnico')
     urgency = forms.FloatField(label='Urgencia')
-
     #allowed_developers
+    
+class UserStoryTypeCreateForm(forms.Form):
+    def __init__(self, project, *args, **kwargs):
+        import pdb
+        super(UserStoryTypeCreateForm, self).__init__(*args, **kwargs)
+        
+        self.choices = []
+        for flow in Flow.flows.filter(project=project):
+            self.choices.append( (flow.pk, flow.name) )
+        self.choices = tuple( self.choices )
+
+        self.fields['name'] = forms.CharField(label='Nombre', max_length=140)
+        self.fields['flows'] = forms.MultipleChoiceField(
+            label='Flujos',
+            widget=forms.CheckboxSelectMultiple,
+            choices=self.choices
+        )
+

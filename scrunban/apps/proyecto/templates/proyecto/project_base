@@ -23,6 +23,9 @@ Proyecto
 <li>
   <a href="{% url URL_NAMES.ADM_US_LIST project.pk %}">User Stories</a>
 </li>
+<li>
+  <a href="{% url URL_NAMES.ADM_UST_LIST project.pk %}">Tipos de User Story</a>
+</li>
 {% endblock %}
 
 

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import ProjectForm, UserStoryCreateForm
+from .forms import ProjectForm, UserStoryCreateForm, UserStoryTypeCreateForm
 from apps.autenticacion.models import User
 from apps.autenticacion.decorators import login_required
 from django.db.utils import IntegrityError
@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 from django.views.generic.list import ListView
 from django.views.generic.edit import FormView
 from apps.proyecto.models import Project
-from apps.administracion.models import UserStory
+from apps.administracion.models import UserStory, UserStoryType, Flow
 from apps.administracion import forms
 from django.shortcuts import get_object_or_404, HttpResponseRedirect
 
@@ -18,6 +18,8 @@ from apps.proyecto.mixins import UrlNamesContextMixin
 from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin
 
 from scrunban.settings import base as base_settings
+
+import pdb
 
 def index(request):
     """
@@ -281,10 +283,46 @@ def user_story_list(request, project):
     return render(request, 'administracion/user_story/list', context)
 
 @login_required()
-def user_story_delete(reques, project, user_story):
+def user_story_delete(request, project, user_story):
     # TODO Check permissions
     # TODO Check project and us
     us = UserStory.user_stories.get(pk=user_story)
     us.delete()
     return redirect(base_settings.ADM_US_LIST, project=project)
 
+@login_required()
+def user_story_type_create(request, project):
+    if request.method == 'POST':
+        # TODO Check project and flow (if belongs to project)
+        p = Project.projects.get(pk=project)
+        form = UserStoryTypeCreateForm(p, request.POST)
+        if form.is_valid():
+            ust = UserStoryType.types.create(name=form.cleaned_data['name'])
+            for flow in form.cleaned_data['flows']:
+                ust.flows.add(Flow.flows.get(pk=flow))
+            return redirect(base_settings.ADM_UST_LIST, project=project)
+    else:
+        # TODO Check project
+        p = Project.projects.get(pk=project)
+        context = {
+            'URL_NAMES': base_settings.URL_NAMES,
+            'project': p,
+            'form': UserStoryTypeCreateForm(p)
+        }
+        return render(request, 'administracion/user_story_type/create', context)
+
+@login_required()
+def user_story_type_list(request, project):
+    context = {
+        'URL_NAMES': base_settings.URL_NAMES,
+        'project': Project.projects.get(pk=project),
+        'user_story_types': UserStoryType.types.filter(flows__project=project).distinct().order_by('name')
+    }
+    return render(request, 'administracion/user_story_type/list', context)
+
+@login_required()
+def user_story_type_delete(request, project, user_story_type):
+    # TODO Check project, permissions and ust
+    ust = UserStoryType.types.get(pk=user_story_type)
+    ust.delete()
+    return redirect(base_settings.ADM_UST_LIST, project=project)

@@ -160,6 +160,10 @@ ADM_US_LIST = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstory_list')
 ADM_US_CREATE = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstory_create')
 ADM_US_DELETE = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstory_delete')
 ADM_US_SUMMARY = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstory_summary')
+ADM_UST_LIST = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstorytype_list')
+ADM_UST_CREATE = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstorytype_create')
+ADM_UST_DELETE = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstorytype_delete')
+ADM_UST_SUMMARY = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstorytype_summary')
 
 URL_NAMES = {
     'LOGIN_NAME': LOGIN_NAME,
@@ -190,4 +194,10 @@ URL_NAMES = {
     'ADM_US_CREATE': ADM_US_CREATE,
     'ADM_US_DELETE': ADM_US_DELETE,
     'ADM_US_SUMMARY': ADM_US_SUMMARY,
+    'ADM_UST_LIST': ADM_UST_LIST,
+    'ADM_UST_CREATE': ADM_UST_CREATE,
+    'ADM_UST_DELETE': ADM_UST_DELETE,
+    'ADM_UST_SUMMARY': ADM_UST_SUMMARY,
 }
+
+
