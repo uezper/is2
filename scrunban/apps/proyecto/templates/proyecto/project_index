@@ -16,10 +16,8 @@
                         <h3>Pagina principal</h3>
                          <hr />
                 </div>
-
+                <label class="col-sm-2 control-label text-right">Estado:</label> {{ project_state }}
             </div>
-
-            Aqui deberia haber algo
 		</div>
 	</div>
 
