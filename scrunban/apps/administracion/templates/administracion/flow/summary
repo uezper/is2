@@ -1,12 +1,12 @@
-{% extends "administracion/user_story/base" %}
+{% extends "administracion/flow/base" %}
 
 {% block "working_path" %}
 {{ block.super }}
 <li class='active'>Modificando {{ form.instance }}<li>
 {% endblock "working_path" %}
 
-{% block "user_story_content" %}
-<h3>Detalles de User Story</h3>
+{% block "flow_content" %}
+<h3>Detalles de Flujo</h3>
 <hr></hr>
 <form action='' method='post'>
   {% csrf_token %}
@@ -15,5 +15,4 @@
   </table>
   <input type='submit' value='Modificar'>
 </form>
-{% endblock "user_story_content" %}
-
+{% endblock "flow_content" %}

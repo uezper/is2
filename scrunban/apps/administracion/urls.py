@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^proyecto/(?P<project>\d+)/flow/$', views.flow_list, name=base_settings.ADM_FLW_LIST),
     url(r'^proyecto/(?P<project>\d+)/flow/create$', views.flow_create, name=base_settings.ADM_FLW_CREATE),
     url(r'^proyecto/(?P<project>\d+)/flow/(?P<flow>\d+)/delete$', views.flow_delete, name=base_settings.ADM_FLW_DELETE),
+    url(r'^proyecto/(?P<project>\d+)/flow/(?P<flow>\d+)/$', views.flow_summary, name=base_settings.ADM_FLW_SUMMARY),
     
     url(r'^users/$', views.UserListView.as_view(), name=base_settings.ADM_USER_LIST),
     url(r'^users/create', views.UserCreateView.as_view(), name=base_settings.ADM_USER_CREATE),

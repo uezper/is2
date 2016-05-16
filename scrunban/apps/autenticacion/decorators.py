@@ -10,14 +10,7 @@ class login_required():
 
     :param redirect_url: La dirección originalmente solicitada. Se agrega dentro de la URL.
 
-    """
-    def __init__(self):
-        """
-        Inicializador.
-        """
-        pass
-
-        
+    """ 
     def __call__(self, view):
         """
         Retorna una función que extiende la funcionalidad de las vistas con este decorador.

@@ -6,7 +6,8 @@
 {% endblock "working_path" %}
 
 {% block "flow_content" %}
-    <h1>Crear Flujo</h1>
+    <h3>Crear Flujo</h3>
+    <hr></hr>
     <form class="form-horizontal" action='' method='post' id="form">
       {% csrf_token %}
       <table>
