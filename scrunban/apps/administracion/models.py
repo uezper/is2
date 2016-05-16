@@ -4,6 +4,24 @@ from apps.autenticacion.models import User, Role
 from apps.proyecto.models import Sprint, Project, Team, Flow
 from django.utils import timezone
 
+class UserStoryType(models.Model):
+    """
+    Modelo que determina a cuales Flujos puede pertenecer un User Story.
+
+    :param name: Nombre del Tipo de User Story
+    """
+    # Public fields mapped to DB columns
+    project = models.ForeignKey(Project)
+    name = models.TextField()
+    flows = models.ManyToManyField(Flow)
+
+    # Public fields for simplicity
+    types = models.Manager() # Alias
+    objects = models.Manager()
+
+    def __str__(self):
+        return "{}".format(self.name)
+
 class UserStory(models.Model):
     """
     Modelo donde se almacena la información sobre cada actividad a realizar dentro del projecto.
@@ -17,7 +35,7 @@ class UserStory(models.Model):
     tecnical_value = models.FloatField()
     urgency = models.FloatField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
-    allowed_developers = models.ManyToManyField(User)
+    us_type = models.ForeignKey(UserStoryType, on_delete=models.SET_NULL, null=True)
 
     # Public fields for simplicity
     user_stories = models.Manager() # Alias
@@ -40,6 +58,7 @@ class Grained(models.Model):
     # TODO activity = ...
     # TODO state = ...
     developers = models.ManyToManyField(Team)
+    flow = models.ForeignKey(Flow, default=None, null=True)
 
     # Public fields for simplicity
     graineds = models.Manager() # Alias
@@ -62,19 +81,4 @@ class Note(models.Model):
     notes = models.Manager() # Alias
     objects = models.Manager()
 
-class UserStoryType(models.Model):
-    """
-    Modelo que determina a cuales Flujos puede pertenecer un User Story.
 
-    :param name: Nombre del Tipo de User Story
-    """
-    # Public fields mapped to DB columns
-    name = models.TextField()
-    flows = models.ManyToManyField(Flow)
-
-    # Public fields for simplicity
-    types = models.Manager() # Alias
-    objects = models.Manager()
-
-    def __str__(self):
-        return "{}".format(self.name)

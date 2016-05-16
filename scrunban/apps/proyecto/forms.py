@@ -265,7 +265,7 @@ class CreateSprintForm(forms.Form):
     def clean_sprint_backlog(self):
 
         from apps.administracion.models import UserStory
-        from apps.proyecto.models import Team
+        from apps.proyecto.models import Team, Flow
 
 
         new_sb = []
@@ -275,14 +275,13 @@ class CreateSprintForm(forms.Form):
             us = reg.split(':')
             us_id = us[0]
             us_devs = us[1].split('_')
-
+            us_flujo = Flow.objects.get(id=us[2])
 
             us_ = UserStory.objects.filter(id=us_id)
             if len(us_) == 0:
                 raise ValidationError('Ha ingresado un US invalido: ' + us_id)
             else:
                 #Todo! Agregar validacion de estado y flujo cuando esten
-
                 if len(us_devs) == 0:
                     raise ValidationError('No ha ingresado desarrolladores para el US ' + us_[0].description)
                 else:
@@ -303,7 +302,7 @@ class CreateSprintForm(forms.Form):
                     self._demmand += us_[0].estimated_time
                     if len(new_devs) == 0:
                         raise ValidationError('No ha ingresado desarrolladores para el US ' + us_[0].description)
-                    new_sb.append((us_[0], new_devs))
+                    new_sb.append((us_[0], new_devs, us_flujo))
         print(self._capacity)
         return new_sb
 
@@ -330,6 +329,7 @@ class CreateSprintForm(forms.Form):
             grain = Grained()
             grain.user_story = us[0]
             grain.sprint = sprint
+            grain.flow = us[2]
             grain.save()
             for dev in us[1]:
                 grain.developers.add(dev)
@@ -369,6 +369,7 @@ class EditSprintForm(CreateSprintForm):
 
             for dev in us[1]:
                 grain.developers.add(dev)
+
             grain.save()
 
 class DeleteSprintForm(EditSprintForm):

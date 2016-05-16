@@ -132,6 +132,20 @@ class UserStoryCreateForm(forms.Form):
     tecnical_value = forms.FloatField(label='Valor técnico')
     urgency = forms.FloatField(label='Urgencia')
     #allowed_developers
+
+    def __init__(self, project, *args, **kwargs):
+        from apps.administracion.models import UserStoryType
+        super(UserStoryCreateForm, self).__init__(*args, **kwargs)
+        self.choices = []
+        for typeUs in UserStoryType.objects.filter(project=project):
+            self.choices.append((typeUs.id, typeUs.name))
+        self.choices = tuple(self.choices)
+        self.fields['us_type_'] = forms.ChoiceField(
+            label='Tipo de User Story',
+            widget=forms.RadioSelect,
+            choices=self.choices
+        )
+
     
 class UserStoryTypeCreateForm(forms.Form):
     def __init__(self, project, *args, **kwargs):

@@ -49,13 +49,56 @@
                    $("#selectUsers").find("p:first").find("span:first").html(value[3]);
 
                    dev_users = value[4];
+                   flows = value[5];
 
                    $.each(dev_users, function(index, value){
                         $("input[value='"+ value +"']").prop("checked", true);
                    });
+
+                    _x = 0;
+                   $("#flujo_section").html('');
+                   $.each(flows, function(index, value){
+                       if (value[2] == false) {
+                           $("#flujo_section").append("<input type='radio' name='flow' value='" + value[0] + "'> <span id='" + value[0] + "_name'>" + value[1] + "</span><br />");
+                       }
+                       else {
+                           $("#flujo_section").append("<input type='radio' name='flow' value='" + value[0] + "' checked> <span id='" + value[0] + "_name'>" + value[1] + "</span><br />");
+                           _x++;
+                       }
+                   });
+                   if (_x == 0)
+                   {
+                       temp_ = $("#flujo_section").find("input[name='flow']:first");
+                       $(temp_).prop("checked", true);
+                       $(temp_).trigger("change");
+
+
+                   }
                }
             });
 
+
+        });
+
+        $("#flujo_section").on("change","input[name='flow']", function(e){
+           us_id = $("#id_us").html();
+            flow_id = $(this).val()
+
+            $.each(sb, function(index, value){
+               if (value[0] == us_id)
+               {
+                   $.each(value[5], function(i, v){
+                       if (v[0] == flow_id)
+                       {
+                           sb[index][5][i][2] = true;
+                       }
+                       else
+                       {
+                           sb[index][5][i][2] = false;
+                       }
+                   });
+               }
+            });
 
         });
 
@@ -71,6 +114,8 @@
                   _id = $(val).attr('value');
                   dev_users.push(_id);
               });
+
+
 
             $.each(sb, function(index, value){
                if (value[0] == us_id)
@@ -213,10 +258,17 @@
             us_desc = $(us_element).find('a').text();
             us_prior = $(us_element).find('.text-center:first').text();
             us_est = $(us_element).find('.text-center:last').text();
+            us_flows = [];
 
-            sb.push([us_id, us_desc, us_prior, us_est, []]);
+            $("#" + us_id + "_flow_list").find("input[name=flow]").each(function(index, value){
+                flow_id = $(value).val();
+                flow_name = $("#" + flow_id + "_name").html();
+                us_flows.push([flow_id, flow_name, false]);
+            });
 
-            $(us_element).remove();
+            sb.push([us_id, us_desc, us_prior, us_est, [], us_flows]);
+
+
 
             _demanda += parseInt(us_est);
             $("#demmand").val(_demanda);
@@ -224,6 +276,7 @@
             $("#id_us").html(us_id);
 
 
+            $(us_element).remove();
 
 
             $("#sb").append("<tr id='"+us_id+"'>" +
@@ -239,6 +292,7 @@
                     "</td>" +
                     "</tr>");
 
+            console.log(sb);
             ordenar_sb();
 
 
@@ -354,7 +408,15 @@
 
             $.each(sb, function(index, us)
             {
-                sb_.push(us[0] + ":" + us[4].join("_"));
+                flujo = -1;
+                $.each(us[5], function(i, v){
+                   if  (v[2] == true)
+                   {
+                       flujo = v[0];
+                   }
+                });
+                sb_.push(us[0] + ":" + us[4].join("_") + ":" + flujo);
+
             });
 
             sb_str = sb_.join(",");
@@ -446,7 +508,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group {% if form.demmand.errors|length > 0 %} has-error {% endif %}"">
+                        <div class="form-group {% if form.demmand.errors|length > 0 %} has-error {% endif %}">
                         <label for="rowDemanda" class="col-sm-2 control-label">Demanda:</label>
 
                             <div class="row" id="rowDemanda">
@@ -465,7 +527,7 @@
                                 <div class="col-md-8">
                                     <table class="table table-hover" id="tableSB">
                                         <thead>
-                                        <tr> <th>User Story</th></th><th class="text-center">Prioridad</th><th class="text-center">Tiempo estimado</th><th class="text-center">Desarrolladores</th>
+                                        <tr> <th>User Story</th><th class="text-center">Prioridad</th><th class="text-center">Tiempo estimado</th><th class="text-center">Desarrolladores</th>
                                             <th class="text-right">
                                             {% if delete_form %}
                                                 {% else %}
@@ -534,7 +596,15 @@
                     <tbody id="pb">
                         {% for row in user_stories %}
                         <tr id="{{ row.0.id }}">
-                            <td><a href="#">{{row.0.description}}</a></td>
+                            <td><a href="#">{{row.0.description}}</a>
+
+
+                                    <span id="{{row.0.id}}_flow_list" style="display: none">
+                                    {% for flow in row.0.flow_list %}
+                                        <input type="radio" value="{{flow.id}}" name="flow"><span id="{{flow.id}}_name">{{flow.name}}</span>
+                                    {% endfor %}
+                                    </span>
+                            </td>
                             <td class="text-center">{{row.1}}</td>
                             <td class="text-center">{{row.0.estimated_time}}</td>
                             <td class="text-right">
@@ -563,7 +633,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Selecciona desarrolladores:</h4>
+        <h4 class="modal-title">Selecciona desarrolladores y/o flujo:</h4>
       </div>
       <div class="modal-body" style="max-height: 500px; overflow-y: auto">
           <span id="id_us" style="display: none;"></span>
@@ -592,6 +662,8 @@
                     </tbody>
                 {% endif %}
                 </table>
+                <p>Flujo:</p><p id="flujo_section"></p>
+
 
       </div>
       <div class="modal-footer">
