@@ -113,7 +113,7 @@
                                                                         </div>
                                                                       <div class="row">
                                                                             <div class="col-md-4 text-right"><span ><b>Flujo:</b></span></div>
-                                                                            <div class="col-md-6">-</div>
+                                                                            <div class="col-md-6">{{us.0.flow.name}}</div>
                                                                         </div>
                                                                   </div>
 

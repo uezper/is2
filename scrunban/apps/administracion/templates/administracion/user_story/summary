@@ -40,7 +40,11 @@
     <tr>
       <th><label for="id_urgency">Urgencia:</label></th>
       <td>{{ user_story.urgency }}</td>
-    </tr> 
+    </tr>
+     <tr>
+      <th><label for="id_us_type">Tipo de User Story:</label></th>
+      <td>{{ user_story.us_type.name }}</td>
+    </tr>
   </tbody>
 </table>
 {% endblock "user_story_content" %}

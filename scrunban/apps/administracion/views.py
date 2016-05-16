@@ -301,13 +301,18 @@ def user_story_create(request, project):
     x.request = request
     x.get_user_permissions_context(context)
     if request.method == 'POST':
-        form = UserStoryCreateForm(request.POST)
+        form = UserStoryCreateForm(context['project'], request.POST)
         if form.is_valid():
             # TODO Validate project!
             # Create new user story
             data = form.cleaned_data
             data['project'] = Project.projects.get(pk=project)
+
+            us_type = UserStoryType.objects.get(id=data['us_type_'])
+            data.pop('us_type_', None)
             us = UserStory.user_stories.create(**data)
+            us.us_type = us_type
+            us.save()
             # Redirect to the new user story summary page!
             context = {
                 'URL_NAMES': base_settings.URL_NAMES,
@@ -321,7 +326,7 @@ def user_story_create(request, project):
     else:
         # TODO Check project id
 
-        context['form'] = UserStoryCreateForm()
+        context['form'] = UserStoryCreateForm(context['project'])
 
     return render(request, 'administracion/user_story/create', context)
 
@@ -378,7 +383,7 @@ def user_story_type_create(request, project):
         p = Project.projects.get(pk=project)
         form = UserStoryTypeCreateForm(p, request.POST)
         if form.is_valid():
-            ust = UserStoryType.types.create(name=form.cleaned_data['name'])
+            ust = UserStoryType.types.create(name=form.cleaned_data['name'], project=context['project'])
             for flow in form.cleaned_data['flows']:
                 ust.flows.add(Flow.flows.get(pk=flow))
             return redirect(base_settings.ADM_UST_LIST, project=project)

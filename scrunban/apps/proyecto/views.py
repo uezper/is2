@@ -519,7 +519,17 @@ class SprintCreateView(UserIsAuthenticatedMixin, ValidateHasPermission, FormView
         from apps.proyecto.models import Team
 
         for us in UserStory.objects.filter(project=self.object):
-            if (len(Grained.objects.filter(user_story=us)) == 0):
+            grains = Grained.objects.filter(user_story=us)
+            do_not = False
+            us.flow_list = us.us_type.flows.all()
+            if len(grains) != 0:
+                for g in grains:
+                    if g.sprint.state != 'Finalizado':
+                        do_not = True
+                        break
+                    else:
+                        us.flow_list = [g.flow]
+            if not (do_not):
                 context['user_stories'].append((us, us.get_weight()))
 
         context['user_stories'].sort(key=lambda x: -x[1])
@@ -604,15 +614,27 @@ class SprintEditView(ValidateSprintStatePending, SprintCreateView):
         context['edit_form'] = True
         context['sprint'] = self.sprint
 
-        from apps.administracion.models import Grained, UserStory
+        from apps.administracion.models import Grained, UserStory, UserStoryType
 
         context['user_stories'] = []
         for us in UserStory.objects.filter(project=self.object):
-            if (len(Grained.objects.filter(user_story=us)) == 0):
+            grains = Grained.objects.filter(user_story=us)
+            do_not = False
+            us.flow_list = us.us_type.flows.all()
+            if len(grains) != 0:
+                for g in grains:
+                    if g.sprint.state != 'Finalizado':
+                        do_not = True
+                        break
+                    else:
+                        us.flow_list = g.flow
+            if not(do_not):
                 context['user_stories'].append((us, us.get_weight()))
 
         for g in Grained.objects.filter(sprint=self.sprint):
-            context['user_stories'].append((g.user_story, g.user_story.get_weight()))
+            temp_ = g.user_story
+            temp_.flow_list = [g.flow]
+            context['user_stories'].append((temp_, g.user_story.get_weight()))
 
         context['user_stories'].sort(key=lambda x: -x[1])
 
@@ -718,8 +740,9 @@ class SprintDetailView(UserIsAuthenticatedMixin, TemplateView, SingleObjectMixin
 
         # Obtiene los desarrolladores del Sprint, sus user stories, su capacidad y su demanda
         for grain in Grained.objects.filter(sprint=sprint):
-
-            user_stories.append((grain.user_story, grain.developers.all()))
+            temp_ = grain.user_story
+            temp_.flow = grain.flow
+            user_stories.append((temp_, grain.developers.all()))
             demmand += grain.user_story.estimated_time
 
             for dev in grain.developers.all():

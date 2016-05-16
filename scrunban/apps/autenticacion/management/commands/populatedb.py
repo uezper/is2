@@ -155,18 +155,18 @@ class Command(BaseCommand):
             p = Project.projects.create(name=reg[0], date_start=reg[1], date_end=reg[2], scrum_master=scrum_master, product_owner=product_owner)
             
             default_flow = Flow.flows.create(name='Flujo por defecto', project=p)
-            default_user_story_type = UserStoryType.types.create(name='UST por defecto')
+            default_user_story_type = UserStoryType.types.create(name='UST por defecto', project=p)
             default_user_story_type.flows.add(default_flow)
 
             default_empty_flow = Flow.flows.create(name='Flujo vacio', project=p)
 
             # Crea User Stories
             if p != None:
-                self.create_user_story(p)
+                self.create_user_story(p, default_user_story_type)
                 self.stdout.write('Creado projecto {}'.format(p.name))
 
 
-    def create_user_story(self, project):
+    def create_user_story(self, project, default_user_story):
         user_stories = [
             (
                 'Creacion de login',
@@ -176,8 +176,6 @@ class Command(BaseCommand):
                 '2.3',
                 '3.2',
                 '5',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de Proyecto',
@@ -187,8 +185,6 @@ class Command(BaseCommand):
                 '2.3',
                 '5.2',
                 '2',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de Sprint',
@@ -198,8 +194,6 @@ class Command(BaseCommand):
                 '3.3',
                 '9.2',
                 '2',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de Roles',
@@ -209,8 +203,6 @@ class Command(BaseCommand):
                 '2.3',
                 '7.2',
                 '8',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de vista de asignacion de roles',
@@ -220,8 +212,6 @@ class Command(BaseCommand):
                 '4.3',
                 '3.2',
                 '2',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de vista de eliminacion de usuario',
@@ -231,8 +221,6 @@ class Command(BaseCommand):
                 '7.3',
                 '4.2',
                 '2',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de usuario',
@@ -242,8 +230,6 @@ class Command(BaseCommand):
                 '4.3',
                 '5.2',
                 '3',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
 
 
@@ -259,5 +245,6 @@ class Command(BaseCommand):
            us.tecnical_value = reg[5]
            us.urgency = reg[6]
            us.project = project
+           us.us_type = default_user_story
 
            us.save()
