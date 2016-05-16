@@ -1,18 +1,11 @@
-{% extends "administracion/admin_base" %}
+{% extends "proyecto/project_base" %}
 
 {% block "working_path" %}
 {{ block.super }}
-<li>
-  <a href="{% url URL_NAMES.PROJECT_INDEX project.pk %}">{{ project.name }}</a>
-</li>
+	<li class="active">{{ section_title }}</li>
 {% endblock "working_path" %}
 
 
-{% block "left_menu_options" %}
-<li>
-  <a href="{% url URL_NAMES.PROJECT_INDEX project.pk %}">Detalles del Proyecto</a>
-</li>
-{% endblock "left_menu_options" %}
 
 
 {% block "content" %}

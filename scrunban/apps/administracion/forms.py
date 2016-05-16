@@ -1,14 +1,14 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from apps.administracion.models import Flow
+from apps.administracion.models import Flow, Project
 from apps.autenticacion.models import User
+from django.forms import ModelForm
 
-class ProjectForm(forms.Form):
-    name = forms.CharField(label = "Nombre del Proyecto", max_length=128)
-    date_start = forms.DateField(label = "Fecha de inicio")
-    date_end = forms.DateField(label = "Fecha de finalizacion")
-    scrum_master = forms.CharField(label = "Scrum Master", max_length = 128)
-    product_owner = forms.CharField(label = "Product Owner", max_length = 128)
+class ProjectForm(ModelForm):
+    class Meta:
+        model = Project
+        fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
+
 
 
 class UserForm(forms.Form):

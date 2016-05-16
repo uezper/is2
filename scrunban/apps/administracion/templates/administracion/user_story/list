@@ -3,7 +3,7 @@
 {% block "user_story_content" %}
 <div class="row">
   <div class="col-md-12">
-    <h3>Lista de User Stories de {{ project.name }}</h3>
+    <h3>Lista de User Stories</h3>
     <hr></hr>
     <table class="table table-striped">
       <thead>
