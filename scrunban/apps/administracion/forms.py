@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 from django.core.exceptions import ValidationError
-from apps.administracion.models import Flow, UserStory
+from apps.administracion.models import Flow, UserStory, UserStoryType
 from apps.autenticacion.models import User
 
 class ProjectForm(forms.Form):

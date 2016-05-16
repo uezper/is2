@@ -64,7 +64,7 @@ class Note(models.Model):
 
 class Flow(models.Model):
     # Public fields mapped to DB columns
-    name = models.TextField()
+    name = models.CharField('Nombre', max_length=140)
     project = models.ForeignKey(Project)
     
     # Public fields for simplicity
@@ -81,7 +81,7 @@ class UserStoryType(models.Model):
     :param name: Nombre del Tipo de User Story
     """
     # Public fields mapped to DB columns
-    name = models.TextField()
+    name = models.TextField('Nombre')
     flows = models.ManyToManyField(Flow)
 
     # Public fields for simplicity
