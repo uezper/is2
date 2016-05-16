@@ -292,7 +292,14 @@ class UserDeleteView(UserCreateView):
 
 @login_required()
 def user_story_create(request, project):
-    context = {}
+    context = {
+        'URL_NAMES': base_settings.URL_NAMES,
+        'project': Project.projects.get(pk=project),
+    }
+    x = UserPermissionContextMixin()
+    x.project = context['project']
+    x.request = request
+    x.get_user_permissions_context(context)
     if request.method == 'POST':
         form = UserStoryCreateForm(request.POST)
         if form.is_valid():
@@ -309,13 +316,13 @@ def user_story_create(request, project):
             }
             #return HttpResponseRedirect('administracion/user_story/summary')
             return render(request, 'administracion/user_story/summary', context)
+        else:
+            context['form'] = form
     else:
         # TODO Check project id
-        context = {
-            'URL_NAMES': base_settings.URL_NAMES,
-            'project': Project.projects.get(pk=project),
-            'form': UserStoryCreateForm()
-        }
+
+        context['form'] = UserStoryCreateForm()
+
     return render(request, 'administracion/user_story/create', context)
 
 @login_required()
@@ -328,6 +335,10 @@ def user_story_summary(request, project, user_story):
         'project': Project.projects.get(pk=project),
         'user_story': UserStory.user_stories.get(pk=user_story)
     }
+    x = UserPermissionContextMixin()
+    x.project = context['project']
+    x.request = request
+    x.get_user_permissions_context(context)
     return render(request, 'administracion/user_story/summary', context)
 
 @login_required()
@@ -338,6 +349,10 @@ def user_story_list(request, project):
         'project': project_instance,
         'user_stories': UserStory.user_stories.filter(project=project_instance)
     }
+    x = UserPermissionContextMixin()
+    x.project = context['project']
+    x.request = request
+    x.get_user_permissions_context(context)
     return render(request, 'administracion/user_story/list', context)
 
 @login_required()
@@ -354,6 +369,10 @@ def user_story_type_create(request, project):
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
     }
+    x = UserPermissionContextMixin()
+    x.project = context['project']
+    x.request = request
+    x.get_user_permissions_context(context)
     if request.method == 'POST':
         # TODO Check project and flow (if belongs to project)
         p = Project.projects.get(pk=project)
@@ -380,6 +399,10 @@ def user_story_type_list(request, project):
         'project': Project.projects.get(pk=project),
         'user_story_types': UserStoryType.types.filter(flows__project=project).distinct().order_by('name')
     }
+    x = UserPermissionContextMixin()
+    x.project = context['project']
+    x.request = request
+    x.get_user_permissions_context(context)
     return render(request, 'administracion/user_story_type/list', context)
 
 @login_required()
@@ -395,6 +418,12 @@ def flow_create(request, project):
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
     }
+
+    x = UserPermissionContextMixin()
+    x.project = context['project']
+    x.request = request
+    x.get_user_permissions_context(context)
+
     if request.method == 'POST':
         form = FlowCreateForm(request.POST)
         if form.is_valid():
@@ -404,6 +433,8 @@ def flow_create(request, project):
                 project=Project.projects.get(pk=project)
             )
             return redirect(base_settings.ADM_FLW_LIST, project=project)
+        else:
+            context['form'] = form
     else:
         # TODO Check project
         context['form'] = FlowCreateForm()
@@ -411,12 +442,20 @@ def flow_create(request, project):
 
 @login_required()
 def flow_list(request, project):
+
+
     # TODO Check project
     context = {
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
         'flows': Flow.flows.filter(project=project)
     }
+
+    x = UserPermissionContextMixin()
+    x.project = context['project']
+    x.request = request
+    x.get_user_permissions_context(context)
+
     return render(request, 'administracion/flow/list', context)
 
 @login_required()

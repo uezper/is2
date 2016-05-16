@@ -37,6 +37,29 @@ class SprintBacklogField(StringListField):
             raise ValidationError(self.error_messages['is_required'])
 
 
+class ActivitiesField(StringListField):
+    default_error_messages = {
+        'is_required': u'Debe introducir al menos una actividad'
+    }
+
+    def validate(self, value):
+
+        ac_list = list(value)
+
+        if (len(ac_list) == 0):
+            raise ValidationError(self.error_messages['is_required'])
+
+        x = 0
+        new_values = []
+        for ac in ac_list:
+            if ac == '':
+                continue
+            new_values.append(ac)
+
+        if (len(new_values) == 0):
+            raise ValidationError(self.error_messages['is_required'])
+
+
 class PermissionListField(StringListField):
     default_error_messages = {
         'is_required': u'Debe introducir al menos un permiso',

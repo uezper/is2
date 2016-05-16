@@ -478,3 +478,28 @@ class Sprint(models.Model):
         self.start_date = fecha
         self.save()
 
+class Flow(models.Model):
+    # Public fields mapped to DB columns
+    name = models.TextField()
+    project = models.ForeignKey(Project)
+
+    # Public fields for simplicity
+    flows = models.Manager() # Alias
+    objects = models.Manager()
+
+    def __str__(self):
+        return "{} of {}".format(self.name, self.project)
+
+
+class Activity(models.Model):
+    name = models.TextField()
+    sec = models.IntegerField()
+    flow = models.ForeignKey(Flow)
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return self.name
+
+
+

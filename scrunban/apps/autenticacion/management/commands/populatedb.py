@@ -35,6 +35,15 @@ class Command(BaseCommand):
                 'Paraguay',
             ),
             (
+                '4653217',
+                'admin',
+                'Uriel',
+                'Pereira',
+                'uriel@scrunban.com',
+                '5484 85478',
+                'Paraguay',
+            ),
+            (
                 '1478963',
                 'user123',
                 'Kishan',
@@ -82,7 +91,10 @@ class Command(BaseCommand):
         ]
 
         for reg in usuarios:
-            User.users.create(username=reg[0],password=reg[1],first_name=reg[2],last_name=reg[3],email=reg[4],telefono=reg[5],direccion=reg[6])
+            x = User.users.create(username=reg[0],password=reg[1],first_name=reg[2],last_name=reg[3],email=reg[4],telefono=reg[5],direccion=reg[6])
+            if reg[2] == 'Uriel' and x != None:
+                from apps.autenticacion.models import Role as r
+                r.objects.get(group__name='system_admin').add_user(x)
 
     def create_projects(self):
         proyecots = [
@@ -92,6 +104,13 @@ class Command(BaseCommand):
                 '2016-06-05',
                 '1478963',
                 '1478964'
+            ),
+            (
+                'Uriel Project',
+                '2016-05-05',
+                '2016-06-05',
+                '4653217',
+                '1478963',
             ),
             (
                 'Gordarg Project',
