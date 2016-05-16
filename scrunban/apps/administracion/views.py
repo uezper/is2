@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import ProjectForm, UserStoryCreateForm, UserStoryTypeCreateForm, FlowCreateForm
+from .forms import ProjectForm, UserStoryTypeCreateForm, FlowCreateForm, UserStoryForm
 from apps.autenticacion.models import User
 from apps.autenticacion.decorators import login_required
 from django.db.utils import IntegrityError
@@ -293,39 +293,41 @@ class UserDeleteView(UserCreateView):
 @login_required()
 def user_story_create(request, project):
     if request.method == 'POST':
-        form = UserStoryCreateForm(request.POST)
+        form = UserStoryForm(request.POST)
         if form.is_valid():
             # TODO Validate project!
             # Create new user story
             data = form.cleaned_data
             data['project'] = Project.projects.get(pk=project)
             us = UserStory.user_stories.create(**data)
-            # Redirect to the new user story summary page!
-            context = {
-                'URL_NAMES': base_settings.URL_NAMES,
-                'project': us.project,
-                'user_story': us
-            }
-            #return HttpResponseRedirect('administracion/user_story/summary')
-            return render(request, 'administracion/user_story/summary', context)
+            return redirect(base_settings.ADM_US_SUMMARY, project=us.project.pk, user_story=us.pk)
     else:
         # TODO Check project id
         context = {
             'URL_NAMES': base_settings.URL_NAMES,
             'project': Project.projects.get(pk=project),
-            'form': UserStoryCreateForm()
+            'form': UserStoryForm()
         }
-    return render(request, 'administracion/user_story/create', context)
+        return render(request, 'administracion/user_story/create', context)
 
 @login_required()
 def user_story_summary(request, project, user_story):
     # TODO Check user permissions
     # TODO Check project id
     # TODO Check userstory id
+    if request.method == 'POST':
+        us = UserStory.user_stories.get(pk=user_story)
+        form = UserStoryForm(request.POST, instance=us)
+        if form.is_valid():
+            form.save()
+            return redirect(base_settings.ADM_US_LIST, project=us.project.pk)
+    
+    us = UserStory.user_stories.get(pk=user_story)
+    form = UserStoryForm(instance=us)
     context = {
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
-        'user_story': UserStory.user_stories.get(pk=user_story)
+        'form': form
     }
     return render(request, 'administracion/user_story/summary', context)
 
@@ -366,7 +368,7 @@ def user_story_type_create(request, project):
             'project': p,
             'form': UserStoryTypeCreateForm(p)
         }
-    return render(request, 'administracion/user_story_type/create', context)
+        return render(request, 'administracion/user_story_type/create', context)
 
 @login_required()
 def user_story_type_list(request, project):
@@ -402,7 +404,7 @@ def flow_create(request, project):
             'project': Project.projects.get(pk=project),
             'form': FlowCreateForm()
         }
-    return render(request, 'administracion/flow/create', context)
+        return render(request, 'administracion/flow/create', context)
 
 @login_required()
 def flow_list(request, project):

@@ -1,6 +1,7 @@
 from django import forms
+from django.forms import ModelForm
 from django.core.exceptions import ValidationError
-from apps.administracion.models import Flow
+from apps.administracion.models import Flow, UserStory
 from apps.autenticacion.models import User
 
 class ProjectForm(forms.Form):
@@ -123,15 +124,16 @@ class UserDeleteForm(UserForm):
         u = User.objects.filter(id=self.cleaned_data['id'])[0]
         u.delete()
 
-class UserStoryCreateForm(forms.Form):
-    description = forms.CharField(label='Descripción corta', max_length=140)
-    details = forms.CharField(label='Detalles de implementación')
-    acceptance_requirements = forms.CharField(label='Requisitos para aceptación')
-    estimated_time = forms.IntegerField(label='Tiempo estimado')
-    business_value = forms.FloatField(label='Valor de negocio')
-    tecnical_value = forms.FloatField(label='Valor técnico')
-    urgency = forms.FloatField(label='Urgencia')
-    #allowed_developers
+class FlowCreateForm(forms.Form):
+    name = forms.CharField(label='Nombre del Flujo', max_length=140)
+
+class UserStoryForm(ModelForm):
+    class Meta():
+        model=UserStory
+        fields=[
+            'description', 'details', 'acceptance_requirements', 'estimated_time',
+            'business_value', 'tecnical_value', 'urgency'    
+        ]
     
 class UserStoryTypeCreateForm(forms.Form):
     def __init__(self, project, *args, **kwargs):
@@ -149,6 +151,3 @@ class UserStoryTypeCreateForm(forms.Form):
             widget=forms.CheckboxSelectMultiple,
             choices=self.choices
         )
-
-class FlowCreateForm(forms.Form):
-    name = forms.CharField(label='Nombre del Flujo', max_length=140)

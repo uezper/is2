@@ -9,13 +9,13 @@ class UserStory(models.Model):
     Modelo donde se almacena la información sobre cada actividad a realizar dentro del projecto.
     """
     # Public fields mapped to DB columns
-    description = models.CharField(max_length=140) # Twetter..?? XD
-    details = models.TextField()
-    acceptance_requirements = models.TextField()
-    estimated_time = models.IntegerField() # tiempo para su finalizacion en horas
-    business_value = models.FloatField()
-    tecnical_value = models.FloatField()
-    urgency = models.FloatField()
+    description = models.CharField('Descripcion', max_length=140) # Twetter..?? XD
+    details = models.TextField('Detalles')
+    acceptance_requirements = models.TextField('Requisitos de Aceptacion')
+    estimated_time = models.IntegerField('Tiempo estimado') # tiempo para su finalizacion en horas
+    business_value = models.FloatField('Valor de negocio')
+    tecnical_value = models.FloatField('Valor tecnico')
+    urgency = models.FloatField('Urgencia')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     allowed_developers = models.ManyToManyField(User)
 
