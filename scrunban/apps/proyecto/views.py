@@ -249,6 +249,10 @@ def index(request, project_id):
         'URL_NAMES': base_settings.URL_NAMES,
         'project' : get_object_or_404(Project, id=project_id)
     }
+    x = UserPermissionContextMixin()
+    x.project = context['project']
+    x.request = request
+    x.get_user_permissions_context(context)
 
     return render(request, 'proyecto/project_index', context)
 

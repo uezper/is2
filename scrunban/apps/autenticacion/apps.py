@@ -16,6 +16,7 @@ class AutenticacionConfig(AppConfig):
         for def_perm in settings.DEFAULT_PERMISSIONS:
             perm = Permission.objects.filter(codename=def_perm[0])
             if (len(perm) == 0):
+                print('Creando permiso ' + def_perm[0])
                 permission_data = {
                     'name': def_perm[1],
                     'codename': def_perm[0],

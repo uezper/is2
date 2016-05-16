@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Permission
 from apps.autenticacion.models import User
 from apps.administracion.models import Project
-from apps.proyecto.fields import PermissionListField, UserListField, SprintBacklogField
+from apps.proyecto.fields import PermissionListField, UserListField, SprintBacklogField, ActivitiesField
 
 
 class CreateRolForm(forms.Form):
@@ -389,3 +389,90 @@ class DeleteSprintForm(EditSprintForm):
 
 
         sprint_.delete()
+
+class CreateFlowForm(forms.Form):
+    project = forms.IntegerField(required=True, widget=forms.HiddenInput)
+    name = forms.CharField(required=True, widget=forms.HiddenInput)
+    activities = ActivitiesField(required=True, widget=forms.HiddenInput)
+
+    def clean_project(self):
+        return Project.objects.get(id=self.cleaned_data['project'])
+
+    def clean_name(self):
+        from apps.proyecto.models import Flow
+        f = Flow.objects.filter(project=self.cleaned_data['project'], name=self.cleaned_data['name'])
+        if len(f) != 0:
+            raise ValidationError('Ya existe un flujo con ese nombre dentro del proyecto')
+        else:
+            return self.cleaned_data['name']
+
+    def clean_activities(self):
+        from apps.proyecto.models import Activity
+
+        ac_list = self.cleaned_data['activities']
+        new_ac_list = []
+        i = 1
+        for ac in ac_list:
+            new_ac = Activity()
+            new_ac.name = ac
+            new_ac.sec = i
+
+            i = i + 1
+
+            new_ac_list.append(new_ac)
+
+        if len(new_ac_list) == 0:
+            raise ValidationError('Debe introducir al menos una actividad')
+
+        return new_ac_list
+
+    def save(self):
+        from apps.proyecto.models import Flow
+        flow_data = {
+            'name' : self.cleaned_data['name'],
+            'project' : self.cleaned_data['project']
+        }
+
+        f = Flow.objects.create(**flow_data)
+
+        for ac in self.cleaned_data['activities']:
+            ac.flow = f
+            ac.save()
+
+class EditFlowForm(CreateFlowForm):
+    old_name = forms.CharField(required=True, widget=forms.HiddenInput)
+
+    def clean_name(self):
+        if self.data['old_name'] == self.cleaned_data['name']:
+            return self.cleaned_data['name']
+        else:
+            return super(EditFlowForm, self).clean_name()
+
+    def save(self):
+        from apps.proyecto.models import Flow, Activity
+
+        f = Flow.objects.get(project=self.cleaned_data['project'], name=self.cleaned_data['old_name'])
+        f.name = self.cleaned_data['name']
+
+        for ac in Activity.objects.filter(flow=f):
+            ac.delete()
+
+        for ac in self.cleaned_data['activities']:
+            ac.flow = f
+            ac.save()
+
+class DeleteFlowForm(forms.Form):
+    project = forms.IntegerField(required=True, widget=forms.HiddenInput)
+    flow = forms.IntegerField(required=True, widget=forms.HiddenInput)
+
+    def clean_project(self):
+        return Project.objects.get(id=self.cleaned_data['project'])
+
+    def clean_flow(self):
+        from apps.proyecto.models import Flow
+        return Flow.objects.get(id=self.cleaned_data['flow'])
+
+    def save(self):
+        f = self.cleaned_data['flow']
+        f.delete()
+
