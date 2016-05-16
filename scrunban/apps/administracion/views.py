@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import ProjectForm, UserStoryTypeCreateForm, FlowCreateForm, UserStoryForm
+from .forms import ProjectForm, UserStoryTypeCreateForm, UserStoryForm, FlowForm
 from apps.autenticacion.models import User
 from apps.autenticacion.decorators import login_required
 from django.db.utils import IntegrityError
@@ -300,7 +300,7 @@ def user_story_create(request, project):
             data = form.cleaned_data
             data['project'] = Project.projects.get(pk=project)
             us = UserStory.user_stories.create(**data)
-            return redirect(base_settings.ADM_US_SUMMARY, project=us.project.pk, user_story=us.pk)
+        return redirect(base_settings.ADM_US_SUMMARY, project=us.project.pk, user_story=us.pk)
     else:
         # TODO Check project id
         context = {
@@ -320,16 +320,16 @@ def user_story_summary(request, project, user_story):
         form = UserStoryForm(request.POST, instance=us)
         if form.is_valid():
             form.save()
-            return redirect(base_settings.ADM_US_LIST, project=us.project.pk)
-    
-    us = UserStory.user_stories.get(pk=user_story)
-    form = UserStoryForm(instance=us)
-    context = {
-        'URL_NAMES': base_settings.URL_NAMES,
-        'project': Project.projects.get(pk=project),
-        'form': form
-    }
-    return render(request, 'administracion/user_story/summary', context)
+        return redirect(base_settings.ADM_US_LIST, project=us.project.pk)
+    else:
+        us = UserStory.user_stories.get(pk=user_story)
+        form = UserStoryForm(instance=us)
+        context = {
+            'URL_NAMES': base_settings.URL_NAMES,
+            'project': Project.projects.get(pk=project),
+            'form': form
+        }
+        return render(request, 'administracion/user_story/summary', context)
 
 @login_required()
 def user_story_list(request, project):
@@ -389,20 +389,20 @@ def user_story_type_delete(request, project, user_story_type):
 @login_required()
 def flow_create(request, project):
     if request.method == 'POST':
-        form = FlowCreateForm(request.POST)
+        form = FlowForm(request.POST)
         if form.is_valid():
             # TODO Check project
             Flow.flows.create(
                 name=form.cleaned_data['name'],
                 project=Project.projects.get(pk=project)
             )
-            return redirect(base_settings.ADM_FLW_LIST, project=project)
+        return redirect(base_settings.ADM_FLW_LIST, project=project)
     else:
         # TODO Check project
         context = {
             'URL_NAMES': base_settings.URL_NAMES,
             'project': Project.projects.get(pk=project),
-            'form': FlowCreateForm()
+            'form': FlowForm()
         }
         return render(request, 'administracion/flow/create', context)
 
@@ -422,3 +422,19 @@ def flow_delete(request, project, flow):
     flow = Flow.flows.get(pk=flow)
     flow.delete()
     return redirect(base_settings.ADM_FLW_LIST, project=project)
+
+@login_required()
+def flow_summary(request, project, flow):
+    if request.method == 'POST':
+        flow = Flow.flows.get(pk=flow)
+        form = FlowForm(request.POST, instance=flow)
+        if form.is_valid():
+            form.save()
+        return redirect(base_settings.ADM_FLW_LIST, project=project)
+    else:
+        context = {
+            'URL_NAMES': base_settings.URL_NAMES,
+            'project': Project.projects.get(pk=project),
+            'form': FlowForm(instance=Flow.flows.get(pk=flow))
+        }
+        return render(request, 'administracion/flow/summary', context)

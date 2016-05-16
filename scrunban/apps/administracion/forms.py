@@ -124,8 +124,10 @@ class UserDeleteForm(UserForm):
         u = User.objects.filter(id=self.cleaned_data['id'])[0]
         u.delete()
 
-class FlowCreateForm(forms.Form):
-    name = forms.CharField(label='Nombre del Flujo', max_length=140)
+class FlowForm(ModelForm):
+    class Meta():
+        model=Flow
+        fields=['name']
 
 class UserStoryForm(ModelForm):
     class Meta():
