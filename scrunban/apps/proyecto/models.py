@@ -40,16 +40,19 @@ class ProjectManager(models.Manager):
             from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
             from django.contrib.auth.models import Permission
 
+
             for rol in DEFAULT_PROJECT_ROLES:
                 role_data = {
                     'name': rol[0],
                     'desc_larga': rol[1]
                 }
 
+
                 new_rol = p.add_rol(**role_data)
                 for perm_ in rol[2]:
                     perm = Permission.objects.get(codename=perm_[0])
                     new_rol.add_perm(perm)
+
 
             p_id = p.id
             for rol in p.get_roles():

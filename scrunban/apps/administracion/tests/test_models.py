@@ -3,11 +3,42 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
 from django.utils import timezone
 from apps.autenticacion.models import User, Role
-from apps.administracion.models import UserStory, Note
+from apps.administracion.models import UserStory, Note, Grained
 from apps.proyecto.models import Project, Sprint
 import time
 
 class AutenticacionModelsTests(TestCase):
+        def setUp(self):
+                from apps.autenticacion.models import Role, User
+                from apps.autenticacion import settings
+                from django.contrib.auth.models import Permission
+                from django.contrib.contenttypes.models import ContentType
+
+                __user_contenttype = ContentType.objects.get_for_model(User)
+
+                for def_perm in settings.DEFAULT_PERMISSIONS:
+                        perm = Permission.objects.filter(codename=def_perm[0])
+                        if (len(perm) == 0):
+                                permission_data = {
+                                        'name': def_perm[1],
+                                        'codename': def_perm[0],
+                                        'content_type': __user_contenttype
+                                }
+                                perm = Permission.objects.create(**permission_data)
+
+                for def_rol in settings.DEFAULT_ADMIN_ROLES:
+                        rol = Role.roles.filter(name=def_rol[0])
+                        if (len(rol) == 0):
+                                role_data = {
+                                        'name': def_rol[0],
+                                        'desc_larga': def_rol[1]
+                                }
+                                r = Role.roles.create(**role_data)
+
+                                for p in def_rol[2]:
+                                        perm = Permission.objects.filter(codename=p[0])[0]
+                                        r.add_perm(perm)
+
         def helper_create_user(self, username):
                 return User.users.create(username=username, password=username)
         
@@ -34,19 +65,14 @@ class AutenticacionModelsTests(TestCase):
                         'description': 'Main Page',
                         'details': 'Make it like google',
                         'acceptance_requirements': 'Has to be blue',
-                        'deadline': timezone.now(),
+                        'estimated_time': '10',
                         'business_value': 153.1,
                         'tecnical_value': 45.8,
                         'urgency': 80,
-                        'project': prj
+                        'project': project
                 }
                 us = UserStory.user_stories.create(**us_data)
-                try:
-                        for developer in developers:
-                                us.allowed_developers.add(developer)
-                except:
-                        us.allowed_delevelopers.add(developers)
-                               
+
                 return us
         
         def test_userstory_create_delete(self):
@@ -62,14 +88,13 @@ class AutenticacionModelsTests(TestCase):
                         'description': 'Main Page',
                         'details': 'Make it like google',
                         'acceptance_requirements': 'Has to be blue',
-                        'deadline': timezone.now(),
+                        'estimated_time': '10',
                         'business_value': 153.1,
                         'tecnical_value': 45.8,
                         'urgency': 80,
                         'project': prj
                 }
                 us = UserStory.objects.create(**us_data)
-                us.allowed_developers.add(user1, user2)
                 self.assertNotEqual(us, None)
                 
                 us.delete()
@@ -87,7 +112,7 @@ class AutenticacionModelsTests(TestCase):
                         'description': 'Main Page',
                         'details': 'Make it like google',
                         'acceptance_requirements': 'Has to be blue',
-                        'deadline': timezone.now(),
+                        'estimated_time': '10',
                         'business_value': 153.1,
                         'tecnical_value': 45.8,
                         'urgency': 80,
@@ -97,7 +122,7 @@ class AutenticacionModelsTests(TestCase):
                         'description': 'New Main Page',
                         'details': 'Make it not like google',
                         'acceptance_requirements': 'Has not to be blue',
-                        'deadline': timezone.now(),
+                        'estimated_time': '10',
                         'business_value': 15,
                         'tecnical_value': 455.8,
                         'urgency': 88,
@@ -105,18 +130,15 @@ class AutenticacionModelsTests(TestCase):
                 }
 
                 us = UserStory.objects.create(**data)
-                us.allowed_developers.add(user1)
                 
                 self.assertNotEqual(us, None)
 
                 self.assertEqual(us.description, data['description'])
                 self.assertEqual(us.details, data['details'])
                 self.assertEqual(us.acceptance_requirements, data['acceptance_requirements'])
-                self.assertEqual(us.deadline, data['deadline'])
                 self.assertEqual(us.business_value, data['business_value'])
                 self.assertEqual(us.tecnical_value, data['tecnical_value'])
                 self.assertEqual(us.urgency, data['urgency'])
-                self.assertEqual(user1 in us.allowed_developers.all(), True)
                 self.assertEqual(us.project, data['project'])
 
                 us.description = new_data['description']
@@ -125,7 +147,6 @@ class AutenticacionModelsTests(TestCase):
                 us.business_value = new_data['business_value']
                 us.tecnical_value = new_data['tecnical_value']
                 us.urgency = new_data['urgency']
-                us.allowed_developers.add(user2)
                 us.project = new_data['project']
 
                 self.assertEqual(us.description, new_data['description'])
@@ -134,7 +155,6 @@ class AutenticacionModelsTests(TestCase):
                 self.assertEqual(us.business_value, new_data['business_value'])
                 self.assertEqual(us.tecnical_value, new_data['tecnical_value'])
                 self.assertEqual(us.urgency, new_data['urgency'])
-                self.assertEqual(user2 in us.allowed_developers.all(), True)
                 self.assertEqual(us.project, new_data['project'])
                 
                 us.delete()
@@ -165,7 +185,7 @@ class AutenticacionModelsTests(TestCase):
                         'description': 'Main Page',
                         'details': 'Make it like google',
                         'acceptance_requirements': 'Has to be blue',
-                        'deadline': timezone.now(),
+                        'estimated_time': '10',
                         'business_value': 153.1,
                         'tecnical_value': 45.8,
                         'urgency': 80,
@@ -173,7 +193,6 @@ class AutenticacionModelsTests(TestCase):
                 }
                 
                 us = UserStory.objects.create(**us_data)
-                us.allowed_developers.add(user1)
                 self.assertNotEqual(us, None)
                 
                 usn_data = {
@@ -187,41 +206,3 @@ class AutenticacionModelsTests(TestCase):
                 usn.delete()
                 us.delete()
 
-        def test_userstory_get_userstorynotes(self):
-                user1 = self.helper_create_user('user1')
-                prj = self.helper_create_project('Dummy', user1, user1)
-                us_data = {
-                        'description': 'Main Page',
-                        'details': 'Make it like google',
-                        'acceptance_requirements': 'Has to be blue',
-                        'deadline': timezone.now(),
-                        'business_value': 153.1,
-                        'tecnical_value': 45.8,
-                        'urgency': 80,
-                        'project': prj
-                }
-                
-                us = UserStory.user_stories.create(**us_data)
-                self.assertNotEqual(us, None)
-                
-                usn1_data = {
-                        'note': 'This is a note about an user story',
-                        'user_story': us,
-                        'user': user1
-                }
-                usn2_data = {
-                        'note': 'This is another note about an user story',
-                        'user_story': us,
-                        'user': user1
-                }
-
-                usn1 = Note.notes.create(**usn1_data)
-                usn2 = Note.notes.create(**usn2_data)
-                self.assertNotEqual(usn1, None)
-                self.assertNotEqual(usn2, None)
-                
-                self.assertEqual(usn1 in us.get_notes(), True)
-                self.assertEqual(usn2 in us.get_notes(), True)
-                
-                us.delete()
-                self.assertEqual(Note.notes.all().count(), 0)
