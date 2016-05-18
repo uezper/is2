@@ -6,13 +6,13 @@ from django.views.generic.detail import SingleObjectMixin
 
 from apps.autenticacion.models import Role
 from apps.administracion.models import Project
-from apps.proyecto.models import Team, Sprint
+from apps.proyecto.models import Team, Sprint, Flow
 
 from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
 from apps.proyecto import forms
 from django.shortcuts import get_object_or_404, HttpResponseRedirect
 
-from apps.proyecto.mixins import PermissionListMixin, UrlNamesContextMixin, UserListMixin, ValidateSprintStatePending
+from apps.proyecto.mixins import PermissionListMixin, UrlNamesContextMixin, UserListMixin, ValidateSprintStatePending, ProjectViwMixin, DefaultFormData
 from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin, ValidateHasPermission
 from scrunban.settings import base as base_settings
 
@@ -780,3 +780,148 @@ class SprintDetailView(UserIsAuthenticatedMixin, TemplateView, SingleObjectMixin
 
         return sprint_data
 
+
+
+
+class FlowListView(ProjectViwMixin, ListView):
+
+    """
+    Clase correspondiente a la vista que lista los flujos de un proyecto
+
+
+    """
+    model = Flow
+    context_object_name = 'flow_list'
+    template_name = 'proyecto/project_flow_list'
+    pk_url_kwarg = 'project_id'
+    paginate_by = 10
+    section_title = 'Flujos'
+    left_active = 'Flujos'
+
+    def get_queryset(self):
+        project = self.get_project()
+        return Flow.objects.filter(project=project)
+
+
+class FlowCreateView(ProjectViwMixin, DefaultFormData, FormView):
+    """
+    Clase correspondiente a la vista que permite crear un Flujo dentro de un proyecto
+
+    """
+
+    form_class = forms.CreateFlowForm
+    template_name = 'proyecto/project_flow_create_edit_delete'
+    pk_url_kwarg = 'project_id'
+    section_title = 'Crear Flujo'
+    left_active = 'Flujos'
+
+    def get_default_fields(self):
+        project = self.get_project()
+        data = {
+            'project': project.id,
+        }
+        return data
+
+    def get_success_url(self):
+        project = self.get_project()
+
+        from scrunban.settings.base import PROJECT_FLOW_LIST
+        return reverse(PROJECT_FLOW_LIST, args=(project.id,))
+
+    def get_initial(self):
+        initial = {
+            'activities': ''
+        }
+
+        return initial
+
+    def form_valid(self, form):
+
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+
+    def form_invalid(self, form):
+
+        context = {
+            'form' : form
+        }
+
+        print(form)
+        return super(FlowCreateView, self).render_to_response(self.get_context_data(**context))
+
+
+class FlowEditView(FlowCreateView):
+    """
+    Clase correspondiente a la vista que permite editar un Flujo dentro de un proyecto
+
+    """
+
+    form_class = forms.EditFlowForm
+
+    flow_url_kwarg = 'flow_id'
+
+    section_title = 'Editar Flujo'
+
+
+    def get_default_fields(self):
+        from apps.proyecto.models import Flow
+
+        project = self.get_project()
+        flow = get_object_or_404(Flow, id=self.kwargs.get(self.flow_url_kwarg))
+
+        data = {
+            'project': project.id,
+            'old_name': flow.name
+        }
+
+        return data
+
+    def get_context_data(self, **kwargs):
+        context = super(FlowEditView, self).get_context_data(**kwargs)
+        context['edit_form'] = True
+        context['flow'] = self.flow
+
+        return context
+
+    def get_initial(self):
+        from apps.proyecto.models import Flow, Activity
+
+        self.flow = get_object_or_404(Flow, id=self.kwargs.get(self.flow_url_kwarg))
+
+        initial = {
+            'name': self.flow.name,
+            'activities': ','.join([ac.name for ac in Activity.objects.filter(flow=self.flow)])
+        }
+
+        return initial
+
+class FlowDeleteView(FlowEditView):
+    """
+    Clase correspondiente a la vista que permite eliminar un Flujo dentro de un proyecto
+
+    """
+
+    form_class = forms.DeleteFlowForm
+
+    section_title = 'Eliminar Flujo'
+
+    def get_default_fields(self):
+        from apps.proyecto.models import Flow
+
+        project = self.get_project()
+        flow = get_object_or_404(Flow, id=self.kwargs.get(self.flow_url_kwarg))
+
+        data = {
+            'project': project.id,
+            'flow': flow.id
+        }
+
+        return data
+
+    def get_context_data(self, **kwargs):
+        context = super(FlowDeleteView, self).get_context_data(**kwargs)
+        context['delete_form'] = True
+        context['no_editable'] = True
+
+        return context

@@ -497,7 +497,7 @@ class Flow(models.Model):
 class Activity(models.Model):
     name = models.TextField()
     sec = models.IntegerField()
-    flow = models.ForeignKey(Flow)
+    flow = models.ForeignKey(Flow, on_delete=models.CASCADE)
 
     objects = models.Manager()
 

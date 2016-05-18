@@ -97,7 +97,12 @@ class ValidateHasPermission(ValidateTestMixin, UserPermissionListMixin):
 
         user_perms = self.get_user_permissions_list()
 
-        for perm in self.get_required_permissions():
+        required = self.get_required_permissions()
+
+        if len(required) == 0:
+            return sup
+
+        for perm in required:
             if perm in user_perms:
                 return sup
 
