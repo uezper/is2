@@ -1,5 +1,15 @@
 {% extends "proyecto/project_base" %}
 
+{% block "include" %}
+<script>
+    $(document).ready(function(){
+        $("#seguro").click(function(){
+            $("#form").submit();
+        });
+    });
+</script>
+{% endblock %}
+
 {% block "working_path" %}
 	{{ block.super }}
 	<li class="active">{{ section_title }}</li>
@@ -28,14 +38,80 @@
                             <div class="col-md-2 text-right"><b>Capacidad:</b></div>
                             <div class="col-md-2">{{sprint_data.capacity}} Horas-Hombre</div>
                             <div class="col-md-2 text-right"><b>Tiempo estimado:</b></div>
-                            <div class="col-md-2">{{sprint.estimated_time}} dias</div>
+                            <div class="col-md-2">{{sprint.estimated_time}} dia{% if sprint.estimated_time > 1%}s{%endif%}</div>
                         </div>
                         <div class="row">
                             <div class="col-md-2 text-right"><b>Estado:</b></div>
                             <div class="col-md-2">{{sprint.state}}</div>
                             <div class="col-md-2 text-right"><b>Demanda:</b></div>
                             <div class="col-md-2">{{sprint_data.demmand}} Horas-Hombre</div>
+                            {% if sprint.start_date != '' %}
+                            {% if sprint.state == 'Ejecucion' or sprint.state == 'Cancelado' or sprint.state == 'Finalizado' %}
+                            <div class="col-md-2 text-right"><b>Fecha de inicio:</b></div>
+                            <div class="col-md-2">{{sprint.start_date}} </div>
+                            {% endif %}
+                            {% endif %}
                         </div>
+                        <div class="row">
+                            {% if can_execute and sprint.state != 'Finalizado' and sprint.state != 'Cancelado' %}
+                            <div class="col-md-2 text-right"><b>Operacion:</b></div>
+                            <div class="col-md-2">
+
+                                    <form action="#" method="post" id="form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="operation" value="ejecutar" />
+                                    <button type="submit" class="btn btn-success" id="ejecutar">Ejecutar</button>
+                                    </form>
+                            </div>
+                                {% elif sprint.state == 'Ejecucion' %}
+                            <div class="col-md-2 text-right"><b>Operacion:</b></div>
+                            <div class="col-md-2">
+                                    <form action="#" method="post" id="form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="operation" value="cancelar" />
+                                    <button type="button" class="btn btn-warning" id="cancelar" data-toggle="modal" data-target="#seguroModal">Cancelar</button>
+                                    </form>
+                            </div>
+                                {% else %}
+                                <div class="col-md-4"></div>
+                                {% endif %}
+                            <div class="col-md-4"></div>
+                            {% if sprint.start_date != '' %}
+                            {% if sprint.state == 'Ejecucion' or sprint.state == 'Cancelado' %}
+                            <div class="col-md-2 text-right"><b>Timepo restante:</b></div>
+                            <div class="col-md-2">{{sprint.faltante}} dia{% if sprint.faltante > 1%}s{%endif%}</div>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                        {% if sprint.state == 'Ejecucion' %}
+                          <div class="row" style="padding: 10px">
+                            <div class="col-md-12">
+                                <div class="progress">
+                                  <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="{{sprint.progress}}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{sprint.progress}}%">
+
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% elif sprint.state == 'Cancelado' %}
+                          <div class="row" style="padding: 10px">
+                            <div class="col-md-12">
+                                <div class="progress">
+                                  <div class="progress-bar progress-bar-danger progress-bar-striped" role="progressbar" aria-valuenow="{{sprint.progress}}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{sprint.progress}}%">
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if message %}
+                        <div class="row">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-10 alert {% if error %} alert-danger {% else %} alert-success {% endif %}" role="alert">
+                                {{message}}
+                            </div>
+                        </div>
+                        {% endif %}
+
                       </div>
                     </div>
                   </div>
@@ -105,15 +181,23 @@
                                                                   <div class="col-md-6">
                                                                         <div class="row">
                                                                             <div class="col-md-4 text-right"><span ><b>User story:</b></span></div>
-                                                                            <div class="col-md-6"><a href="#">{{us.0.description}}</a></div>
+                                                                            <div class="col-md-6"><a href="{% url URL_NAMES.ADM_US_SUMMARY project.id us.0.id %}">{{us.0.description}}</a></div>
                                                                         </div>
                                                                       <div class="row">
                                                                             <div class="col-md-4 text-right"><span ><b>Tiempo estimado:</b></span></div>
                                                                             <div class="col-md-6">{{us.0.estimated_time}} horas</div>
                                                                         </div>
-                                                                      <div class="row">
+                                                                       <div class="row">
                                                                             <div class="col-md-4 text-right"><span ><b>Flujo:</b></span></div>
                                                                             <div class="col-md-6">{{us.0.flow.name}}</div>
+                                                                        </div>
+                                                                      <div class="row">
+                                                                            <div class="col-md-4 text-right"><span ><b>Actividad:</b></span></div>
+                                                                            <div class="col-md-6">{{us.0.activity.name}}</div>
+                                                                        </div>
+                                                                      <div class="row">
+                                                                            <div class="col-md-4 text-right"><span ><b>Estado:</b></span></div>
+                                                                            <div class="col-md-6">{{us.0.state}}</div>
                                                                         </div>
                                                                   </div>
 
@@ -188,7 +272,23 @@
 		</div>
 	</div>
 
-
+<div class="modal fade" tabindex="-1" role="dialog" id="seguroModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Cancelar Sprint</h4>
+      </div>
+      <div class="modal-body">
+        <p>Estas seguro de que quieres cancelar el Sprint?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+        <button type="button" class="btn btn-primary" id="seguro">Si</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 
 {% endblock %}

@@ -258,14 +258,24 @@ class CreateSprintForm(forms.Form):
 
     def clean_estimated_time(self):
         if self.cleaned_data['estimated_time'] > 0:
+
+            from datetime import date, timedelta
+
+            project_date_end = Project.objects.get(id=self.data['project']).date_end
+            today = date.today()
+            sprint_end = today + timedelta(days=self.cleaned_data['estimated_time'])
+
+            if (project_date_end - sprint_end).days < 0:
+                raise ValidationError('El Sprint finalizaria pasada la fecha de finalizacion del proyecto: {}/{}/{}'.format(project_date_end.day, project_date_end.month, project_date_end.year))
+
             return self.cleaned_data['estimated_time']
         else:
             raise ValidationError('Este campo debe ser un entero positivo mayor que cero')
 
     def clean_sprint_backlog(self):
 
-        from apps.administracion.models import UserStory
-        from apps.proyecto.models import Team, Flow
+        from apps.administracion.models import UserStory, Grained
+        from apps.proyecto.models import Team, Flow, Activity
 
 
         new_sb = []
@@ -273,18 +283,46 @@ class CreateSprintForm(forms.Form):
 
         for reg in self.cleaned_data['sprint_backlog']:
             us = reg.split(':')
+
+            if len(us) != 4:
+                raise ValidationError('Error en el SprintBacklog. Introduzca todos los datos e intente de nuevo');
+
             us_id = us[0]
             us_devs = us[1].split('_')
-            us_flujo = Flow.objects.get(id=us[2])
+            us_flujo = Flow.objects.filter(id=us[2])
+            us_actividad = Activity.objects.filter(id=us[3])
+
 
             us_ = UserStory.objects.filter(id=us_id)
             if len(us_) == 0:
                 raise ValidationError('Ha ingresado un US invalido: ' + us_id)
             else:
-                #Todo! Agregar validacion de estado y flujo cuando esten
+                us_ = us_[0]
+
+                if (UserStory.states[us_.state] == 'Finalizado'):
+                    raise ValidationError('El us no puede estar aqui: ' + us_.description)
+
+                for g in Grained.objects.filter(user_story=us_):
+                    if not(g.sprint.state in ['Finalizado', 'Cancelado']):
+                        raise ValidationError('El us no puede estar aqui: ' + us_.description)
+
+
                 if len(us_devs) == 0:
-                    raise ValidationError('No ha ingresado desarrolladores para el US ' + us_[0].description)
+                    raise ValidationError('No ha ingresado desarrolladores para ' + us_.description)
+                elif len(us_flujo) == 0:
+                    raise ValidationError('Ha ingresado un flujo invalido para ' + us_.description)
+                elif len(us_actividad) == 0:
+                    raise ValidationError('Ha ingresado una actividad invalida para ' + us_.description)
                 else:
+
+                    us_flujo = us_flujo[0]
+                    us_actividad = us_actividad[0]
+
+                    if not(us_flujo in us_.us_type.flows.all()):
+                        raise ValidationError('Ha ingresado un flujo invalido para ' + us_.description)
+                    elif us_actividad.flow != us_flujo:
+                        raise ValidationError('Ha ingresado una actividad invalida para ' + us_.description)
+
                     new_devs = []
                     for dev in us_devs:
                         if dev == '':
@@ -294,16 +332,16 @@ class CreateSprintForm(forms.Form):
                         if len(team_) == 0:
                             raise ValidationError('No existe el desarrollador: ' + dev)
                         else:
-                            new_devs.append(team_[0])
+                            team_ = team_[0]
+                            new_devs.append(team_)
                             if not(dev in devs):
-                                self._capacity += team_[0].hs_hombre * self.cleaned_data.get('estimated_time', 0)
+                                self._capacity += team_.hs_hombre * self.cleaned_data.get('estimated_time', 0)
                                 devs.append(dev)
 
-                    self._demmand += us_[0].estimated_time
+                    self._demmand += us_.estimated_time
                     if len(new_devs) == 0:
-                        raise ValidationError('No ha ingresado desarrolladores para el US ' + us_[0].description)
-                    new_sb.append((us_[0], new_devs, us_flujo))
-        print(self._capacity)
+                        raise ValidationError('No ha ingresado desarrolladores para el US ' + us_.description)
+                    new_sb.append((us_, new_devs, us_flujo, us_actividad))
         return new_sb
 
     def clean_capacity(self):
@@ -331,6 +369,8 @@ class CreateSprintForm(forms.Form):
             grain.user_story = us[0]
             grain.sprint = sprint
             grain.flow = us[2]
+            grain.activity = us[3]
+            grain.state = 1
             grain.save()
             for dev in us[1]:
                 grain.developers.add(dev)
@@ -346,6 +386,78 @@ class EditSprintForm(CreateSprintForm):
     """
 
     id = forms.IntegerField(required=True, widget=forms.HiddenInput)
+
+
+    def clean_sprint_backlog(self):
+
+        from apps.administracion.models import UserStory, Grained
+        from apps.proyecto.models import Team, Flow, Activity, Sprint
+
+        sprint_ = Sprint.objects.get(id=self.data['id'])
+
+        new_sb = []
+        devs = []
+
+        for reg in self.cleaned_data['sprint_backlog']:
+            us = reg.split(':')
+
+            if len(us) != 4:
+                raise ValidationError('Error en el SprintBacklog. Introduzca todos los datos e intente de nuevo');
+
+            us_id = us[0]
+            us_devs = us[1].split('_')
+            us_flujo = Flow.objects.filter(id=us[2])
+            us_actividad = Activity.objects.filter(id=us[3])
+
+            us_ = UserStory.objects.filter(id=us_id)
+            if len(us_) == 0:
+                raise ValidationError('Ha ingresado un US invalido: ' + us_id)
+            else:
+                us_ = us_[0]
+
+                if (UserStory.states[us_.state] == 'Finalizado'):
+                    raise ValidationError('El us no puede estar aqui: ' + us_.description)
+
+                for g in Grained.objects.filter(user_story=us_):
+                    if not(g.sprint.state in ['Finalizado', 'Cancelado']) and g.sprint != sprint_:
+                        raise ValidationError('El us no puede estar aqui: ' + us_.description)
+
+                if len(us_devs) == 0:
+                    raise ValidationError('No ha ingresado desarrolladores para ' + us_.description)
+                elif len(us_flujo) == 0:
+                    raise ValidationError('Ha ingresado un flujo invalido para ' + us_.description)
+                elif len(us_actividad) == 0:
+                    raise ValidationError('Ha ingresado una actividad invalida para ' + us_.description)
+                else:
+
+                    us_flujo = us_flujo[0]
+                    us_actividad = us_actividad[0]
+
+                    if not (us_flujo in us_.us_type.flows.all()):
+                        raise ValidationError('Ha ingresado un flujo invalido para ' + us_.description)
+                    elif us_actividad.flow != us_flujo:
+                        raise ValidationError('Ha ingresado una actividad invalida para ' + us_.description)
+
+                    new_devs = []
+                    for dev in us_devs:
+                        if dev == '':
+                            continue
+
+                        team_ = Team.objects.filter(id=dev)
+                        if len(team_) == 0:
+                            raise ValidationError('No existe el desarrollador: ' + dev)
+                        else:
+                            team_ = team_[0]
+                            new_devs.append(team_)
+                            if not (dev in devs):
+                                self._capacity += team_.hs_hombre * self.cleaned_data.get('estimated_time', 0)
+                                devs.append(dev)
+
+                    self._demmand += us_.estimated_time
+                    if len(new_devs) == 0:
+                        raise ValidationError('No ha ingresado desarrolladores para el US ' + us_.description)
+                    new_sb.append((us_, new_devs, us_flujo, us_actividad))
+        return new_sb
 
     def save(self):
         from apps.proyecto.models import Sprint
@@ -364,6 +476,9 @@ class EditSprintForm(CreateSprintForm):
 
             else:
                 grain = grain[0]
+                grain.flow = us[2]
+                grain.activity = us[3]
+                grain.state = 1
 
                 for dev in grain.developers.all():
                     grain.developers.remove(dev)
@@ -488,3 +603,13 @@ class DeleteFlowForm(EditFlowForm):
         f = self.cleaned_data['flow']
         f.delete()
 
+
+class ChangeSprintStateForm(forms.Form):
+    operation = forms.CharField(required=True);
+
+    def clean_operation(self):
+        op_ = self.cleaned_data['operation']
+        if op_ == '' or not(op_ in ['ejecutar', 'cancelar']):
+            raise ValidationError('Operacion invalida')
+
+        return op_
