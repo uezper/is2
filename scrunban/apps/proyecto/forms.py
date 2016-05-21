@@ -310,8 +310,9 @@ class CreateSprintForm(forms.Form):
         return self._capacity
 
     def clean_demmand(self):
-        self.data['demmand'] = self._demmand
         self.data['capacity'] = self._capacity
+        self.data['demmand'] = self._demmand
+
         if self._demmand > self._capacity:
             raise ValidationError('La demanda es mayor que la capacidad del Sprint')
         return self._demmand
