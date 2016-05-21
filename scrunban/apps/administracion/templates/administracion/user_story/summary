@@ -14,6 +14,10 @@
 <table>
   <tbody>
     <tr>
+      <th><label for="id_description">Estado:</label></th>
+      <td>{{ user_story.state }}</td>
+    </tr>
+    <tr>
       <th><label for="id_description">Descripción corta:</label></th>
       <td>{{ user_story.description }}</td>
     </tr>

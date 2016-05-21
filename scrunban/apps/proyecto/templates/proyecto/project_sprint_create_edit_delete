@@ -4,6 +4,74 @@
 <script>
     $(document).ready(function(){
 
+        developers = [];
+        {% for dev in dev_list %}
+            dev_ = {
+                id: '{{dev.id}}',
+                hs_hombre: {{ dev.hs_hombre }},
+                name: '{{dev.user}}',
+            };
+            developers.push(dev_);
+        {% endfor %}
+
+
+        user_stories = [];
+        {% for us in user_stories %}
+            us_ = {
+               id:'{{ us.id }}',
+               added: false,
+               description: '{{us.description }}',
+               weight: '{{us.weight}}',
+               estimated_time: {{us.estimated_time}},
+               developers: [],
+               available_flows: [
+               {% for flow in us.available_flows %}
+                    {
+                        id: '{{ flow.id }}',
+                        name: '{{flow.name}}',
+                        activities: [
+                            {% for activity in flow.activities %}
+                                {
+                                    id: '{{activity.id}}',
+                                    name: '{{activity.name}}',
+                                    sec: {{activity.sec}},
+                                },
+                            {% endfor %}
+                        ]
+                    },
+               {% endfor %}
+               ],
+               {% if us.flow %}
+               flow: {
+                   id: '{{ us.flow.id }}',
+                   name: '{{ us.flow.name }}',
+                   {% if us.flow.no_editable == '' %}
+                   editable: false,
+                   {% else %}
+                   editable: true,
+                   {% endif %}
+                   activity: {
+                       id: '{{us.flow.activity.id}}',
+                       name: '{{us.flow.activity.name}}',
+                       sec: {{us.flow.activity.sec}}
+                   },
+                   activities: [
+                            {% for activity in us.flow.activities %}
+                                {
+                                    id: '{{activity.id}}',
+                                    name: '{{activity.name}}',
+                                    sec: {{activity.sec}},
+                                },
+                            {% endfor %}
+                        ]
+               }
+               {% else %}
+               flow: undefined
+               {% endif %}
+            };
+            user_stories.push(us_);
+        {% endfor %}
+
         sb = [];
         _demanda = 0;
         _capacity = 0;
@@ -11,15 +79,6 @@
 
         cargar_datos();
 
-
-        if ($("#errors").children().length > 0)
-        {
-            $("#errors").show();
-        }
-        else
-        {
-            $("#errors").hide();
-        }
 
 
         $( "table" ).on( "click", ".addUS", function() {
@@ -35,79 +94,150 @@
 
         });
 
+        $("#selectUS").on('show.bs.modal', function(e)
+        {
+
+            cargar_pb();
+
+        });
 
         $("#selectUsers").on('show.bs.modal', function(e){
 
 
               us_id = $("#id_us").html();
+              us_ = get_user_story_by_id(us_id);
 
-              $("input[name='checkboxUser']").prop("checked", false);
+              $("#selectUsers").find("p:first").find("span:first").html(us_.estimated_time);
 
-            $.each(sb, function(index, value){
-               if (value[0] == us_id)
-               {
-                   $("#selectUsers").find("p:first").find("span:first").html(value[3]);
+              if (developers.length != 0) {
+                      $("#dev_list").html('');
 
-                   dev_users = value[4];
-                   flows = value[5];
-
-                   $.each(dev_users, function(index, value){
-                        $("input[value='"+ value +"']").prop("checked", true);
-                   });
-
-                    _x = 0;
-                   $("#flujo_section").html('');
-                   $.each(flows, function(index, value){
-                       if (value[2] == false) {
-                           $("#flujo_section").append("<input type='radio' name='flow' value='" + value[0] + "'> <span id='" + value[0] + "_name'>" + value[1] + "</span><br />");
-                       }
-                       else {
-                           $("#flujo_section").append("<input type='radio' name='flow' value='" + value[0] + "' checked> <span id='" + value[0] + "_name'>" + value[1] + "</span><br />");
-                           _x++;
-                       }
-                   });
-                   if (_x == 0)
-                   {
-                       temp_ = $("#flujo_section").find("input[name='flow']:first");
-                       $(temp_).prop("checked", true);
-                       $(temp_).trigger("change");
+                      $.each(developers, function(index, dev)
+                      {
+                         checked = "";
+                         if (us_.developers.indexOf(dev.id) != -1)
+                         {
+                            checked = "checked";
+                         }
+                         html_ =  "<tr id=\"dev_"+dev.id+"\">" +
+                                    "<td>"+dev.name+"</td>" +
+                                    "<td class=\"text-center\">"+dev.hs_hombre+"</td>" +
+                                    "<td class=\"text-right\">" +
+                                        "<input type=\"checkbox\" name=\"checkboxUser\" {% if delete_form %} disabled {% endif %} value=\""+dev.id+"\" "+checked+" />" +
+                                    "</td>";
+                        $("#dev_list").append(html_);
+                      });
+              }
 
 
-                   }
-               }
-            });
+              $("#flujo_section").prop("disabled", false);
+              $("#actividad_section").prop("disabled", false);
+
+              $("#flujo_section").html('');
+              $.each(us_.available_flows, function(index, flow)
+              {
+                  html_ = "<option value='" + flow.id + "'>"+ flow.name +"</option>";
+                  $("#flujo_section").append(html_);
+              });
+
+              if (us_.flow != undefined)
+                 {
+                     flow_id = us_.flow.id;
+                     flow_activity = us_.flow.activity;
+                     flow_ = us_.flow;
+
+
+
+                     temp_ = $("#flujo_section").find("[value='"+flow_id+"']:first");
+                     $(temp_).prop('selected', true);
+
+                     $("#actividad_section").html('');
+                     $.each(flow_.activities, function(i, activity){
+                        checked = "";
+                         if (flow_activity.id == activity.id) { checked = "selected"; }
+                             html_ = "<option value='" + activity.id + "' " + checked + ">" + activity.name + "</option>";
+                        $("#actividad_section").append(html_);
+                     });
+
+
+                    if (flow_.editable == false)
+                    {
+                        $("#flujo_section").prop("disabled", true);
+                        $("#actividad_section").prop("disabled", true);
+                    }
+
+
+                 }
+              else
+              {
+                    temp_ = $("#flujo_section").children().first();
+
+                    $(temp_).prop("selected", true);
+                    $(temp_).trigger("change");
+              }
+
+
 
 
         });
 
-        $("#flujo_section").on("change","input[name='flow']", function(e){
-           us_id = $("#id_us").html();
-            flow_id = $(this).val()
+        $("#flujo_section").on("change", function(e){
+            us_id = $("#id_us").html();
+            us_ = get_user_story_by_id(us_id);
 
-            $.each(sb, function(index, value){
-               if (value[0] == us_id)
-               {
-                   $.each(value[5], function(i, v){
-                       if (v[0] == flow_id)
-                       {
-                           sb[index][5][i][2] = true;
-                       }
-                       else
-                       {
-                           sb[index][5][i][2] = false;
-                       }
-                   });
-               }
+            flow_id = $(this).val();
+            flow_ = undefined;
+            flow_activity = undefined;
+
+            $("#actividad_section").html('');
+            $.each(us_.available_flows, function(index, flow)
+            {
+                if (flow.id == flow_id)
+                {
+                    flow_ = {
+                        id: flow.id,
+                        name: flow.name,
+                        activities: flow.activities
+                    };
+                    $.each(flow_.activities, function(i, activity){
+                        if (flow_activity == undefined) { flow_activity = activity; }
+                        html_ = "<option value='" + activity.id + "'>"+ activity.name +"</option>";
+                        $("#actividad_section").append(html_);
+                    });
+
+
+                }
+            });
+            flow_.activity = flow_activity;
+            us_.flow = flow_;
+
+        });
+
+        $("#actividad_section").on("change", function(e) {
+            us_id = $("#id_us").html();
+            us_ = get_user_story_by_id(us_id);
+            activity_id = $(this).val();
+            activity_ = undefined;
+
+            $.each(us_.flow.activities, function(i, activity){
+                if (activity.id == activity_id)
+                {
+                    activity_ = activity;
+                }
             });
 
+            us_.flow.activity = activity_;
         });
 
         $("#selectUsers").on('hidden.bs.modal', function(e){
 
               dev_users = [];
               us_id = $("#id_us").html();
+              us_ = get_user_story_by_id(us_id);
               _dem = Number($("#selectUsers").find("p:first").find("span:first").html());
               _cap = 0;
+
+
 
 
               $("input[name='checkboxUser']:checked").each(function (index, val) {
@@ -116,15 +246,8 @@
               });
 
 
-
-            $.each(sb, function(index, value){
-               if (value[0] == us_id)
-               {
-                   value[4] = dev_users;
-                   $("#"+ us_id).find(".text-center:last").html(dev_users.length);
-               }
-            });
-
+              us_.developers = dev_users;
+              $("#"+ us_id).find(".text-center:last").html(dev_users.length);
 
             check_capacity();
 
@@ -147,22 +270,24 @@
         });
         $( "table" ).on( "click", ".removeUS", function() {
 
-                _id = $(this).parent().parent().prop('id');
+                us_id = $(this).parent().parent().prop('id');
+                us_ = get_user_story_by_id(us_id);
+                us_.added = false;
                 _index = -1;
 
                 $.each(sb ,function (index, value) {
-                    if (value[0] == _id)
+                    if (value == us_id)
                     {
                         _index = index;
                     }
                 });
 
 
-                _desc = sb[_index][1];
-                _prior = sb[_index][2];
-                _est = sb[_index][3];
+                _desc = us_.description;
+                _prior = us_.priority;
+                _est = us_.estimated_time;
 
-                _html = "<tr id='"+ _id +"'>" +
+                _html = "<tr id='"+ us_id +"'>" +
                         "<td><a href='#'>" + _desc + "</a></td>" +
                         "<td class='text-center'>"+_prior+"</td>" +
                         "<td class='text-center'>"+ _est +"</td>" +
@@ -180,6 +305,30 @@
             });
 
 
+        function cargar_pb()
+        {
+
+            $("#pb").html('');
+            for (var i = 0; i < user_stories.length; i++)
+            {
+                us_ = user_stories[i];
+                if (us_.added == false)
+                {
+                    _html = "<tr id='"+ us_.id +"'>" +
+                        "<td><a href='#'>" + us_.description + "</a></td>" +
+                        "<td class='text-center'>"+us_.weight+"</td>" +
+                        "<td class='text-center'>"+ us_.estimated_time +"</td>" +
+                        "<td class='text-right'>" +
+                        "<button type='button' class='btn btn-default btn-sm addUS'>" +
+                        "<span class='glyphicon glyphicon-plus' aria-hidden='true'></span>" +
+                        "</button></td></tr>";
+                    $("#pb").append(_html);
+                }
+
+            }
+            ordenar_pb();
+        }
+
         function check_capacity()
         {
             _estimated = 0;
@@ -195,30 +344,32 @@
 
 
             $.each(sb, function(index, value){
-                _demanda += Number(value[3]);
-                _us_dem = Number(value[3]);
+                us_ = get_user_story_by_id(value);
+
+                _demanda += Number(us_.estimated_time);
+                _us_dem = Number(us_.estimated_time);
                 _us_cap = 0;
 
-                $.each(value[4], function(i, dev){
-                    if (dev != "") {
-                        _us_cap += $("#dev_" + dev).find(".text-center").html() * _estimated;
+                $.each(us_.developers, function(i, dev){
+
+                        _dev = get_developer_by_id(dev);
+                        _us_cap += _dev.hs_hombre * _estimated;
 
                         x = _devs.indexOf(dev);
                         if (x == -1) {
                             _devs.push(dev);
-                            _capacity += $("#dev_" + dev).find(".text-center").html() * _estimated;
+                            _capacity += _dev.hs_hombre * _estimated;
                         }
-                    }
-                });
 
+                });
                 if (_us_cap < _us_dem)
                 {
-                    $("#" + value[0]).addClass("danger");
+                    $("#" + value).addClass("danger");
                     _errors++;
                 }
                 else
                 {
-                    $("#" + value[0]).removeClass("danger");
+                    $("#" + value).removeClass("danger");
                 }
 
             });
@@ -251,38 +402,53 @@
 
         }
 
+        function get_user_story_by_id(id)
+        {
+
+            us_ = undefined;
+            $.each(user_stories, function(index, val)
+            {
+                if (val.id == id) {
+                    us_ = val;
+                }
+            });
+            return us_;
+        }
+
+        function get_developer_by_id(id)
+        {
+
+            dev_ = undefined;
+            $.each(developers, function(index, val)
+            {
+                if (val.id == id) {
+                    dev_ = val;
+                }
+            });
+            return dev_;
+        }
+
         function add_user_story(us_element) {
 
-
             us_id = $(us_element).prop('id');
-            us_desc = $(us_element).find('a').text();
-            us_prior = $(us_element).find('.text-center:first').text();
-            us_est = $(us_element).find('.text-center:last').text();
+            us_ = get_user_story_by_id(us_id);
+            us_.added = true;
             us_flows = [];
-
-            $("#" + us_id + "_flow_list").find("input[name=flow]").each(function(index, value){
-                flow_id = $(value).val();
-                flow_name = $("#" + flow_id + "_name").html();
-                us_flows.push([flow_id, flow_name, false]);
-            });
-
-            sb.push([us_id, us_desc, us_prior, us_est, [], us_flows]);
+            sb.push(us_id);
 
 
-
-            _demanda += parseInt(us_est);
+            _demanda += parseInt(us_.estimated_time);
             $("#demmand").val(_demanda);
 
             $("#id_us").html(us_id);
 
-
             $(us_element).remove();
 
 
-            $("#sb").append("<tr id='"+us_id+"'>" +
-                    "<td><a href='#'>" + us_desc + "</a> </td>" +
-                    "<td class='text-center'>" + us_prior + "</td>" +
-                    "<td class='text-center'>" + us_est + "</td>" +
+            $("#sb").append("<tr id='"+us_.id+"'>" +
+                    "<td><a href='#'>" + us_.description + "</a> </td>" +
+                    "<td class='text-center'>" + us_.weight + "</td>" +
+                    "<td class='text-center'>" + us_.estimated_time + "</td>" +
                     "<td class='text-center'>0</td>" +
                     "<td class='text-right'>" +
                             {% if delete_form %} {% else %}
@@ -292,7 +458,7 @@
                     "</td>" +
                     "</tr>");
 
-            console.log(sb);
+
             ordenar_sb();
 
 
@@ -362,6 +528,7 @@
                 }
             }
 
+
             sb_str_ = $("#id_sprint_backlog").val();
             if (sb_str_ != undefined && sb_str_ != '')
             {
@@ -382,21 +549,18 @@
 
         function cargar_sb(us, us_devs)
         {
-
+            cargar_pb();
             $us_element = $("#pb").find("tr[id='"+us+"']:first");
             add_user_story($us_element);
 
-            $.each(sb, function(index, value)
-            {
-               if (value[0] == us)
-               {
-                   value[4] = us_devs;
-               }
-            });
+            us_ = get_user_story_by_id(us);
+
             if (us_devs != "")
+                us_.developers = us_devs;
                 $("#"+ us).find(".text-center:last").html(us_devs.length);
 
         }
+
 
         $("#form").submit(function(event){
 
@@ -408,15 +572,9 @@
 
             $.each(sb, function(index, us)
             {
-                flujo = -1;
-                $.each(us[5], function(i, v){
-                   if  (v[2] == true)
-                   {
-                       flujo = v[0];
-                   }
-                });
-                sb_.push(us[0] + ":" + us[4].join("_") + ":" + flujo);
-
+                us_id = us;
+                us_ = get_user_story_by_id(us);
+                sb_.push(us_.id + ":" + us_.developers.join("_") + ":" + us_.flow.id + ":" + us_.flow.activity.id);
             });
 
             sb_str = sb_.join(",");
@@ -429,6 +587,7 @@
                     $("#id_" + fields[i]).val(elementos[i]);
                 }
             }
+
             $("#id_sprint_backlog").val(sb_str);
 
         });
@@ -552,9 +711,12 @@
                       <div class="form-group">
                           <div class="col-sm-offset-2 col-sm-10">
                                 {% if delete_form %}
-                                    <button type="submit" class="btn btn-default" id="delete">Borrar</button>
+                                    <button type="submit" class="btn btn-danger" id="delete">Borrar</button>
                                     <a href="{% url URL_NAMES.PROJECT_SPRINT_EDIT project.id sprint.id %}">
                                     <button type="button" class="btn btn-default" id="edit">Editar</button>
+                                    </a>
+                                    <a href="{% url URL_NAMES.PROJECT_SPRINT_LIST project.id %}">
+                                    <button type="button" class="btn btn-default" id="cancel">Cancelar</button>
                                     </a>
                                 {% elif edit_form %}
                                     <button type="submit" class="btn btn-default" id="save">Guardar</button>
@@ -567,7 +729,6 @@
                           </div>
                       </div>
                     </form>
-
                 </div>
             </div>
 
@@ -594,27 +755,6 @@
                     </tbody>
                     {% else %}
                     <tbody id="pb">
-                        {% for row in user_stories %}
-                        <tr id="{{ row.0.id }}">
-                            <td><a href="#">{{row.0.description}}</a>
-
-
-                                    <span id="{{row.0.id}}_flow_list" style="display: none">
-                                    {% for flow in row.0.flow_list %}
-                                        <input type="radio" value="{{flow.id}}" name="flow"><span id="{{flow.id}}_name">{{flow.name}}</span>
-                                    {% endfor %}
-                                    </span>
-                            </td>
-                            <td class="text-center">{{row.1}}</td>
-                            <td class="text-center">{{row.0.estimated_time}}</td>
-                            <td class="text-right">
-                                <button type="button" class="btn btn-default btn-sm addUS">
-                                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                </button>
-                            </td>
-                        </tr>
-
-                        {% endfor %}
                     </tbody>
                 {% endif %}
                 </table>
@@ -633,7 +773,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Selecciona desarrolladores y/o flujo:</h4>
+        <h4 class="modal-title">Configuracion:</h4>
       </div>
       <div class="modal-body" style="max-height: 500px; overflow-y: auto">
           <span id="id_us" style="display: none;"></span>
@@ -648,21 +788,12 @@
                         <tr class="danger">  <td colspan="2">Actualmente no hay desarrolladores</td> </tr>
                     </tbody>
                     {% else %}
-                    <tbody>
-                        {% for dev in dev_list %}
-                        <tr id="dev_{{ dev.id }}">
-                            <td>{{dev.user}}</td>
-                            <td class="text-center">{{dev.hs_hombre}}</td>
-                            <td class="text-right">
-                                <input type="checkbox" name="checkboxUser" {% if delete_form %} disabled {% endif %} value="{{dev.id}}" />
-                            </td>
-                        </tr>
-
-                        {% endfor %}
+                    <tbody id="dev_list">
                     </tbody>
                 {% endif %}
                 </table>
-                <p>Flujo:</p><p id="flujo_section"></p>
+                <p>Flujo:</p><p> <select id="flujo_section" class="form-control" {% if no_editable %} disabled {% endif %}></select></p>
+                <p>Actividad:</p><p><select id="actividad_section" class="form-control" {% if no_editable %} disabled {% endif %}></select></p>
 
 
       </div>
@@ -672,7 +803,5 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-
-
 
 {% endblock %}

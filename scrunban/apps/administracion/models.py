@@ -1,7 +1,7 @@
 from django.db import models
 from django.dispatch import receiver
 from apps.autenticacion.models import User, Role
-from apps.proyecto.models import Sprint, Project, Team, Flow
+from apps.proyecto.models import Sprint, Project, Team, Flow, Activity
 from django.utils import timezone
 
 class UserStoryType(models.Model):
@@ -27,7 +27,10 @@ class UserStory(models.Model):
     Modelo donde se almacena la información sobre cada actividad a realizar dentro del projecto.
     """
     # Public fields mapped to DB columns
-    description = models.CharField(max_length=140) # Twetter..?? XD
+
+    states = ['Pendiente', 'Ejecutando', 'Finalizado']
+
+    description = models.CharField(max_length=140)
     details = models.TextField()
     acceptance_requirements = models.TextField()
     estimated_time = models.IntegerField() # tiempo para su finalizacion en horas
@@ -36,6 +39,7 @@ class UserStory(models.Model):
     urgency = models.FloatField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     us_type = models.ForeignKey(UserStoryType, on_delete=models.SET_NULL, null=True)
+    state = models.IntegerField(default=0);
 
     # Public fields for simplicity
     user_stories = models.Manager() # Alias
@@ -55,10 +59,10 @@ class Grained(models.Model):
     # Public fields mapped to DB columns
     user_story = models.ForeignKey(UserStory)
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE)
-    # TODO activity = ...
-    # TODO state = ...
+    activity = models.ForeignKey(Activity, on_delete=models.SET_NULL, null=True)
+    state = models.IntegerField(default=1)
     developers = models.ManyToManyField(Team)
-    flow = models.ForeignKey(Flow, default=None, null=True)
+    flow = models.ForeignKey(Flow, default=None, null=True, on_delete=models.SET_NULL)
 
     # Public fields for simplicity
     graineds = models.Manager() # Alias

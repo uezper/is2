@@ -332,11 +332,15 @@ def user_story_summary(request, project, user_story):
     # TODO Check user permissions
     # TODO Check project id
     # TODO Check userstory id
+
+    us = UserStory.user_stories.get(pk=user_story)
+    us.state = UserStory.states[us.state]
     context = {
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
-        'user_story': UserStory.user_stories.get(pk=user_story)
+        'user_story': us
     }
+
     x = UserPermissionContextMixin()
     x.project = context['project']
     x.request = request
