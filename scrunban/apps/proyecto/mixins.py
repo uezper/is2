@@ -1,7 +1,8 @@
 from scrunban.settings.base import URL_NAMES, PROJECT_SPRINT_LIST
 from apps.autenticacion.models import User
-from apps.autenticacion.mixins import ValidateTestMixin
+from apps.autenticacion.mixins import ValidateTestMixin, UserIsAuthenticatedMixin, UserPermissionContextMixin, ValidateHasPermission
 from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 
 class UrlNamesContextMixin(object):
     """
@@ -91,3 +92,51 @@ class ValidateSprintStatePending(ValidateTestMixin):
             return sup
 
         return self.get_fail_state_url(request, *args, **kwargs)
+
+
+class DefaultFormData(object):
+
+    def get_default_fields(self):
+        return {}
+
+    def post(self, request, *args, **kwargs):
+        from django.http.request import QueryDict
+
+        form_class = self.get_form_class()
+
+        # Recibe la peticion enviada por POST
+        # y actualiza agregando los campos por defecto basados en la vista
+
+        data = QueryDict.dict(request.POST)
+        data.update(**self.get_default_fields())
+
+        qdict = QueryDict('', mutable=True)
+        qdict.update(data)
+
+        form = form_class(qdict)
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+class ProjectViwMixin(UserIsAuthenticatedMixin, ValidateHasPermission, UrlNamesContextMixin, UserPermissionContextMixin):
+
+    def get_project(self):
+        from apps.proyecto.models import Project
+        project_id = self.kwargs.get(self.pk_url_kwarg, None)
+        return get_object_or_404(Project, id=project_id)
+
+    def get_context_data(self, **kwargs):
+        context = super(ProjectViwMixin, self).get_context_data(**kwargs)
+        context['project'] = self.get_project()
+        context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
+
+        self.get_url_context(context)
+        self.get_user_permissions_context(context)
+
+
+        return context
+
+

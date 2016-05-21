@@ -310,8 +310,9 @@ class CreateSprintForm(forms.Form):
         return self._capacity
 
     def clean_demmand(self):
-        self.data['demmand'] = self._demmand
         self.data['capacity'] = self._capacity
+        self.data['demmand'] = self._demmand
+
         if self._demmand > self._capacity:
             raise ValidationError('La demanda es mayor que la capacidad del Sprint')
         return self._demmand
@@ -412,8 +413,11 @@ class CreateFlowForm(forms.Form):
 
         ac_list = self.cleaned_data['activities']
         new_ac_list = []
+        new_ac_names = []
         i = 1
         for ac in ac_list:
+            if (ac in new_ac_names):
+                raise ValidationError("No se puede tener actividades con nombres repetidos dentro del mismo flujo")
             new_ac = Activity()
             new_ac.name = ac
             new_ac.sec = i
@@ -421,6 +425,7 @@ class CreateFlowForm(forms.Form):
             i = i + 1
 
             new_ac_list.append(new_ac)
+            new_ac_names.append(ac)
 
         if len(new_ac_list) == 0:
             raise ValidationError('Debe introducir al menos una actividad')
@@ -462,9 +467,15 @@ class EditFlowForm(CreateFlowForm):
             ac.flow = f
             ac.save()
 
-class DeleteFlowForm(forms.Form):
+class DeleteFlowForm(EditFlowForm):
     project = forms.IntegerField(required=True, widget=forms.HiddenInput)
     flow = forms.IntegerField(required=True, widget=forms.HiddenInput)
+    old_name = forms.CharField(required=False, widget=forms.HiddenInput)
+
+    def clean_name(self):
+        pass
+    def clean_activities(self):
+        pass
 
     def clean_project(self):
         return Project.objects.get(id=self.cleaned_data['project'])
