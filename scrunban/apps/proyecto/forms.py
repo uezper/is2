@@ -149,6 +149,20 @@ class EditRolForm(CreateRolForm):
 
             rol.set_desc(self.cleaned_data['inputNombre'])
 
+            from apps.autenticacion.models import Role
+            from django.contrib.auth.models import Permission
+            from apps.autenticacion.settings import PROJECT_US_DEVELOP
+            from apps.proyecto.models import Team
+
+            old_perms = rol.get_perms()
+            p_ = Permission.objects.get(codename=PROJECT_US_DEVELOP[0])
+            save_hs = False
+            if p_ in old_perms:
+                save_hs = True
+                for u in users:
+                    team_ = Team.objects.filter(user=u,project=project)
+                    if (len(team_)):
+                        u.temp_ = team_[0].hs_hombre
 
             for u in rol.group.user_set.all():
                 rol.remove_user(u.user)
@@ -161,6 +175,10 @@ class EditRolForm(CreateRolForm):
 
             for u in users:
                 rol.add_user(u)
+                if (save_hs):
+                    x = Team.objects.filter(user=u,project=project)[0]
+                    x.hs_hombre = u.temp_
+                    x.save()
 
 
 
@@ -605,7 +623,7 @@ class DeleteFlowForm(EditFlowForm):
 
 
 class ChangeSprintStateForm(forms.Form):
-    operation = forms.CharField(required=True);
+    operation = forms.CharField(required=True)
 
     def clean_operation(self):
         op_ = self.cleaned_data['operation']
@@ -613,3 +631,110 @@ class ChangeSprintStateForm(forms.Form):
             raise ValidationError('Operacion invalida')
 
         return op_
+
+
+class KanbanOperation(forms.Form):
+    us = forms.IntegerField(required=True, widget=forms.HiddenInput)
+    grain = forms.IntegerField(required=True, widget=forms.HiddenInput)
+    opt = forms.CharField(required=False, widget=forms.HiddenInput)
+    operation = forms.CharField(required=True, widget=forms.HiddenInput)
+
+
+
+    def clean_us(self):
+        from apps.administracion.models import UserStory
+        us = UserStory.objects.filter(id=self.cleaned_data['us'])
+        if len(us) == 0:
+            raise ValidationError('US invalido')
+        us = us[0]
+        #TODO! Comprobar estado de US, permiso de dev, grain pertenece a sprint en ejecucion
+
+        return us
+
+    def clean_grain(self):
+        from apps.administracion.models import Grained
+        return Grained.objects.get(sprint=self.cleaned_data['grain'], user_story=self.cleaned_data['us'])
+
+    def clean_opt(self):
+        if self.cleaned_data.get('opt', '') == '':
+            return None
+        from apps.proyecto.models import Activity
+
+        act_ = Activity.objects.filter(id=self.cleaned_data['opt'])
+        if len(act_) == 0:
+            raise ValidationError('Actividad invalida')
+        else:
+            act_ = act_[0]
+            activities_ = Activity.objects.filter(flow=self.cleaned_data['grain'].flow)
+
+            if not (act_ in activities_):
+                raise ValidationError('Actividad invalida')
+            return act_
+
+    def clean_operation(self):
+
+        op = self.cleaned_data['operation']
+        if not(op in ['move_next', 'move_prev', 'move_act', 'aprove']):
+            raise ValidationError('Operacion invalida')
+
+        from apps.proyecto.models import Activity
+        from apps.administracion.models import Grained, Note
+
+        grain = self.cleaned_data['grain']
+        us_max_act = len(Activity.objects.filter(flow=grain.flow))
+        opt = self.cleaned_data.get('opt', None)
+        us = grain.user_story
+
+        if op == 'move_next' and grain.state == 3 and grain.activity.sec == us_max_act:
+            raise ValidationError('Operacion invalida')
+        elif op == 'move_prev' and grain.state == 1 and grain.activity.sec == 1:
+            raise ValidationError('Operacion invalida')
+        elif op == 'move_act' and opt == None:
+            raise ValidationError('Operacion invalida')
+        elif op == 'aprove':
+            if grain.state != 3:
+                raise ValidationError('Operacion invalida')
+
+            #TODO! Verificar permisos
+            worked_time = 0
+            grains_us = Grained.objects.filter(user_story=us)
+            for g in grains_us:
+                for note in Note.objects.filter(grained=g, aproved=True):
+                    worked_time = worked_time + note.work_load
+            if worked_time < us.estimated_time:
+                raise ValidationError('Operacion invalida')
+        return op
+
+    def save(self):
+        from apps.proyecto.models import Activity
+
+        op = self.cleaned_data['operation']
+        grain = self.cleaned_data['grain']
+
+        activities = Activity.objects.filter(flow=grain.flow).order_by('sec')
+
+        if (op == 'move_prev'):
+            if grain.state != 1:
+                grain.state = grain.state - 1
+                grain.save()
+            else:
+                grain.activity = activities[grain.activity.sec - 2]
+                grain.state = 3
+                grain.save()
+        elif(op == 'move_next'):
+            if grain.state != 3:
+                grain.state = grain.state + 1
+                grain.save()
+            else:
+                grain.activity = activities[grain.activity.sec]
+                grain.state = 1
+                grain.save()
+        elif(op == 'move_act'):
+            grain.activity = self.cleaned_data['opt']
+            grain.state = 1
+            grain.save()
+        elif(op == 'aprove'):
+            x = grain.user_story
+            x.state = 2
+            x.save()
+

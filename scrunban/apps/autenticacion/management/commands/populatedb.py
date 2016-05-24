@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from apps.administracion.models import UserStory, UserStoryType, Flow
 from apps.autenticacion.models import User
-from apps.proyecto.models import Project
+from apps.proyecto.models import Project, Activity
 
 from apps.autenticacion.apps import AutenticacionConfig
 
@@ -153,12 +153,20 @@ class Command(BaseCommand):
             product_owner = User.users.filter(username=reg[4])[0]
 
             p = Project.projects.create(name=reg[0], date_start=reg[1], date_end=reg[2], scrum_master=scrum_master, product_owner=product_owner)
-            
+
+
+
             default_flow = Flow.flows.create(name='Flujo por defecto', project=p)
+            activity = Activity.objects.create(name='Actividad 1', sec=1, flow=default_flow)
+            activity = Activity.objects.create(name='Actividad 2', sec=2, flow=default_flow)
+            activity = Activity.objects.create(name='Actividad 3', sec=3, flow=default_flow)
+
             default_user_story_type = UserStoryType.types.create(name='UST por defecto', project=p)
             default_user_story_type.flows.add(default_flow)
 
             default_empty_flow = Flow.flows.create(name='Flujo vacio', project=p)
+            activity = Activity.objects.create(name='Actividad 1', sec=1, flow=default_empty_flow)
+
 
             # Crea User Stories
             if p != None:

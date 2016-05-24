@@ -403,8 +403,8 @@ class Sprint(models.Model):
     project = models.ForeignKey(to=Project, null=True, blank=True, on_delete=models.CASCADE)
     state = models.CharField(max_length=15, choices=state_choices, default=state_choices[0][0], null=False)
     estimated_time = models.IntegerField(null=False) # en dias
-    real_time = models.IntegerField(null=False) # en dias
     start_date = models.DateField(null=True)
+    cancel_date = models.DateField(null=True)
 
     objects = models.Manager()
     sprints = SprintManager()
@@ -458,12 +458,6 @@ class Sprint(models.Model):
         self.estimated_time = time
         self.save()
 
-    def get_real_time(self):
-        """
-        Retorna el tiempo de duracion real del Sprint
-        :returns: Tiempo de duracion real
-        """
-        return self.get_real_time
 
 
     def get_start_date(self):

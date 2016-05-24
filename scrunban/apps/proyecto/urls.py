@@ -28,6 +28,8 @@ urlpatterns = [
         name=base_settings.PROJECT_SPRINT_DELETE),
     url(r'^(?P<project_id>[0-9]+)/sprint/detail/(?P<sprint_id>[0-9]+)/$', sprint.SprintDetailView.as_view(),
         name=base_settings.PROJECT_SPRINT_DETAIL),
+    url(r'^(?P<project_id>[0-9]+)/sprint/kanban/(?P<sprint_id>[0-9]+)/$', sprint.SprintKanbanView.as_view(),
+        name=base_settings.PROJECT_SPRINT_KANBAN),
     url(r'^(?P<project_id>[0-9]+)/flow/create/$', flow.FlowCreateView.as_view(),
         name=base_settings.PROJECT_FLOW_CREATE),
     url(r'^(?P<project_id>[0-9]+)/flow/$', flow.FlowListView.as_view(),

@@ -151,9 +151,9 @@ class SprintCreateView(ProjectViwMixin, DefaultFormData, FormView):
 
 
 
-from apps.proyecto.mixins import ValidateSprintStatePending
+from apps.proyecto.mixins import ValidateSprintState
 
-class SprintEditView(ValidateSprintStatePending, SprintCreateView):
+class SprintEditView(ValidateSprintState, SprintCreateView):
     """
     Clase correspondiente a la vista que permite editar un Sprint dentro de un proyecto
 
@@ -287,10 +287,14 @@ class SprintDetailView(ProjectViwMixin, FormView):
         context['sprint'] = self.sprint
         d_ = self.sprint.start_date
         if d_ != None:
-            context['sprint'].start_date = '{}/{}/{}'.format(d_.day, d_.month, d_.year)
-            context['sprint'].faltante = (d_ + timedelta(days=self.sprint.estimated_time) - date.today()).days
-            context['sprint'].progress = '{0:.0f}'.format(((date.today() - d_).days / self.sprint.estimated_time) * 100)
-            print(context['sprint'].progress)
+            if (self.sprint.state == 'Ejecucion'):
+                context['sprint'].start_date = '{}/{}/{}'.format(d_.day, d_.month, d_.year)
+                context['sprint'].faltante = (d_ + timedelta(days=self.sprint.estimated_time) - date.today()).days
+                context['sprint'].progress = '{0:.0f}'.format(((date.today() - d_).days / self.sprint.estimated_time) * 100)
+            elif (self.sprint.state == 'Cancelado'):
+                context['sprint'].start_date = '{}/{}/{}'.format(d_.day, d_.month, d_.year)
+                context['sprint'].faltante = (d_ + timedelta(days=self.sprint.estimated_time) - self.sprint.cancel_date).days
+                context['sprint'].progress = '{0:.0f}'.format(((self.sprint.cancel_date - d_).days / self.sprint.estimated_time) * 100)
         else:
             context['sprint'].start_date = ''
         context['sprint_data'] = self.get_context_sprint_data()
@@ -369,15 +373,25 @@ class SprintDetailView(ProjectViwMixin, FormView):
                 context['message'] = 'No se puede ejecutar al Sprint pues el tiempo de finalizacion supera al del proyecto. ' \
                                      'Edite el Sprint e intentelo de nuevo.'
             else:
+                from apps.administracion.models import Grained
+
+                grains = Grained.objects.filter(sprint=sprint)
+                for g in grains:
+                    x = g.user_story
+                    x.state = 1
+                    x.save()
 
                 sprint.start_date = date.today()
                 sprint.state = 'Ejecucion'
                 sprint.save()
                 context['message'] = 'El Sprint ha iniciado su ejecucion'
         elif (form.cleaned_data['operation'] == 'cancelar' and sprint.state == 'Ejecucion'):
+            from datetime import date
 
             sprint.state = 'Cancelado'
+            sprint.cancel_date = date.today()
             sprint.save()
+
             context['message'] = 'El Sprint ha sido cancelado'
 
         return super(SprintDetailView, self).render_to_response(self.get_context_data(**context))
@@ -390,3 +404,115 @@ class SprintDetailView(ProjectViwMixin, FormView):
 
         return super(SprintDetailView, self).render_to_response(self.get_context_data(**context))
 
+class SprintKanbanView(ProjectViwMixin, DefaultFormData, FormView):
+    """
+    Clase correspondiente a la vista que muestra el kanban de un Sprint de un proyecto
+
+    """
+
+    form_class = forms.KanbanOperation
+    template_name = 'proyecto/project_sprint_kanban'
+    pk_url_kwarg = 'project_id'
+    sprint_url_kwarg = 'sprint_id'
+    section_title = ''
+    left_active = 'Sprints'
+
+    def get_context_data(self, **kwargs):
+
+        context = super(SprintKanbanView, self).get_context_data(**kwargs)
+        self.sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg, ''))
+
+        context['sprint'] = self.sprint
+        context['sprint_data'] = self.get_context_sprint_data()
+
+        return context
+
+    def get_context_sprint_data(self):
+        from apps.administracion.models import Grained, Note, UserStory
+        from apps.proyecto.models import Activity
+
+        sprint = self.sprint
+
+        flows_added = []
+        flows = {}
+
+
+        # Agrupa los US de un Sprint por actividad y flujo
+        for grain in Grained.objects.filter(sprint=sprint):
+            temp_ = grain.user_story
+            temp_.us_state = UserStory.states[grain.user_story.state]
+            temp_.flow = grain.flow
+            temp_.activity = grain.activity
+            temp_.state = grain.state
+            temp_.demmand = grain.user_story.estimated_time
+            temp_.developers = {}
+
+            for dev in grain.developers.all():
+                temp_.developers[dev.user.id] = True
+
+            temp_.worked_time = 0
+
+            grains_us = Grained.objects.filter(user_story=grain.user_story)
+            for g in grains_us:
+                for note in Note.objects.filter(grained=g, aproved=True):
+                    temp_.worked_time = temp_.worked_time + note.work_load
+
+            temp_.completed = '{0:.0f}'.format(min((temp_.worked_time / temp_.estimated_time) * 100, 100))
+
+
+            if (grain.flow.id not in flows_added):
+                flows_added.append(grain.flow.id)
+                flows[grain.flow.id] = {}
+                flows[grain.flow.id]['flow'] = grain.flow
+                flows[grain.flow.id]['activity_list'] = {}
+
+                activity_list = Activity.objects.filter(flow = grain.flow).order_by('sec')
+                for act in activity_list:
+                    act.states = {
+                        '1': [],
+                        '2': [],
+                        '3': []
+                    }
+                    flows[grain.flow.id]['activity_list'][act.id] = act
+
+
+            flows[temp_.flow.id]['activity_list'][temp_.activity.id].states[str(grain.state)].append(temp_)
+
+        flow_list = [flows[id] for id in flows.keys()]
+        for flow in flow_list:
+            flow['activities'] = []
+            for act_id in flow['activity_list']:
+                act_ = flow['activity_list'][act_id]
+                states_ = [act_.states['1'], act_.states['2'], act_.states['3']]
+                act_.states = states_
+
+                flow['activities'].append(act_)
+
+        # Prepara el context
+
+        sprint_data = {}
+        sprint_data['flow_list'] = flow_list
+
+        return sprint_data
+
+    def get_default_fields(self):
+        from apps.administracion.models import Grained
+        sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
+
+        data = {
+            'grain': sprint.id,
+        }
+
+        return data
+
+    def form_valid(self, form):
+        form.save()
+        context = {}
+        return super(SprintKanbanView, self).render_to_response(self.get_context_data(**context))
+
+    def form_invalid(self, form):
+
+        context = {
+            'form': form
+        }
+        return super(SprintKanbanView, self).render_to_response(self.get_context_data(**context))

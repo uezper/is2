@@ -12,7 +12,7 @@ from django.views.generic.edit import FormView
 from apps.administracion.forms import UserEditForm
 from django.shortcuts import HttpResponseRedirect
 
-from apps.proyecto.mixins import UrlNamesContextMixin, ValidateSprintStatePending
+from apps.proyecto.mixins import UrlNamesContextMixin, ValidateSprintState
 from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin
 from scrunban.settings import base as base_settings
 
