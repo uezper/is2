@@ -39,7 +39,8 @@ class UserStory(models.Model):
     urgency = models.FloatField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     us_type = models.ForeignKey(UserStoryType, on_delete=models.SET_NULL, null=True)
-    state = models.IntegerField(default=0);
+    state = models.IntegerField(default=0)
+    delay_urgency = models.IntegerField(default=0)
 
     # Public fields for simplicity
     user_stories = models.Manager() # Alias
@@ -49,7 +50,7 @@ class UserStory(models.Model):
         return Note.notes.filter(user_story=self)
 
     def get_weight(self):
-        return (self.business_value + self.urgency + 2 * self.tecnical_value)/4
+        return (self.business_value + self.urgency + 2 * self.tecnical_value)/4 + self.delay_urgency
     
     def __str__(self):
         return "{}".format(self.description)

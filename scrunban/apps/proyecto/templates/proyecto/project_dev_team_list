@@ -42,7 +42,7 @@
 					{% endfor %}
 					<tr>
                         <td class="text-right"><b>Capacidad del Equipo:</b></td>
-                        <td class="text-center">{{project.capacity}}</td>
+                        <td class="text-center">{{capacity}}</td>
                         <td></td>
                     </tr>
 				</tbody>

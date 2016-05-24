@@ -12,7 +12,7 @@
 
 {% block "working_path" %}
 	{{ block.super }}
-	<li class="active">{{ section_title }}</li>
+	<li class="active">{{ sprint }}</li>
 {% endblock %}
 
 {% block "content" %}
@@ -23,7 +23,7 @@
 
 		<div class="row">
 		                <div class="col-md-12">
-		                    <h3>{{ section_title }}</h3>
+		                    <h3>{{ sprint }}</h3>
 				    <hr />
 
 
@@ -75,7 +75,9 @@
                                 {% else %}
                                 <div class="col-md-4"></div>
                                 {% endif %}
-                            <div class="col-md-4"></div>
+                            <div class="col-md-4 text-center">
+                                <a href="{% url URL_NAMES.PROJECT_SPRINT_KANBAN project.id sprint.id %}">Ver Kanban</a>
+                            </div>
                             {% if sprint.start_date != '' %}
                             {% if sprint.state == 'Ejecucion' or sprint.state == 'Cancelado' %}
                             <div class="col-md-2 text-right"><b>Timepo restante:</b></div>

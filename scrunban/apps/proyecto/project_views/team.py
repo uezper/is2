@@ -21,6 +21,15 @@ class DevListView(ProjectViwMixin, ListView):
     section_title = 'Equipo de Desarrollo'
     left_active = 'Equipo de Desarrollo'
 
+    def get_context_data(self, **kwargs):
+        context = super(DevListView, self).get_context_data(**kwargs)
+        cap = 0
+        for t in Team.objects.filter(project=self.get_project()):
+            cap = cap + t.hs_hombre
+
+        context['capacity'] = cap
+        return context
+
     def get_queryset(self):
         project = self.get_project()
         return Team.teams.filter(project=project)

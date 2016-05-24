@@ -66,9 +66,9 @@ class UserListMixin(object):
         """
         return User.objects.all()
 
-class ValidateSprintStatePending(ValidateTestMixin):
+class ValidateSprintState(ValidateTestMixin):
     """
-    Mixin que valida que el estado de un Sprint sea Pendiente antes de entrar en una vista
+    Mixin que valida que el estado de un Sprint no sea el de finalizado o cancelado antes de entrar en una vista
     """
 
     def get_fail_state_url(self, request, *args, **kwargs):
@@ -81,14 +81,14 @@ class ValidateSprintStatePending(ValidateTestMixin):
 
     def validate_tests(self, request, *args, **kwargs):
 
-        sup = super(ValidateSprintStatePending, self).validate_tests(request, *args, **kwargs)
+        sup = super(ValidateSprintState, self).validate_tests(request, *args, **kwargs)
 
         from apps.proyecto.models import Sprint
         from django.shortcuts import get_object_or_404
 
         sprint = get_object_or_404(Sprint, id=kwargs.get(self.sprint_url_kwarg))
 
-        if sprint.get_state() == Sprint.state_choices[0][0]:
+        if sprint.get_state() in ['Pendiente', 'Ejecucion']:
             return sup
 
         return self.get_fail_state_url(request, *args, **kwargs)
@@ -121,6 +121,8 @@ class DefaultFormData(object):
             return self.form_invalid(form)
 
 class ProjectViwMixin(UserIsAuthenticatedMixin, ValidateHasPermission, UrlNamesContextMixin, UserPermissionContextMixin):
+
+
 
     def get_project(self):
         from apps.proyecto.models import Project
