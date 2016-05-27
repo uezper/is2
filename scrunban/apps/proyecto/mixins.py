@@ -94,7 +94,7 @@ class ValidateSprintState(ValidateTestMixin):
         return self.get_fail_state_url(request, *args, **kwargs)
 
 
-class DefaultFormData(object):
+class DefaultFormDataMixin(object):
 
     def get_default_fields(self):
         return {}
@@ -123,6 +123,14 @@ class DefaultFormData(object):
 class ProjectViwMixin(UserIsAuthenticatedMixin, ValidateHasPermission, UrlNamesContextMixin, UserPermissionContextMixin):
 
     __checked = False
+
+
+    def get_fail_permission_url(self, request, *args, **kwargs):
+        from scrunban.settings.base import PROJECT_INDEX
+        project = self.get_project()
+
+        return reverse(PROJECT_INDEX, args=(project.id,))
+
 
     def get_project(self):
         from apps.proyecto.models import Project

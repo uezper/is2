@@ -134,9 +134,7 @@
                                                                 <span class="collapse" role="tabpanel" id="collapse_us_{{us.id}}">
                                                                     <div class="row">
                                                                         <div class="col-md-12">
-                                                                            {% if user_permissions.project_us_aprove or user.user.id in us.developers %}
                                                                             <p><a href="{% url URL_NAMES.PROJECT_US_DETAIL project.id us.id %}">Mas informacion</a></p>
-                                                                            {% endif %}
                                                                             <p>Completado: {{us.completed}}%</p>
                                                                             <p>Progreso: {{us.worked_time}} / {{us.estimated_time}} horas</p>
                                                                         </div>

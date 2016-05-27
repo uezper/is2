@@ -35,7 +35,7 @@
 				<tbody>
 					{% for flow in flow_list %}
 					<tr>
-						<td><a href="#">{{flow.name}}</a></td>
+						<td><a href="{% url URL_NAMES.PROJECT_FLOW_EDIT project.id flow.id %}">{{flow.name}}</a></td>
 						<td class="text-right">
 							{% if flow.can_delete %}
 							<a href="{% url URL_NAMES.PROJECT_FLOW_DELETE project.id flow.id %}">
