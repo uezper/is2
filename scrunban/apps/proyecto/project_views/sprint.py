@@ -48,14 +48,12 @@ class SprintCreateView(ProjectViwMixin, DefaultFormData, FormView):
 
     def get_required_permissions(self):
         from apps.autenticacion.settings import PROJECT_SPRINT_MANAGEMENT
-        from django.contrib.auth.models import Permission
 
-        required = []
-        required.append(PROJECT_SPRINT_MANAGEMENT)
+        required = [
+            PROJECT_SPRINT_MANAGEMENT
+        ]
 
-        res = [Permission.objects.get(codename=p[0]) for p in required]
-
-        return res
+        return required
 
     def get_default_fields(self):
         project = self.get_project()
@@ -286,9 +284,10 @@ class SprintDetailView(ProjectViwMixin, FormView):
 
         context['sprint'] = self.sprint
         d_ = self.sprint.start_date
-        tzinfo = d_.tzinfo
-        now = datetime.now(tzinfo)
+
         if d_ != None:
+            tzinfo = d_.tzinfo
+            now = datetime.now(tzinfo)
             if (self.sprint.state == 'Ejecucion'):
                 context['sprint'].start_date = d_
                 context['sprint'].progress = '{0:.0f}'.format(((now - d_).seconds / (self.sprint.estimated_time * 3600 * 24)) * 100)
