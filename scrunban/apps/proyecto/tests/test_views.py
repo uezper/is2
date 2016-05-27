@@ -40,11 +40,13 @@ class AutenticacionViewsTests(TestCase):
                                         perm = Permission.objects.filter(codename=p[0])[0]
                                         r.add_perm(perm)
 
-        def authenticate(self, client):
+        def authenticate(self, client, u=None):
+
                 u = User.users.create(username='Test_client_user', password='client')
-                client.login(username='Test_client_user', password='client')
+                client.login(username=u.get_username(), password='client')
 
         def create_project(self, nombre='Testing project'):
+
                 u = User.users.create(username='Test_user', password='dummy password')
 
                 data = {
@@ -67,6 +69,7 @@ class AutenticacionViewsTests(TestCase):
                 self.assertEqual(isinstance(c.get(path), http.HttpResponseNotFound), True)
 
         def test_list_rol_view_valid_project(self):
+
                 c = self.client
                 self.authenticate(c)
 
@@ -75,7 +78,7 @@ class AutenticacionViewsTests(TestCase):
 
                 path = reverse(base_settings.PROJECT_ROLE_LIST, args=(project.id,))
 
-                self.assertEqual(c.get(path).status_code, 200)
+                self.assertEqual(c.get(path).status_code, 302)
 
         def test_create_rol_view_invalid_project(self):
                 c = self.client

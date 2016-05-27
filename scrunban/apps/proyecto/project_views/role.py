@@ -9,9 +9,17 @@ from apps.proyecto.models import Role
 class RoleListView(ProjectViwMixin, ListView):
 
     """
-    Clase correspondiente a la vista que lista los roles de un proyecto
+        Clase correspondiente a la vista que lista los roles de un proyecto
 
+        :param model: Modelo que Django utilizara para listar los objetos
+        :param context_object_name: Nombre dentro del context que contendra la lista de objetos.
+        :param template_name: Nombre del template que sera utilizado
+        :param pk_url_kwarg: Nombre del parametro de url que contiene el id del proyecto
+        :param paginate_by: Nro. maximo de elementos por pagina
+        :param section_title: Titulo de la Seccion, colocado dentro del context['section_title']
+        :param left_active: Nombre de la seccion activa del menu lateral izquierdo
 
+        Esta clase hereda de `ProjectViewMixin` y de `ListViewMixin`
     """
     model = Role
     context_object_name = 'role_list'
@@ -21,11 +29,39 @@ class RoleListView(ProjectViwMixin, ListView):
     section_title = 'Lista de Roles'
     left_active = 'Roles'
 
+    def get_required_permissions(self):
+        """
+
+       Este metodo genera y retorna una lista de los permisos requeridos para que un usuario pueda acceder a una vista.
+
+       Los permisos deben ser las tuplas de dos elementos definidos en `apps.autenticacion.settings`
+
+       :return: Lista de permisos requeridos para acceder a la vista
+       """
+        from apps.autenticacion.settings import PROJECT_ROL_MANAGEMENT
+
+        required = [
+            PROJECT_ROL_MANAGEMENT
+        ]
+
+        return required
+
+
     def get_queryset(self):
+        """
+            Este metodo retorna el queryset que sera guardado dentro de `context['context_object_name']`
+
+            :return: Queryset. Lista que sera guardada dentro del context
+        """
         project = self.get_project()
         return project.get_roles()
 
     def get_context_data(self, **kwargs):
+        """
+            Metodo que retorna el context que sera enviado al template
+
+            :return: Context
+        """
         context = super(RoleListView, self).get_context_data(**kwargs)
 
         self.get_role_info(context)
@@ -33,7 +69,13 @@ class RoleListView(ProjectViwMixin, ListView):
         return context
 
     def get_role_info(self, context):
+        """
+        Metodo que agrega informacion adicional a los permisos que seran cargados al context. Esos datos
+        adiciones incluyen informacion sobre si un Permiso puede o no ser eliminado.
 
+        :param context: Context
+        :return: Context con los permisos y sus datos adicionales agregados.
+        """
         from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
 
         project = self.get_project()
@@ -44,11 +86,11 @@ class RoleListView(ProjectViwMixin, ListView):
             removable = True
             users = len(rol.group.user_set.all())
 
+            if rol.group.name in [str(project.id) + '_' + DEFAULT_PROJECT_ROLES[0][0], str(project.id) + '_' + DEFAULT_PROJECT_ROLES[1][0]]:
+                continue
 
-            for default_rol in DEFAULT_PROJECT_ROLES:
-                if (str(project.id) + '_' + default_rol[0] == rol.group.name):
-                    removable = False
-                    break
+            elif (str(project.id) + '_' + DEFAULT_PROJECT_ROLES[2][0] == rol.group.name):
+                removable = False
 
 
             new_role_list.append((rol, removable, users))
@@ -57,7 +99,15 @@ class RoleListView(ProjectViwMixin, ListView):
 
 class RoleCreateView(ProjectViwMixin, FormView, UserListMixin, PermissionListMixin):
     """
-    Clase correspondiente a la vista que permite crear un rol dentro de un proyecto
+        Clase correspondiente a la vista que permite crear un rol dentro de un proyecto
+
+        :param form_class: Formulario que se encarga de la validacion de los datos ingresados por usuarios
+        :param template_name: Nombre del template que sera utilizado
+        :param pk_url_kwarg: Nombre del parametro de url que contiene el id del proyecto
+        :param section_title: Titulo de la Seccion, colocado dentro del context['section_title']
+        :param left_active: Nombre de la seccion activa del menu lateral izquierdo
+
+        Esta clase hereda de `ProjectViewMixin`, `FormView`, `UserListMixin` y `PermissionListMixin`
 
     """
 
@@ -69,7 +119,11 @@ class RoleCreateView(ProjectViwMixin, FormView, UserListMixin, PermissionListMix
     left_active = 'Roles'
 
     def get_context_data(self, **kwargs):
+        """
+            Metodo que retorna el context que sera enviado al template
 
+            :return: Context
+            """
         context = super(RoleCreateView, self).get_context_data(**kwargs)
 
         self.get_user_list_context(context)
@@ -83,12 +137,22 @@ class RoleCreateView(ProjectViwMixin, FormView, UserListMixin, PermissionListMix
 
 
     def get_success_url(self):
+        """
+            Retorna la url a donde sera redirigido el usuario cuando se haya procesado correctamente un formulario
+
+            :return: Url
+            """
         project = self.get_project()
 
         from scrunban.settings.base import PROJECT_ROLE_LIST
         return reverse(PROJECT_ROLE_LIST, args=(project.id,))
 
     def get_initial(self):
+        """
+            Valores por defecto de un formulario al ser cargado por primera vez
+
+            :return: Un diccionario conteniendo los valores por defecto de un formulario
+            """
         project = self.get_project()
 
         initial = {
@@ -98,13 +162,23 @@ class RoleCreateView(ProjectViwMixin, FormView, UserListMixin, PermissionListMix
         return initial
 
     def form_valid(self, form):
+        """
+            Metodo que es llamado cuando un formulario enviado por el usuario es valido.
 
+            :param form: Formulario que ha sido ya comprobado y es valido
+            :return: HttpResponse
+            """
         form.save()
         return HttpResponseRedirect(self.get_success_url())
 
 
     def form_invalid(self, form):
+        """
+            Netodo que es llamado cuando un formulario enviado por el usuario es invalido.
 
+            :param form: Formulario invalido con los errores respectivos
+            :return: HttpResponse
+            """
         context = {
             'form': form
         }
@@ -113,15 +187,27 @@ class RoleCreateView(ProjectViwMixin, FormView, UserListMixin, PermissionListMix
 
 class RoleEditView(RoleCreateView):
     """
-    Clase correspondiente a la vista que permite editar un rol dentro de un proyecto
+        Clase correspondiente a la vista que permite editar un rol dentro de un proyecto
 
-    """
+        :param form_class: Formulario que se encarga de la validacion de los datos ingresados por usuarios
+        :param section_title: Titulo de la Seccion, colocado dentro del context['section_title']
+        :param rol_id_kwname: Nombre del parametro url que contiene el id del rol
+
+        Esta clase hereda de `RoleCreateView`
+
+        """
 
     form_class = forms.EditRolForm
     section_title = 'Editar Rol'
     rol_id_kwname = 'rol_id'
 
     def get_initial(self):
+        """
+            Valores por defecto de un formulario al ser cargado por primera vez
+
+            :return: Un diccionario conteniendo los valores por defecto de un formulario
+            """
+
         project = self.get_project()
         rol_id = self.kwargs.get(self.rol_id_kwname)
         rol = get_object_or_404(Role, id=rol_id)
@@ -141,6 +227,11 @@ class RoleEditView(RoleCreateView):
 
 
     def get_context_data(self, **kwargs):
+        """
+            Metodo que retorna el context que sera enviado al template
+
+            :return: Context
+            """
 
         from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
 
@@ -168,6 +259,11 @@ class RoleDeleteView(RoleEditView):
     """
     Clase correspondiente a la vista que permite eliminar un rol dentro de un proyecto
 
+
+    :param form_class: Formulario que se encarga de la validacion de los datos ingresados por usuarios
+    :param section_title: Titulo de la Seccion, colocado dentro del context['section_title']
+
+    Esta clase hereda de `RoleEditView`
     """
 
 
@@ -177,6 +273,12 @@ class RoleDeleteView(RoleEditView):
 
 
     def get(self, request, *args, **kwargs):
+        """
+        Metodo que es llamado cuando el usuario hace una solicitud GET a la pagina
+
+        :return: HttpResponse
+        """
+
         form = self.form_class(self.get_initial())
         if (form.is_valid()):
             return super(RoleDeleteView, self).get(request, *args, **kwargs)
@@ -188,6 +290,11 @@ class RoleDeleteView(RoleEditView):
             return HttpResponseRedirect(reverse(PROJECT_ROLE_LIST, args=(project.id,)))
 
     def get_initial(self):
+        """
+            Valores por defecto de un formulario al ser cargado por primera vez
+
+            :return: Un diccionario conteniendo los valores por defecto de un formulario
+            """
         initial = super(RoleDeleteView, self).get_initial()
         initial['inputID'] = self.kwargs.get(self.rol_id_kwname)
 
@@ -195,6 +302,11 @@ class RoleDeleteView(RoleEditView):
         return initial
 
     def get_context_data(self, **kwargs):
+        """
+            Metodo que retorna el context que sera enviado al template
+
+            :return: Context
+            """
 
         context = super(RoleDeleteView, self).get_context_data(**kwargs)
 

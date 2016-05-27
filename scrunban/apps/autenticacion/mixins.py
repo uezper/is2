@@ -10,11 +10,15 @@ class UserPermissionListMixin(object):
     """
 
     def get_project(self):
+        if hasattr(self, 'project'):
+            return self.project
         return None
 
     def get_user_permissions_list(self):
         from apps.autenticacion.models import Role
         from apps.autenticacion.settings import DEF_ROLE_ADMIN
+
+
 
         r = Role.objects.get(group__name=DEF_ROLE_ADMIN[0])
 
@@ -23,6 +27,7 @@ class UserPermissionListMixin(object):
 
         # Permisos de un proyecto especifico
         project = self.get_project()
+
         if (project != None):
             for perm in project.get_user_perms(self.request.user.user):
                 result.append(perm)
@@ -31,6 +36,7 @@ class UserPermissionListMixin(object):
         if self.request.user.user in r.get_users():
             for perm in r.get_perms():
                 result.append(perm)
+
 
         return result
 
@@ -46,6 +52,8 @@ class UserPermissionContextMixin(UserPermissionListMixin):
 
 
     def get_user_permissions_context(self, context):
+
+
         context[self.user_permission_context_name] = {}
 
         for perm in self.get_user_permissions_list():
@@ -92,21 +100,24 @@ class ValidateHasPermission(ValidateTestMixin, UserPermissionListMixin):
         return reverse_lazy(PERFIL_NAME, args=[request.user.user.id])
 
     def validate_tests(self, request, *args, **kwargs):
-
+        from django.contrib.auth.models import Permission
         sup = super(ValidateHasPermission, self).validate_tests(request, *args, **kwargs)
 
         user_perms = self.get_user_permissions_list()
 
         required = self.get_required_permissions()
+        required = [Permission.objects.get(codename=p[0]) for p in required]
 
         if len(required) == 0:
             return sup
 
         for perm in required:
-            if perm in user_perms:
-                return sup
+            if not(perm in user_perms):
+                return self.get_fail_permission_url(request, *args, **kwargs)
 
-        return self.get_fail_permission_url(request, *args, **kwargs)
+        return sup
+
+
 
 
 

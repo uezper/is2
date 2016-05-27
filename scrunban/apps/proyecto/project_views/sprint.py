@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http.response import HttpResponseRedirect
 
-from apps.proyecto.mixins import ProjectViwMixin, DefaultFormData
+from apps.proyecto.mixins import ProjectViwMixin, DefaultFormDataMixin
 from apps.proyecto import forms
 from apps.proyecto.models import Sprint
 
@@ -12,11 +12,19 @@ from apps.proyecto.models import Sprint
 
 
 class SprintListView(ProjectViwMixin, ListView):
-
     """
-    Clase correspondiente a la vista que lista los Sprints de un proyecto
+       Clase correspondiente a la vista que lista los sprints de un proyecto
 
-    """
+       :param model: Modelo que Django utilizara para listar los objetos
+       :param context_object_name: Nombre dentro del context que contendra la lista de objetos.
+       :param template_name: Nombre del template que sera utilizado
+       :param pk_url_kwarg: Nombre del parametro de url que contiene el id del proyecto
+       :param paginate_by: Nro. maximo de elementos por pagina
+       :param section_title: Titulo de la Seccion, colocado dentro del context['section_title']
+       :param left_active: Nombre de la seccion activa del menu lateral izquierdo
+
+       Esta clase hereda de `ProjectViewMixin` y de `ListViewMixin`
+       """
     model = Sprint
     context_object_name = 'sprint_list'
     template_name = 'proyecto/project_sprint_list'
@@ -25,15 +33,45 @@ class SprintListView(ProjectViwMixin, ListView):
     section_title = 'Sprints'
     left_active = 'Sprints'
 
+    def get_required_permissions(self):
+        """
+
+        Este metodo genera y retorna una lista de los permisos requeridos para que un usuario pueda acceder a una vista.
+
+        Los permisos deben ser las tuplas de dos elementos definidos en `apps.autenticacion.settings`
+
+        :return: Lista de permisos requeridos para acceder a la vista
+        """
+        from apps.autenticacion.settings import PROJECT_KANBAN_WATCH
+
+        required = [
+            PROJECT_KANBAN_WATCH
+        ]
+
+        return required
+
     def get_queryset(self):
+        """
+            Este metodo retorna el queryset que sera guardado dentro de `context['context_object_name']`
+
+            :return: Queryset. Lista que sera guardada dentro del context
+            """
         project = self.get_project()
         return Sprint.sprints.filter(project=project)
 
-class SprintCreateView(ProjectViwMixin, DefaultFormData, FormView):
+class SprintCreateView(ProjectViwMixin, DefaultFormDataMixin, FormView):
     """
-    Clase correspondiente a la vista que permite crear un Sprint dentro de un proyecto
+        Clase correspondiente a la vista que permite crear un sprint dentro de un proyecto
 
-    """
+        :param form_class: Formulario que se encarga de la validacion de los datos ingresados por usuarios
+        :param template_name: Nombre del template que sera utilizado
+        :param pk_url_kwarg: Nombre del parametro de url que contiene el id del proyecto
+        :param section_title: Titulo de la Seccion, colocado dentro del context['section_title']
+        :param left_active: Nombre de la seccion activa del menu lateral izquierdo
+
+        Esta clase hereda de `ProjectViewMixin`, `DefaultFormDataMixin` y de `FormView`
+
+        """
 
     form_class = forms.CreateSprintForm
     template_name = 'proyecto/project_sprint_create_edit_delete'
@@ -42,22 +80,29 @@ class SprintCreateView(ProjectViwMixin, DefaultFormData, FormView):
     section_title = 'Crear Sprint'
     left_active = 'Sprints'
 
-    def get_fail_permission_url(self, request, *args, **kwargs):
-        from scrunban.settings.base import PROJECT_INDEX
-        return reverse(PROJECT_INDEX, args=(kwargs[self.pk_url_kwarg],))
-
     def get_required_permissions(self):
+        """
+
+        Este metodo genera y retorna una lista de los permisos requeridos para que un usuario pueda acceder a una vista.
+
+        Los permisos deben ser las tuplas de dos elementos definidos en `apps.autenticacion.settings`
+
+        :return: Lista de permisos requeridos para acceder a la vista
+        """
         from apps.autenticacion.settings import PROJECT_SPRINT_MANAGEMENT
-        from django.contrib.auth.models import Permission
 
-        required = []
-        required.append(PROJECT_SPRINT_MANAGEMENT)
+        required = [
+            PROJECT_SPRINT_MANAGEMENT
+        ]
 
-        res = [Permission.objects.get(codename=p[0]) for p in required]
-
-        return res
+        return required
 
     def get_default_fields(self):
+        """
+            Campos por defecto que son agregados a los datos proveidos por los usuarios al enviar un formulario.
+
+            :return: Diccionario con campos por defectos y sus respectivos valores.
+        """
         project = self.get_project()
 
         data = {
@@ -69,6 +114,11 @@ class SprintCreateView(ProjectViwMixin, DefaultFormData, FormView):
         return data
 
     def get_context_data(self, **kwargs):
+        """
+            Metodo que retorna el context que sera enviado al template
+
+            :return: Context
+            """
         context = super(SprintCreateView, self).get_context_data(**kwargs)
 
         context['user_stories'] = []
@@ -110,12 +160,22 @@ class SprintCreateView(ProjectViwMixin, DefaultFormData, FormView):
         return context
 
     def get_success_url(self):
+        """
+            Retorna la url a donde sera redirigido el usuario cuando se haya procesado correctamente un formulario
+
+            :return: Url
+            """
         project = self.get_project()
 
         from scrunban.settings.base import PROJECT_SPRINT_LIST
         return reverse(PROJECT_SPRINT_LIST, args=(project.id,))
 
     def get_initial(self):
+        """
+            Valores por defecto de un formulario al ser cargado por primera vez
+
+            :return: Un diccionario conteniendo los valores por defecto de un formulario
+            """
         from apps.proyecto.models import Sprint
         project = self.get_project()
         sec = 1
@@ -135,13 +195,24 @@ class SprintCreateView(ProjectViwMixin, DefaultFormData, FormView):
         return initial
 
     def form_valid(self, form):
+        """
+            Metodo que es llamado cuando un formulario enviado por el usuario es valido.
+
+            :param form: Formulario que ha sido ya comprobado y es valido
+            :return: HttpResponse
+            """
 
         form.save()
         return HttpResponseRedirect(self.get_success_url())
 
 
     def form_invalid(self, form):
+        """
+            Netodo que es llamado cuando un formulario enviado por el usuario es invalido.
 
+            :param form: Formulario invalido con los errores respectivos
+            :return: HttpResponse
+            """
         context = {
             'form' : form
         }
@@ -155,9 +226,15 @@ from apps.proyecto.mixins import ValidateSprintState
 
 class SprintEditView(ValidateSprintState, SprintCreateView):
     """
-    Clase correspondiente a la vista que permite editar un Sprint dentro de un proyecto
+        Clase correspondiente a la vista que permite editar un sprint dentro de un proyecto
 
-    """
+        :param form_class: Formulario que se encarga de la validacion de los datos ingresados por usuarios
+        :param section_title: Titulo de la Seccion, colocado dentro del context['section_title']
+        :param sprint_url_kwarg: Parametro url que contiene el id del sprint
+
+        Esta clase hereda de `ValidateSprintState` y de `SprintCreateView`
+
+        """
 
     form_class = forms.EditSprintForm
     sprint_url_kwarg = 'sprint_id'
@@ -165,6 +242,11 @@ class SprintEditView(ValidateSprintState, SprintCreateView):
 
 
     def get_default_fields(self):
+        """
+            Campos por defecto que son agregados a los datos proveidos por los usuarios al enviar un formulario.
+
+            :return: Diccionario con campos por defectos y sus respectivos valores.
+            """
         from apps.proyecto.models import Sprint
 
         project = self.get_project()
@@ -181,6 +263,11 @@ class SprintEditView(ValidateSprintState, SprintCreateView):
         return data
 
     def get_context_data(self, **kwargs):
+        """
+            Metodo que retorna el context que sera enviado al template
+
+            :return: Context
+            """
         context = super(SprintEditView, self).get_context_data(**kwargs)
 
 
@@ -213,6 +300,11 @@ class SprintEditView(ValidateSprintState, SprintCreateView):
         return context
 
     def get_initial(self):
+        """
+            Valores por defecto de un formulario al ser cargado por primera vez
+
+            :return: Un diccionario conteniendo los valores por defecto de un formulario
+            """
         from apps.proyecto.models import Sprint
         from apps.administracion.models import Grained
 
@@ -236,9 +328,14 @@ class SprintEditView(ValidateSprintState, SprintCreateView):
 
 class SprintDeleteView(SprintEditView):
     """
-    Clase correspondiente a la vista que permite eliminar un Sprint dentro de un proyecto
+        Clase correspondiente a la vista que permite eliminar un sprint dentro de un proyecto
 
-    """
+
+        :param form_class: Formulario que se encarga de la validacion de los datos ingresados por usuarios
+        :param section_title: Titulo de la Seccion, colocado dentro del context['section_title']
+
+        Esta clase hereda de `SprintEditView`
+        """
 
     form_class = forms.DeleteSprintForm
 
@@ -246,6 +343,11 @@ class SprintDeleteView(SprintEditView):
 
 
     def get_context_data(self, **kwargs):
+        """
+            Metodo que retorna el context que sera enviado al template
+
+            :return: Context
+            """
         context = super(SprintDeleteView, self).get_context_data(**kwargs)
         context['delete_form'] = True
         context['no_editable'] = True
@@ -256,11 +358,21 @@ class SprintDeleteView(SprintEditView):
 
 
 class SprintDetailView(ProjectViwMixin, FormView):
-
     """
-    Clase correspondiente a la vista que muestra la informacion sobre un Sprint de un proyecto
+        Clase correspondiente a la vista que muestra los detalles de un sprint de un proyecto
 
-    """
+        :param form_class: Formulario que se encarga de la validacion de los datos ingresados por usuarios
+        :param template_name: Nombre del template que sera utilizado
+        :param pk_url_kwarg: Nombre del parametro de url que contiene el id del proyecto
+        :param user_story_paginate_by: Nro. maximo de user stories por pagina
+        :param dev_paginate_by: Nro. maximo de desarrolladores por pagina
+        :param us_page_name: Nombre del parametro url que tendra el nro. de pagina actual de user stories
+        :param dev_page_name: Nombre del parametro url que tendra el nro. de pagina actual de desarrolladores
+        :param section_title: Titulo de la Seccion, colocado dentro del context['section_title']
+        :param left_active: Nombre de la seccion activa del menu lateral izquierdo
+
+        Esta clase hereda de `ProjectViewMixin` y de `FormView`
+        """
 
     form_class = forms.ChangeSprintStateForm
     template_name = 'proyecto/project_sprint_detail_view'
@@ -275,6 +387,11 @@ class SprintDetailView(ProjectViwMixin, FormView):
 
 
     def get_context_data(self, **kwargs):
+        """
+            Metodo que retorna el context que sera enviado al template
+
+            :return: Context
+            """
         from datetime import timedelta, datetime
 
         context = super(SprintDetailView, self).get_context_data(**kwargs)
@@ -286,9 +403,10 @@ class SprintDetailView(ProjectViwMixin, FormView):
 
         context['sprint'] = self.sprint
         d_ = self.sprint.start_date
-        tzinfo = d_.tzinfo
-        now = datetime.now(tzinfo)
+
         if d_ != None:
+            tzinfo = d_.tzinfo
+            now = datetime.now(tzinfo)
             if (self.sprint.state == 'Ejecucion'):
                 context['sprint'].start_date = d_
                 context['sprint'].progress = '{0:.0f}'.format(((now - d_).seconds / (self.sprint.estimated_time * 3600 * 24)) * 100)
@@ -331,6 +449,11 @@ class SprintDetailView(ProjectViwMixin, FormView):
         return context
 
     def get_context_sprint_data(self):
+        """
+        Metodo que agrega informacion adicional al context
+
+        :return: Diccionario con datos adicionales
+        """
         from apps.administracion.models import Grained
 
         sprint = self.sprint
@@ -387,6 +510,12 @@ class SprintDetailView(ProjectViwMixin, FormView):
         return sprint_data
 
     def form_valid(self, form):
+        """
+            Metodo que es llamado cuando un formulario enviado por el usuario es valido.
+
+            :param form: Formulario que ha sido ya comprobado y es valido
+            :return: HttpResponse
+            """
         context = {}
         sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg, ''))
 
@@ -426,19 +555,31 @@ class SprintDetailView(ProjectViwMixin, FormView):
         return super(SprintDetailView, self).render_to_response(self.get_context_data(**context))
 
     def form_invalid(self, form):
+        """
+            Netodo que es llamado cuando un formulario enviado por el usuario es invalido.
 
+            :param form: Formulario invalido con los errores respectivos
+            :return: HttpResponse
+            """
         context = {
             'form': form
         }
 
         return super(SprintDetailView, self).render_to_response(self.get_context_data(**context))
 
-class SprintKanbanView(ProjectViwMixin, DefaultFormData, FormView):
+class SprintKanbanView(ProjectViwMixin, DefaultFormDataMixin, FormView):
     """
-    Clase correspondiente a la vista que muestra el kanban de un Sprint de un proyecto
+        Clase correspondiente a la vista que muestra el kanban de un sprint de un proyecto
 
-    """
+        :param form_class: Formulario que se encarga de la validacion de los datos ingresados por usuarios
+        :param template_name: Nombre del template que sera utilizado
+        :param pk_url_kwarg: Nombre del parametro de url que contiene el id del proyecto
+        :param sprint_url_kwarg: Nombre del parametro url que contiene el id del sprint
+        :param section_title: Titulo de la Seccion, colocado dentro del context['section_title']
+        :param left_active: Nombre de la seccion activa del menu lateral izquierdo
 
+        Esta clase hereda de `ProjectViewMixin`, `DefaultFormDataMixin` y de `FormView`
+        """
     form_class = forms.KanbanOperation
     template_name = 'proyecto/project_sprint_kanban'
     pk_url_kwarg = 'project_id'
@@ -447,6 +588,11 @@ class SprintKanbanView(ProjectViwMixin, DefaultFormData, FormView):
     left_active = 'Sprints'
 
     def get_context_data(self, **kwargs):
+        """
+            Metodo que retorna el context que sera enviado al template
+
+            :return: Context
+            """
 
         context = super(SprintKanbanView, self).get_context_data(**kwargs)
         self.sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg, ''))
@@ -457,6 +603,11 @@ class SprintKanbanView(ProjectViwMixin, DefaultFormData, FormView):
         return context
 
     def get_context_sprint_data(self):
+        """
+        Metodo que agrega informacion adicional al context
+
+        :return: Informacion adicional a ser agregado al context
+        """
         from apps.administracion.models import Grained, Note, UserStory
         from apps.proyecto.models import Activity
 
@@ -525,7 +676,12 @@ class SprintKanbanView(ProjectViwMixin, DefaultFormData, FormView):
         return sprint_data
 
     def get_default_fields(self):
-        from apps.administracion.models import Grained
+        """
+            Campos por defecto que son agregados a los datos proveidos por los usuarios al enviar un formulario.
+
+            :return: Diccionario con campos por defectos y sus respectivos valores.
+            """
+
         sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
 
         data = {
@@ -535,12 +691,23 @@ class SprintKanbanView(ProjectViwMixin, DefaultFormData, FormView):
         return data
 
     def form_valid(self, form):
+        """
+            Metodo que es llamado cuando un formulario enviado por el usuario es valido.
+
+            :param form: Formulario que ha sido ya comprobado y es valido
+            :return: HttpResponse
+            """
         form.save()
         context = {}
         return super(SprintKanbanView, self).render_to_response(self.get_context_data(**context))
 
     def form_invalid(self, form):
+        """
+            Netodo que es llamado cuando un formulario enviado por el usuario es invalido.
 
+            :param form: Formulario invalido con los errores respectivos
+            :return: HttpResponse
+            """
         context = {
             'form': form
         }
