@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from scrunban.settings import base as base_settings
 from . import views
-from .project_views import flow, sprint, role, team
+from .project_views import flow, sprint, role, team, user_story
 
 urlpatterns = [
     url(r'^(?P<project_id>[0-9]+)/$', views.index,
@@ -38,5 +38,7 @@ urlpatterns = [
         name=base_settings.PROJECT_FLOW_EDIT),
     url(r'^(?P<project_id>[0-9]+)/flow/delete/(?P<flow_id>[0-9]+)/$', flow.FlowDeleteView.as_view(),
         name=base_settings.PROJECT_FLOW_DELETE),
+    url(r'^(?P<project_id>[0-9]+)/userstory/detail/(?P<user_story_id>[0-9]+)/$', user_story.UserStorySummaryView.as_view(),
+        name=base_settings.PROJECT_US_DETAIL),
 ]
 

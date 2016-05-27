@@ -20,7 +20,7 @@
       <tbody>
 	{% for user_story in user_stories %}
 	<tr>
-	  <td><a href="{% url URL_NAMES.ADM_US_SUMMARY project.pk user_story.pk %}">{{ user_story.description }}</a></td>
+	  <td><a href="{% url URL_NAMES.PROJECT_US_DETAIL project.pk user_story.pk %}">{{ user_story.description }}</a></td>
 	  <td>{{ user_story.details }}</td>
 	  <td class="text-right">
 	    <a href="{% url URL_NAMES.ADM_US_DELETE project.pk user_story.pk %}">

@@ -403,8 +403,8 @@ class Sprint(models.Model):
     project = models.ForeignKey(to=Project, null=True, blank=True, on_delete=models.CASCADE)
     state = models.CharField(max_length=15, choices=state_choices, default=state_choices[0][0], null=False)
     estimated_time = models.IntegerField(null=False) # en dias
-    start_date = models.DateField(null=True)
-    cancel_date = models.DateField(null=True)
+    start_date = models.DateTimeField(null=True)
+    cancel_date = models.DateTimeField(null=True)
 
     objects = models.Manager()
     sprints = SprintManager()

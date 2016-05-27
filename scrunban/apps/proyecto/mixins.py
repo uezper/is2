@@ -122,12 +122,35 @@ class DefaultFormData(object):
 
 class ProjectViwMixin(UserIsAuthenticatedMixin, ValidateHasPermission, UrlNamesContextMixin, UserPermissionContextMixin):
 
-
+    __checked = False
 
     def get_project(self):
         from apps.proyecto.models import Project
+        from datetime import datetime
         project_id = self.kwargs.get(self.pk_url_kwarg, None)
-        return get_object_or_404(Project, id=project_id)
+        project = get_object_or_404(Project, id=project_id)
+
+        if not(self.__checked):
+            from apps.proyecto.models import Sprint
+            from apps.administracion.models import Grained
+
+            self.__checked = True
+
+            sprints = Sprint.objects.filter(project=project, state='Ejecucion')
+            for s in sprints:
+                print(((datetime.now(s.start_date.tzinfo) - s.start_date).days))
+                if (datetime.now(s.start_date.tzinfo) - s.start_date).days >= s.estimated_time:
+                    s.state = 'Finalizado'
+                    s.save()
+
+                    for g in Grained.objects.filter(sprint=s):
+                        x = g.user_story
+                        x.delay_urgency = x.delay_urgency + 2
+                        x.save()
+
+
+
+        return project
 
     def get_context_data(self, **kwargs):
         context = super(ProjectViwMixin, self).get_context_data(**kwargs)

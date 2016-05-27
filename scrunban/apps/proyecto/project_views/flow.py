@@ -22,8 +22,25 @@ class FlowListView(ProjectViwMixin, ListView):
     left_active = 'Flujos'
 
     def get_queryset(self):
+        from apps.administracion.models import UserStoryType, Grained
+        from apps.proyecto.models import Sprint
+
         project = self.get_project()
-        return Flow.objects.filter(project=project)
+
+        flows = Flow.objects.filter(project=project)
+        for f in flows:
+            f.can_delete = True
+            f.can_edit = True
+
+            for ust in UserStoryType.objects.filter(project=project):
+                if f in ust.flows.all():
+                    f.can_delete = False
+            for s in Sprint.objects.filter(project=project):
+                for g in Grained.objects.filter(sprint=s):
+                    if f in g.user_story.us_type.flows.all():
+                        f.can_edit = False
+
+        return flows
 
 
 class FlowCreateView(ProjectViwMixin, DefaultFormData, FormView):

@@ -37,16 +37,19 @@
 					<tr>
 						<td><a href="#">{{flow.name}}</a></td>
 						<td class="text-right">
-
+							{% if flow.can_delete %}
 							<a href="{% url URL_NAMES.PROJECT_FLOW_DELETE project.id flow.id %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 							</button></a>
+							{% endif %}
+							{% if flow.can_edit %}
 							<a href="{% url URL_NAMES.PROJECT_FLOW_EDIT project.id flow.id %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
 							</button>
 							</a>
+							{% endif %}
 
 
 						</td>

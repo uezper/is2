@@ -738,3 +738,43 @@ class KanbanOperation(forms.Form):
             x.state = 2
             x.save()
 
+class AproveUSForm(forms.Form):
+    project_id = forms.CharField(required=True, widget=forms.HiddenInput)
+    user_id = forms.CharField(required=True, widget=forms.HiddenInput)
+    note_id = forms.CharField(required=True, widget=forms.HiddenInput)
+
+    def clean_project_id(self):
+        return Project.objects.get(id=self.cleaned_data['project_id'])
+
+    def clean_user_id(self):
+        from apps.autenticacion.settings import PROJECT_US_APROVE
+
+        user = User.objects.get(id=self.cleaned_data['user_id'])
+        project = self.cleaned_data['project_id']
+
+        if not(project.has_perm(user, PROJECT_US_APROVE[0])):
+            raise ValidationError('Permiso denegado')
+
+        return user
+
+    def clean_note_id(self):
+        from apps.administracion.models import Note
+
+        note = Note.objects.filter(id=self.cleaned_data['note_id'])
+        if len(note) == 0:
+            raise ValidationError('Nota invalida')
+
+        note = note[0]
+
+        if note.aproved:
+            raise ValidationError('Nota ya esta aprovada')
+
+        if note.grained.sprint.state != 'Ejecucion':
+            raise ValidationError('Operacion invalida')
+
+        return note
+
+    def save(self):
+        note = self.cleaned_data['note_id']
+        note.aproved = True
+        note.save()

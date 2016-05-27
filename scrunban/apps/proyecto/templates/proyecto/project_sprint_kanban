@@ -57,6 +57,7 @@
 
 {% block "working_path" %}
 	{{ block.super }}
+    <li><a href="{% url URL_NAMES.PROJECT_SPRINT_LIST project.id %}">Sprints</a></li>
 	<li><a href="{% url URL_NAMES.PROJECT_SPRINT_DETAIL project.id sprint.id %}">{{ sprint }}</a></li>
     <li class="active">Kanban</li>
 {% endblock %}
@@ -134,10 +135,10 @@
                                                                     <div class="row">
                                                                         <div class="col-md-12">
                                                                             {% if user_permissions.project_us_aprove or user.user.id in us.developers %}
-                                                                            <p><a href="{% url URL_NAMES.ADM_US_SUMMARY project.id us.id %}">Mas informacion</a></p>
+                                                                            <p><a href="{% url URL_NAMES.PROJECT_US_DETAIL project.id us.id %}">Mas informacion</a></p>
                                                                             {% endif %}
                                                                             <p>Completado: {{us.completed}}%</p>
-                                                                            <p>Progreso: {{us.worked_time}} / {{us.estimated_time}}</p>
+                                                                            <p>Progreso: {{us.worked_time}} / {{us.estimated_time}} horas</p>
                                                                         </div>
                                                                     </div>
                                                             {% if sprint.state == 'Ejecucion' and us.us_state != 'Finalizado'%}

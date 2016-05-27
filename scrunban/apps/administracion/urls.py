@@ -11,7 +11,6 @@ urlpatterns = [
     url(r'^project/(?P<project>\d+)/userstory/$', views.user_story_list, name=base_settings.ADM_US_LIST),
     url(r'^project/(?P<project>\d+)/userstory/create$', views.user_story_create, name=base_settings.ADM_US_CREATE),
     url(r'^project/(?P<project>\d+)/userstory/(?P<user_story>\d+)/delete$', views.user_story_delete, name=base_settings.ADM_US_DELETE),
-    url(r'^project/(?P<project>\d+)/userstory/(?P<user_story>\d+)$', views.user_story_summary, name=base_settings.ADM_US_SUMMARY),
     
     url(r'^project/(?P<project>\d+)/userstorytype/$', views.user_story_type_list, name=base_settings.ADM_UST_LIST),
     url(r'^project/(?P<project>\d+)/userstorytype/create$', views.user_story_type_create, name=base_settings.ADM_UST_CREATE),

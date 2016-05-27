@@ -1,12 +1,12 @@
 from django.shortcuts import get_object_or_404
-from django.views.generic import ListView, FormView, TemplateView
+from django.views.generic import ListView, FormView
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http.response import HttpResponseRedirect
 
 from apps.proyecto.mixins import ProjectViwMixin, DefaultFormData
 from apps.proyecto import forms
-from apps.proyecto.models import Sprint, Project
+from apps.proyecto.models import Sprint
 
 
 
@@ -275,7 +275,7 @@ class SprintDetailView(ProjectViwMixin, FormView):
 
 
     def get_context_data(self, **kwargs):
-        from datetime import date, timedelta
+        from datetime import timedelta, datetime
 
         context = super(SprintDetailView, self).get_context_data(**kwargs)
         self.sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg, ''))
@@ -286,15 +286,44 @@ class SprintDetailView(ProjectViwMixin, FormView):
 
         context['sprint'] = self.sprint
         d_ = self.sprint.start_date
+        tzinfo = d_.tzinfo
+        now = datetime.now(tzinfo)
         if d_ != None:
             if (self.sprint.state == 'Ejecucion'):
-                context['sprint'].start_date = '{}/{}/{}'.format(d_.day, d_.month, d_.year)
-                context['sprint'].faltante = (d_ + timedelta(days=self.sprint.estimated_time) - date.today()).days
-                context['sprint'].progress = '{0:.0f}'.format(((date.today() - d_).days / self.sprint.estimated_time) * 100)
+                context['sprint'].start_date = d_
+                context['sprint'].progress = '{0:.0f}'.format(((now - d_).seconds / (self.sprint.estimated_time * 3600 * 24)) * 100)
+                temp_ = (d_ + timedelta(days=self.sprint.estimated_time) - now)
+
+                if temp_.days > 0:
+                    if temp_.days == 1:
+                        context['sprint'].faltante = '1 dia'
+                    else:
+                        context['sprint'].faltante = str(temp_.days) + ' dias'
+                elif temp_.seconds > 3600:
+                    context['sprint'].faltante = '{0:.0f}'.format((temp_.seconds / 3600)) + ' horas'
+                elif temp_.seconds > 60:
+                    context['sprint'].faltante = '{0:.0f}'.format((temp_.seconds / 60)) + ' minutos'
+                else:
+                    context['sprint'].faltante = str(temp_.seconds) + ' segundos'
+
             elif (self.sprint.state == 'Cancelado'):
-                context['sprint'].start_date = '{}/{}/{}'.format(d_.day, d_.month, d_.year)
-                context['sprint'].faltante = (d_ + timedelta(days=self.sprint.estimated_time) - self.sprint.cancel_date).days
-                context['sprint'].progress = '{0:.0f}'.format(((self.sprint.cancel_date - d_).days / self.sprint.estimated_time) * 100)
+                context['sprint'].start_date = d_
+                temp_ = (d_ + timedelta(days=self.sprint.estimated_time) - self.sprint.cancel_date)
+                if temp_.days > 0:
+                    if temp_.days == 1:
+                        context['sprint'].faltante = '1 dia'
+                    else:
+                        context['sprint'].faltante = str(temp_.days) + ' dias'
+                elif temp_.seconds > 3600:
+                    context['sprint'].faltante = '{0:.0f}'.format((temp_.seconds / 3600)) + ' horas'
+                elif temp_.seconds > 60:
+                    context['sprint'].faltante = '{0:.0f}'.format((temp_.seconds / 60)) + ' minutos'
+                else:
+                    context['sprint'].faltante = str(temp_.seconds) + ' segundos'
+
+
+                context['sprint'].progress = '{0:.0f}'.format(((self.sprint.cancel_date - d_).seconds / (self.sprint.estimated_time * 3600 * 24)) * 100)
+
         else:
             context['sprint'].start_date = ''
         context['sprint_data'] = self.get_context_sprint_data()
@@ -362,7 +391,7 @@ class SprintDetailView(ProjectViwMixin, FormView):
         sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg, ''))
 
         if (form.cleaned_data['operation'] == 'ejecutar' and sprint.state == 'Pendiente'):
-            from datetime import date, timedelta
+            from datetime import date, timedelta, datetime
 
             project_date_end = self.get_project().date_end
             today = date.today()
@@ -381,15 +410,15 @@ class SprintDetailView(ProjectViwMixin, FormView):
                     x.state = 1
                     x.save()
 
-                sprint.start_date = date.today()
+                sprint.start_date = datetime.now()
                 sprint.state = 'Ejecucion'
                 sprint.save()
                 context['message'] = 'El Sprint ha iniciado su ejecucion'
         elif (form.cleaned_data['operation'] == 'cancelar' and sprint.state == 'Ejecucion'):
-            from datetime import date
+            from datetime import datetime
 
             sprint.state = 'Cancelado'
-            sprint.cancel_date = date.today()
+            sprint.cancel_date = datetime.now()
             sprint.save()
 
             context['message'] = 'El Sprint ha sido cancelado'
