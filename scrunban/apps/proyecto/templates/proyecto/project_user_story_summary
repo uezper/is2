@@ -1,0 +1,180 @@
+{% extends "proyecto/project_base" %}
+
+{% block "include" %}
+<script>
+    $(document).ready(function(){
+
+        $(".aprobar").click(function () {
+           note_id = $(this).prop('id');
+
+           $("#nota_id").html(note_id);
+
+           $("#seguroModal").modal({
+                show: true
+           });
+        });
+
+        $("#seguro").click(function(){
+            note_id = $("#nota_id").html();
+            $("#id_note_id").val(note_id);
+            $("#form").submit();
+        });
+    });
+</script>
+{% endblock %}
+
+{% block "working_path" %}
+	{{ block.super }}
+    <li><a href="{% url URL_NAMES.ADM_US_LIST project.id %}">User Stories</a></li>
+	<li class="active">{{ user_story }}</li>
+{% endblock %}
+
+{% block "content" %}
+
+	<div class="panel panel-default">
+
+		<div class="panel-body">
+
+		<div class="row">
+		                <div class="col-md-12">
+		                    <h3>{{ user_story }}</h3>
+				    <hr />
+
+                <form method="post" action="#" id="form">
+                    {% csrf_token %}
+                    {{form.note_id}}
+                </form>
+
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="thumbnail">
+                      <div class="caption">
+                          <h4 class="text-center  text-primary">Informacion Basica</h4>
+
+                          <div class="row">
+                            <div class="col-md-3 text-right"><b>Descripcion:</b></div>
+                            <div class="col-md-6">{{user_story}}</div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-3 text-right"><b>Estado:</b></div>
+                            <div class="col-md-6">{{user_story.state}}</div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-3 text-right"><b>Detalles de Implementacion:</b></div>
+                            <div class="col-md-6">{{user_story.details}}</div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-3 text-right"><b>Requisitos de Aceptacion:</b></div>
+                            <div class="col-md-6">{{user_story.acceptance_requirements}}</div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-3 text-right"><b>Tiempo estimado:</b></div>
+                            <div class="col-md-6">{{user_story.estimated_time}} horas</div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-3 text-right"><b>Valor tecnico:</b></div>
+                            <div class="col-md-6">{{user_story.tecnical_value}}</div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-3 text-right"><b>Valor de Negocio:</b></div>
+                            <div class="col-md-6">{{user_story.business_value}}</div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-3 text-right"><b>Urgencia:</b></div>
+                            <div class="col-md-6">{{user_story.urgency}}</div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-3 text-right"><b>Urgencia por retraso:</b></div>
+                            <div class="col-md-6">{{user_story.delay_urgency}}</div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-3 text-right"><b>Tipo de User Story:</b></div>
+                            <div class="col-md-6">{{user_story.us_type.name}} horas</div>
+                          </div>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {% if user_story_data.note_list|length > 0 %}
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="thumbnail">
+                      <div class="caption">
+                          <h4 class="text-center  text-primary">Historial de Notas</h4>
+
+                          {% for note in user_story_data.note_list %}
+                                    <div class="row">
+                                      <div class="col-md-12">
+                                        <div class="thumbnail">
+                                          <div class="caption">
+                                              <div class="row">
+                                                <div class="col-md-2 text-right"><b>Estado:</b></div>
+                                                <div class="col-md-10">{% if note.aproved %} Aprobado {% else %} Pendiente de aprobacion{% endif %}</div>
+                                              </div>
+                                              <div class="row">
+                                                <div class="col-md-2 text-right"><b>Fecha:</b></div>
+                                                <div class="col-md-4">{{note.date|date:"d/M/Y"}}</div>
+                                                <div class="col-md-2 text-right"><b>Sprint:</b></div>
+                                                <div class="col-md-4"><a href="{% url URL_NAMES.PROJECT_SPRINT_DETAIL project.id note.grained.sprint.id %}">{{note.grained.sprint}}</a> ({{note.grained.sprint.state}})</div>
+                                              </div>
+                                              <div class="row">
+                                                <div class="col-md-2 text-right"><b>Desarrollador:</b></div>
+                                                <div class="col-md-4"><a href="{% url URL_NAMES.PERFIL_NAME note.user.id %}">{{note.user}}</a></div>
+                                                <div class="col-md-2 text-right"><b>Horas cargadas:</b></div>
+                                                <div class="col-md-4">{{note.work_load}} horas</div>
+                                              </div>
+                                              <div class="row">
+                                                <div class="col-md-2 text-right"><b>Nota:</b></div>
+                                                <div class="col-md-10">{{note.note}}</div>
+                                              </div>
+                                              {% if note.grained.sprint.state == 'Ejecucion' and note.aproved == False %}
+                                              <div class="row">
+                                                  <div class="col-md-12 text-center"><button class="btn btn-success aprobar" id="{{note.id}}">Aprobar</button></div>
+                                              </div>
+                                              {% endif %}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                          {% endfor %}
+
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
+
+
+
+		</div>
+
+		</div>
+
+		</div>
+	</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="seguroModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Aprobar nota</h4>
+      </div>
+      <div class="modal-body">
+          <span id="nota_id" style="display: none;"></span>
+        <p>Estas seguro de que quieres aprobar esta nota?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+        <button type="button" class="btn btn-primary" id="seguro">Si</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+{% endblock %}
