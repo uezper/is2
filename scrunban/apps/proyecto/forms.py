@@ -1,6 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Permission
+from django.template.defaulttags import widthratio
+
 from apps.autenticacion.models import User
 from apps.administracion.models import Project
 from apps.proyecto.fields import PermissionListField, UserListField, SprintBacklogField, ActivitiesField
@@ -161,7 +163,7 @@ class EditRolForm(CreateRolForm):
                 save_hs = True
                 for u in users:
                     team_ = Team.objects.filter(user=u,project=project)
-                    if (len(team_)):
+                    if len(team_) != 0:
                         u.temp_ = team_[0].hs_hombre
 
             for u in rol.group.user_set.all():
@@ -177,7 +179,10 @@ class EditRolForm(CreateRolForm):
                 rol.add_user(u)
                 if (save_hs):
                     x = Team.objects.filter(user=u,project=project)[0]
-                    x.hs_hombre = u.temp_
+                    if hasattr(u, 'temp_'):
+                        x.hs_hombre = u.temp_
+                    else:
+                        x.hs_homre = 1
                     x.save()
 
 
@@ -484,6 +489,11 @@ class EditSprintForm(CreateSprintForm):
         sprint_ = Sprint.objects.get(id=self.cleaned_data['id'])
         sprint_.set_estimated_time(self.cleaned_data['estimated_time'])
 
+        if sprint_.state == 'Pendiente':
+            for grain in Grained.objects.filter(sprint=sprint_):
+                grain.delete()
+
+
         for us in self.cleaned_data['sprint_backlog']:
             grain = Grained.objects.filter(sprint=sprint_, user_story=us[0])
             if len(grain) == 0:
@@ -491,15 +501,15 @@ class EditSprintForm(CreateSprintForm):
                 grain.user_story = us[0]
                 grain.sprint = sprint_
                 grain.save()
-
             else:
                 grain = grain[0]
-                grain.flow = us[2]
-                grain.activity = us[3]
-                grain.state = 1
 
-                for dev in grain.developers.all():
-                    grain.developers.remove(dev)
+            grain.flow = us[2]
+            grain.activity = us[3]
+            grain.state = 1
+
+            for dev in grain.developers.all():
+                grain.developers.remove(dev)
 
             for dev in us[1]:
                 grain.developers.add(dev)
@@ -638,8 +648,10 @@ class KanbanOperation(forms.Form):
     grain = forms.IntegerField(required=True, widget=forms.HiddenInput)
     opt = forms.CharField(required=False, widget=forms.HiddenInput)
     operation = forms.CharField(required=True, widget=forms.HiddenInput)
+    user = forms.IntegerField(required=True, widget=forms.HiddenInput)
 
-
+    def clean_user(self):
+        return User.objects.get(id=self.cleaned_data['user'])
 
     def clean_us(self):
         from apps.administracion.models import UserStory
@@ -734,9 +746,22 @@ class KanbanOperation(forms.Form):
             grain.state = 1
             grain.save()
         elif(op == 'aprove'):
+            from apps.administracion.models import Note
+            from _datetime import datetime
+
             x = grain.user_story
             x.state = 2
             x.save()
+
+            n = Note()
+            n.grained = grain
+            n.user = self.cleaned_data['user']
+            n.date = datetime.utcnow()
+            n.note = 'El User Story ha sido aprobado'
+            n.aproved = True
+            n.work_load = 0
+            n.save()
+
 
 class AproveUSForm(forms.Form):
     project_id = forms.CharField(required=True, widget=forms.HiddenInput)
@@ -771,6 +796,8 @@ class AproveUSForm(forms.Form):
 
         if note.grained.sprint.state != 'Ejecucion':
             raise ValidationError('Operacion invalida')
+        if note.grained.user_story.state != 1:
+            raise ValidationError('Operacion invalida')
 
         return note
 
@@ -778,3 +805,40 @@ class AproveUSForm(forms.Form):
         note = self.cleaned_data['note_id']
         note.aproved = True
         note.save()
+
+
+class AddWorkLoad(forms.Form):
+    note = forms.CharField(required=True, widget=forms.HiddenInput)
+    work_load = forms.IntegerField(required=True, widget=forms.HiddenInput)
+    user = forms.IntegerField(required=True, widget=forms.HiddenInput)
+    grained = forms.IntegerField(required=True, widget=forms.HiddenInput)
+
+    def clean_note(self):
+        if self.cleaned_data['note'].replace(' ', '') == '':
+            raise ValidationError('La nota no puede estar vacia')
+        return self.cleaned_data['note']
+
+    def clean_workload(self):
+        if self.cleaned_data['work_load'] <= 0:
+            raise ValidationError('La cantidad de hs trabajadas debe ser un entero positivo mayor que cero')
+        return self.cleaned_data['work_load']
+
+    def clean_user(self):
+        return User.objects.get(id=self.cleaned_data['user'])
+
+    def clean_grained(self):
+        from apps.administracion.models import Grained
+        return Grained.objects.get(id=self.cleaned_data['grained'])
+
+    def save(self):
+        from apps.administracion.models import Note
+        from datetime import datetime
+
+        n = Note()
+        n.work_load = self.cleaned_data['work_load']
+        n.note = self.cleaned_data['note']
+        n.user = self.cleaned_data['user']
+        n.grained = self.cleaned_data['grained']
+        n.date = datetime.utcnow()
+        n.save()
+

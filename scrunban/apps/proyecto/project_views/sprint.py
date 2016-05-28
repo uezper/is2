@@ -281,19 +281,21 @@ class SprintEditView(ValidateSprintState, SprintCreateView):
 
 
         for g in Grained.objects.filter(sprint=self.sprint):
-            temp_ = g.user_story
-            temp_.available_flows = g.user_story.us_type.flows.all()
+            if (g.user_story.state != 2):
+                temp_ = g.user_story
 
-            for flow_ in temp_.available_flows:
-                flow_.activities = Activity.objects.filter(flow=flow_).order_by('sec')
+                temp_.available_flows = g.user_story.us_type.flows.all()
 
-            temp_.weight = "{0:.2f}".format(temp_.get_weight())
-            temp_.flow = g.flow
-            temp_.flow.activity = g.activity
-            temp_.flow.activities = Activity.objects.filter(flow=g.flow).order_by('sec')
+                for flow_ in temp_.available_flows:
+                    flow_.activities = Activity.objects.filter(flow=flow_).order_by('sec')
+
+                temp_.weight = "{0:.2f}".format(temp_.get_weight())
+                temp_.flow = g.flow
+                temp_.flow.activity = g.activity
+                temp_.flow.activities = Activity.objects.filter(flow=g.flow).order_by('sec')
 
 
-            context['user_stories'].append(temp_)
+                context['user_stories'].append(temp_)
 
 
 
@@ -312,9 +314,10 @@ class SprintEditView(ValidateSprintState, SprintCreateView):
 
         sb = []
         for grain in Grained.objects.filter(sprint=self.sprint):
-            us_id = grain.user_story.id
-            us_devs = '_'.join([str(g.id) for g in grain.developers.all()])
-            sb.append(str(us_id) + ':' + us_devs)
+            if grain.user_story.state != 2:
+                us_id = grain.user_story.id
+                us_devs = '_'.join([str(g.id) for g in grain.developers.all()])
+                sb.append(str(us_id) + ':' + us_devs)
 
         sb_string = ','.join(sb)
 
@@ -683,9 +686,11 @@ class SprintKanbanView(ProjectViwMixin, DefaultFormDataMixin, FormView):
             """
 
         sprint = get_object_or_404(Sprint, id=self.kwargs.get(self.sprint_url_kwarg))
+        user = self.request.user.user
 
         data = {
             'grain': sprint.id,
+            'user': user.id
         }
 
         return data
