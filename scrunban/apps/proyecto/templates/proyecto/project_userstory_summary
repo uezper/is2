@@ -129,10 +129,12 @@
                                                 <div class="col-md-2 text-right"><b>Nota:</b></div>
                                                 <div class="col-md-10">{{note.note}}</div>
                                               </div>
-                                              {% if note.grained.sprint.state == 'Ejecucion' and note.aproved == False %}
+                                              {% if user_permissions.project_us_aprove %}
+                                              {% if note.grained.sprint.state == 'Ejecucion' and note.aproved == False and note.grained.user_story.state == 1 %}
                                               <div class="row">
                                                   <div class="col-md-12 text-center"><button class="btn btn-success aprobar" id="{{note.id}}">Aprobar</button></div>
                                               </div>
+                                              {% endif %}
                                               {% endif %}
                                           </div>
                                         </div>

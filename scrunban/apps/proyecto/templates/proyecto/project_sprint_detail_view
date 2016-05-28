@@ -54,6 +54,7 @@
                             {% endif %}
                         </div>
                         <div class="row">
+                            {% if user_permissions.project_sprint_management %}
                             {% if can_execute and sprint.state != 'Finalizado' and sprint.state != 'Cancelado' %}
                             <div class="col-md-2 text-right"><b>Operacion:</b></div>
                             <div class="col-md-2">
@@ -76,6 +77,9 @@
                                 {% else %}
                                 <div class="col-md-4"></div>
                                 {% endif %}
+                            {% else %}
+                                 <div class="col-md-4"></div>
+                            {% endif %}
                             <div class="col-md-4 text-center">
                                 <a href="{% url URL_NAMES.PROJECT_SPRINT_KANBAN project.id sprint.id %}">Ver Kanban</a>
                             </div>

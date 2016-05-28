@@ -40,5 +40,8 @@ urlpatterns = [
         name=base_settings.PROJECT_FLOW_DELETE),
     url(r'^(?P<project_id>[0-9]+)/userstory/detail/(?P<user_story_id>[0-9]+)/$', user_story.UserStorySummaryView.as_view(),
         name=base_settings.PROJECT_US_DETAIL),
+    url(r'^(?P<project_id>[0-9]+)/userstory/addwork/(?P<user_story_id>[0-9]+)/$',
+        user_story.UserStoryAddWorkload.as_view(),
+        name=base_settings.PROJECT_US_ADDWORK),
 ]
 

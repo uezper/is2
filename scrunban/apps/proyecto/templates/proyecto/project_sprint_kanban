@@ -171,13 +171,16 @@
 
                                                                     </div>
                                                                     {% endif %}
-
+                                                                    {% if user.user.id in us.developers and us.state == 2 %}
                                                                     <div class="row">
                                                                         <div class="col-md-12" style="margin-top: 2px">
+                                                                            <a href="{% url URL_NAMES.PROJECT_US_ADDWORK project.id us.id %}">
                                                                             <button class="btn btn-primary col-md-12">Agregar trabajo</button>
+                                                                            </a>
                                                                         </div>
 
                                                                     </div>
+                                                                    {% endif %}
                                                                   {% if us.state == 3 and us.worked_time >= us.estimated_time and user_permissions.project_us_aprove %}
                                                                     <div class="row">
                                                                         <div class="col-md-12" style="margin-top: 2px">

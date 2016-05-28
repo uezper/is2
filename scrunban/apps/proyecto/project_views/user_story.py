@@ -26,7 +26,7 @@ class UserStorySummaryView(ProjectViwMixin, DefaultFormDataMixin, FormView):
         """
 
     form_class = forms.AproveUSForm
-    template_name = 'proyecto/project_user_story_summary'
+    template_name = 'proyecto/project_userstory_summary'
     pk_url_kwarg = 'project_id'
     us_url_kwarg = 'user_story_id'
     notes_paginate_by = 10
@@ -159,3 +159,144 @@ class UserStorySummaryView(ProjectViwMixin, DefaultFormDataMixin, FormView):
         }
 
         return super(UserStorySummaryView, self).render_to_response(self.get_context_data(**context))
+
+
+
+class UserStoryAddWorkload(ProjectViwMixin, DefaultFormDataMixin, FormView):
+    """
+        Clase correspondiente a la vista que muestra la informacion sobre un User Story dentor de un proyecto
+
+        :param form_class: Formulario que se encarga de la validacion de los datos ingresados por usuarios
+        :param template_name: Nombre del template que sera utilizado
+        :param pk_url_kwarg: Nombre del parametro de url que contiene el id del proyecto
+        :param us_url_kwarg: Nombre del parametro url que contiene el id del user story
+        :param section_title: Titulo de la Seccion, colocado dentro del context['section_title']
+        :param left_active: Nombre de la seccion activa del menu lateral izquierdo
+
+        Esta clase hereda de `ProjectViewMixin`, `DefaultFormDataMixin` y de `FormView`
+        """
+
+    form_class = forms.AddWorkLoad
+    template_name = 'proyecto/project_userstory_addwork'
+    pk_url_kwarg = 'project_id'
+    us_url_kwarg = 'user_story_id'
+    section_title = 'Agregar trabajo al User Story'
+    left_active = 'User Stories'
+
+    def validate_tests(self, request, *args, **kwargs):
+        """
+        Metodo que se encarga de validar que se cumpla una condicion para entrar a la vista
+
+        :return:  Url a donde sera redirigido si el test falla, o None
+        """
+        from apps.proyecto.models import Sprint
+        from apps.administracion.models import Grained
+        from django.contrib.auth.models import Permission
+        from apps.autenticacion.settings import PROJECT_US_DEVELOP
+        from scrunban.settings.base import PROJECT_INDEX, PROJECT_SPRINT_KANBAN
+
+        project = self.get_project()
+        project_index = reverse(PROJECT_INDEX, args=(project.id,))
+
+        us = get_object_or_404(UserStory, id=kwargs.get(self.us_url_kwarg, ''))
+
+        user = self.request.user.user
+        user_perms = self.get_user_permissions_list()
+
+        if us.state != 1:
+            return project_index
+
+        if not Permission.objects.get(codename=PROJECT_US_DEVELOP[0]) in user_perms:
+            return project_index
+
+        sprint = Sprint.objects.filter(project=project, state='Ejecucion')
+        if len(sprint) == 0:
+            return project_index
+
+        sprint = sprint[0]
+        grained = Grained.objects.filter(user_story=us, sprint=sprint)
+
+        if len(grained) == 0:
+            return project_index
+
+        grained = grained[0]
+        developers = [t.user for t in grained.developers.all()]
+
+        if not(user in developers):
+            return reverse(PROJECT_SPRINT_KANBAN, args=(project.id, sprint.id))
+
+        return None
+
+
+    def get_default_fields(self):
+        """
+            Campos por defecto que son agregados a los datos proveidos por los usuarios al enviar un formulario.
+
+            :return: Diccionario con campos por defectos y sus respectivos valores.
+            """
+        from apps.administracion.models import Grained
+        from apps.proyecto.models import Sprint
+        us = get_object_or_404(UserStory, id=self.kwargs.get(self.us_url_kwarg, ''))
+        project = self.get_project()
+        sprint = Sprint.objects.get(project=project, state='Ejecucion')
+
+        grained = Grained.objects.get(user_story=us, sprint=sprint)
+
+        user = self.request.user.user
+
+        initial = {
+            'user': user.id,
+            'grained': grained.id
+        }
+
+        return initial
+
+    def get_context_data(self, **kwargs):
+        """
+            Metodo que retorna el context que sera enviado al template
+
+            :return: Context
+            """
+        context = super(UserStoryAddWorkload, self).get_context_data(**kwargs)
+        self.user_story = get_object_or_404(UserStory, id=self.kwargs.get(self.us_url_kwarg, ''))
+
+        context['user_story'] = self.user_story
+
+        return context
+
+
+    def get_success_url(self):
+        """
+            Retorna la url a donde sera redirigido el usuario cuando se haya procesado correctamente un formulario
+
+            :return: Url
+            """
+        from apps.proyecto.models import Sprint
+        from scrunban.settings.base import PROJECT_SPRINT_KANBAN
+        project = self.get_project()
+        sprint = Sprint.objects.get(project=project, state='Ejecucion')
+
+        return reverse(PROJECT_SPRINT_KANBAN, args=(project.id, sprint.id))
+
+
+    def form_valid(self, form):
+        """
+            Metodo que es llamado cuando un formulario enviado por el usuario es valido.
+
+            :param form: Formulario que ha sido ya comprobado y es valido
+            :return: HttpResponse
+            """
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        """
+            Netodo que es llamado cuando un formulario enviado por el usuario es invalido.
+
+            :param form: Formulario invalido con los errores respectivos
+            :return: HttpResponse
+            """
+        context = {
+            'form': form
+        }
+        return super(UserStoryAddWorkload, self).render_to_response(self.get_context_data(**context))
