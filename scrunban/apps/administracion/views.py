@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import ProjectForm, UserStoryTypeCreateForm, UserStoryForm, FlowForm
-from .forms import UserStoryCreateForm, UserStoryTypeCreateForm
+from .forms import ProjectForm, UserStoryForm, FlowForm, UserStoryTypeForm
 from apps.autenticacion.models import User
 from apps.autenticacion.decorators import login_required
 
@@ -300,7 +299,6 @@ def user_story_create(request, project):
     x.request = request
     x.get_user_permissions_context(context)
     if request.method == 'POST':
-        form = UserStoryCreateForm(context['project'], request.POST)
         form = UserStoryForm(context['project'], request.POST)
         if form.is_valid():
             # TODO Validate project!
@@ -319,8 +317,6 @@ def user_story_create(request, project):
             context['form'] = form
     else:
         # TODO Check project id
-
-        context['form'] = UserStoryCreateForm(context['project'])
         context['form'] = UserStoryForm(context['project'])
 
     return render(request, 'administracion/user_story/create', context)
@@ -371,6 +367,7 @@ def user_story_delete(request, project, user_story):
 
 @login_required()
 def user_story_type_create(request, project):
+    # TODO Check project
     context = {
         'section_title':'Tipo de User Story',
         'URL_NAMES': base_settings.URL_NAMES,
@@ -381,9 +378,8 @@ def user_story_type_create(request, project):
     x.request = request
     x.get_user_permissions_context(context)
     if request.method == 'POST':
-        # TODO Check project and flow (if belongs to project)
-        p = Project.projects.get(pk=project)
-        form = UserStoryTypeCreateForm(p, request.POST)
+        # TODO Flow (if belongs to project)
+        form = UserStoryTypeForm(context['project'], request.POST)
         if form.is_valid():
             ust = UserStoryType.types.create(name=form.cleaned_data['name'], project=context['project'])
             for flow in form.cleaned_data['flows']:
@@ -393,8 +389,7 @@ def user_story_type_create(request, project):
             context['form'] = form
 
     else:
-        # TODO Check project
-        context['form'] = UserStoryTypeCreateForm(context['project'])
+        context['form'] = UserStoryTypeForm(context['project'])
     return render(request, 'administracion/user_story_type/create', context)
 
 

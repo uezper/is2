@@ -12,7 +12,7 @@ class UserStoryType(models.Model):
     """
     # Public fields mapped to DB columns
     project = models.ForeignKey(Project)
-    name = models.TextField()
+    name = models.CharField('Nombre', max_length=140)
     flows = models.ManyToManyField(Flow)
 
     # Public fields for simplicity
