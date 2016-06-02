@@ -10,8 +10,6 @@ class ProjectForm(ModelForm):
         model = Project
         fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
 
-
-
 class UserForm(forms.Form):
     id = forms.CharField(max_length=4,widget=forms.HiddenInput, required=False)
     username = forms.CharField(max_length=128,widget=forms.HiddenInput, required=False)
@@ -169,8 +167,8 @@ class UserStoryForm(ModelForm):
 class UserStoryTypeForm(ModelForm):
     def __init__(self, project, *args, **kwargs):
         super(UserStoryTypeForm, self).__init__(*args, **kwargs)
-
         self._project = project
+        # Add Flujos field
         self.choices = []
         for flow in Flow.flows.filter(project=project):
             self.choices.append( (flow.pk, flow.name) )
@@ -181,6 +179,10 @@ class UserStoryTypeForm(ModelForm):
             widget=forms.CheckboxSelectMultiple,
             choices=self.choices
         )
+        # Personalize fields
+        name_field = self.fields.get('name', False)
+        if name_field:
+            name_field.widget.attrs['class'] = 'form-control'
 
     def clean_name(self):
         cleaned_name = self.cleaned_data.get('name', '')
