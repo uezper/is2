@@ -1,7 +1,8 @@
 from scrunban.settings.base import URL_NAMES, PROJECT_SPRINT_LIST
 from apps.autenticacion.models import User
-from apps.autenticacion.mixins import ValidateTestMixin
+from apps.autenticacion.mixins import ValidateTestMixin, UserIsAuthenticatedMixin, UserPermissionContextMixin, ValidateHasPermission
 from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 
 class UrlNamesContextMixin(object):
     """
@@ -65,9 +66,9 @@ class UserListMixin(object):
         """
         return User.objects.all()
 
-class ValidateSprintStatePending(ValidateTestMixin):
+class ValidateSprintState(ValidateTestMixin):
     """
-    Mixin que valida que el estado de un Sprint sea Pendiente antes de entrar en una vista
+    Mixin que valida que el estado de un Sprint no sea el de finalizado o cancelado antes de entrar en una vista
     """
 
     def get_fail_state_url(self, request, *args, **kwargs):
@@ -80,14 +81,95 @@ class ValidateSprintStatePending(ValidateTestMixin):
 
     def validate_tests(self, request, *args, **kwargs):
 
-        sup = super(ValidateSprintStatePending, self).validate_tests(request, *args, **kwargs)
+        sup = super(ValidateSprintState, self).validate_tests(request, *args, **kwargs)
 
         from apps.proyecto.models import Sprint
         from django.shortcuts import get_object_or_404
 
         sprint = get_object_or_404(Sprint, id=kwargs.get(self.sprint_url_kwarg))
 
-        if sprint.get_state() == Sprint.state_choices[0][0]:
+        if sprint.get_state() in ['Pendiente', 'Ejecucion']:
             return sup
 
         return self.get_fail_state_url(request, *args, **kwargs)
+
+
+class DefaultFormDataMixin(object):
+
+    def get_default_fields(self):
+        return {}
+
+    def post(self, request, *args, **kwargs):
+        from django.http.request import QueryDict
+
+        form_class = self.get_form_class()
+
+        # Recibe la peticion enviada por POST
+        # y actualiza agregando los campos por defecto basados en la vista
+
+        data = QueryDict.dict(request.POST)
+        data.update(**self.get_default_fields())
+
+        qdict = QueryDict('', mutable=True)
+        qdict.update(data)
+
+        form = form_class(qdict)
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+class ProjectViwMixin(UserIsAuthenticatedMixin, ValidateHasPermission, UrlNamesContextMixin, UserPermissionContextMixin):
+
+    __checked = False
+
+
+    def get_fail_permission_url(self, request, *args, **kwargs):
+        from scrunban.settings.base import PROJECT_INDEX
+        project = self.get_project()
+
+        return reverse(PROJECT_INDEX, args=(project.id,))
+
+
+    def get_project(self):
+        from apps.proyecto.models import Project
+        from datetime import datetime
+        project_id = self.kwargs.get(self.pk_url_kwarg, None)
+        project = get_object_or_404(Project, id=project_id)
+
+        if not(self.__checked):
+            from apps.proyecto.models import Sprint
+            from apps.administracion.models import Grained
+
+            self.__checked = True
+
+            sprints = Sprint.objects.filter(project=project, state='Ejecucion')
+            for s in sprints:
+                print(((datetime.now(s.start_date.tzinfo) - s.start_date).days))
+                if (datetime.now(s.start_date.tzinfo) - s.start_date).days >= s.estimated_time:
+                    s.state = 'Finalizado'
+                    s.save()
+
+                    for g in Grained.objects.filter(sprint=s):
+                        x = g.user_story
+                        x.delay_urgency = x.delay_urgency + 2
+                        x.save()
+
+
+
+        return project
+
+    def get_context_data(self, **kwargs):
+        context = super(ProjectViwMixin, self).get_context_data(**kwargs)
+        context['project'] = self.get_project()
+        context['section_title'] = self.section_title
+        context['left_active'] = self.left_active
+
+        self.get_url_context(context)
+        self.get_user_permissions_context(context)
+
+
+        return context
+
+

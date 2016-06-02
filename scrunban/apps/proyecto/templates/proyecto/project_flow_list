@@ -18,43 +18,39 @@
 
 			<table class="table table-striped">
 				<thead>
-					<tr>  <th>Sprint</th> <th class="text-center">Estado</th>
+					<tr>  <th>Flujo</th>
                         <th class="text-right">
-							{% if user_permissions.project_sprint_management %}
-                            <a href="{% url URL_NAMES.PROJECT_SPRINT_CREATE project.id %}">
+                            <a href="{% url URL_NAMES.PROJECT_FLOW_CREATE project.id %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
 							</button></a>
-							{% endif %}
                         </th>
                     </tr>
 				</thead>
-				{% if sprint_list|length == 0 %}
+				{% if flow_list|length == 0 %}
 				<tbody>
-					<tr class="danger">  <td colspan="3">Actualmente no hay Sprints</td> </tr>
+					<tr class="danger">  <td colspan="3">Actualmente no hay Flujos</td> </tr>
 				</tbody>
 				{% else %}
 				<tbody>
-					{% for sprint in sprint_list %}
+					{% for flow in flow_list %}
 					<tr>
-						<td><a href="{% url URL_NAMES.PROJECT_SPRINT_DETAIL project.id sprint.id %}">{{sprint}}</a></td>
-						<td class="text-center">{{sprint.state}}</td>
+						<td><a href="{% url URL_NAMES.PROJECT_FLOW_EDIT project.id flow.id %}">{{flow.name}}</a></td>
 						<td class="text-right">
-							{% if sprint.state == 'Pendiente' and user_permissions.project_sprint_management %}
-							<a href="{% url URL_NAMES.PROJECT_SPRINT_DELETE project.id sprint.id %}">
+							{% if flow.can_delete %}
+							<a href="{% url URL_NAMES.PROJECT_FLOW_DELETE project.id flow.id %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 							</button></a>
 							{% endif %}
-							{% if user_permissions.project_sprint_management %}
-							{% if sprint.state == 'Pendiente' or sprint.state == 'Ejecucion' %}
-							<a href="{% url URL_NAMES.PROJECT_SPRINT_EDIT project.id sprint.id %}">
+							{% if flow.can_edit %}
+							<a href="{% url URL_NAMES.PROJECT_FLOW_EDIT project.id flow.id %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
 							</button>
 							</a>
 							{% endif %}
-							{% endif %}
+
 
 						</td>
 					</tr>

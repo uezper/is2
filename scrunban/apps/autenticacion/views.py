@@ -12,7 +12,7 @@ from django.views.generic.edit import FormView
 from apps.administracion.forms import UserEditForm
 from django.shortcuts import HttpResponseRedirect
 
-from apps.proyecto.mixins import UrlNamesContextMixin, ValidateSprintStatePending
+from apps.proyecto.mixins import UrlNamesContextMixin, ValidateSprintState
 from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin
 from scrunban.settings import base as base_settings
 
@@ -148,16 +148,18 @@ def perfil(request, user_id):
 
 
     return render(request, 'autenticacion/profile_detail', context)
-
+import datetime
 def profile_projects(request):
     """
     Retorna la vista correspondiente a la lista de proyectos del usuario activo
     """
+    print(datetime.datetime.now().date())
     context = {
         'URL_NAMES': base_settings.URL_NAMES,
         'user_projects': [],
         'left_active': 'Mis Proyectos',
-        'section_title': 'Mis Proyectos'
+        'section_title': 'Mis Proyectos',
+        'date_now': datetime.datetime.now().date()
     }
 
     for p in request.user.user.get_projects():

@@ -9,9 +9,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   introduction
    documentation
-   proyecto
 
 
 

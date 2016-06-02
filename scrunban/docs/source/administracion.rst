@@ -18,6 +18,4 @@ Vistas
    :undoc-members:
    :show-inheritance:
 
-   .. autofunction:: eliminar_proyecto(request)
-
 

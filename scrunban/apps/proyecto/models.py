@@ -40,16 +40,19 @@ class ProjectManager(models.Manager):
             from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
             from django.contrib.auth.models import Permission
 
+
             for rol in DEFAULT_PROJECT_ROLES:
                 role_data = {
                     'name': rol[0],
                     'desc_larga': rol[1]
                 }
 
+
                 new_rol = p.add_rol(**role_data)
                 for perm_ in rol[2]:
                     perm = Permission.objects.get(codename=perm_[0])
                     new_rol.add_perm(perm)
+
 
             p_id = p.id
             for rol in p.get_roles():
@@ -400,8 +403,8 @@ class Sprint(models.Model):
     project = models.ForeignKey(to=Project, null=True, blank=True, on_delete=models.CASCADE)
     state = models.CharField(max_length=15, choices=state_choices, default=state_choices[0][0], null=False)
     estimated_time = models.IntegerField(null=False) # en dias
-    real_time = models.IntegerField(null=False) # en dias
-    start_date = models.DateField(null=True)
+    start_date = models.DateTimeField(null=True)
+    cancel_date = models.DateTimeField(null=True)
 
     objects = models.Manager()
     sprints = SprintManager()
@@ -455,12 +458,6 @@ class Sprint(models.Model):
         self.estimated_time = time
         self.save()
 
-    def get_real_time(self):
-        """
-        Retorna el tiempo de duracion real del Sprint
-        :returns: Tiempo de duracion real
-        """
-        return self.get_real_time
 
 
     def get_start_date(self):
@@ -477,4 +474,29 @@ class Sprint(models.Model):
         """
         self.start_date = fecha
         self.save()
+
+class Flow(models.Model):
+    # Public fields mapped to DB columns
+    name = models.TextField()
+    project = models.ForeignKey(Project)
+
+    # Public fields for simplicity
+    flows = models.Manager() # Alias
+    objects = models.Manager()
+
+    def __str__(self):
+        return "{} of {}".format(self.name, self.project)
+
+
+class Activity(models.Model):
+    name = models.TextField()
+    sec = models.IntegerField()
+    flow = models.ForeignKey(Flow, on_delete=models.CASCADE)
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return self.name
+
+
 
