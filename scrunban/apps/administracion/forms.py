@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import ModelForm
+from django.forms import ModelForm, Textarea
 from django.core.exceptions import ValidationError
 from apps.administracion.models import Flow, UserStory, UserStoryType, Project
 from apps.autenticacion.models import User
@@ -130,12 +130,30 @@ class FlowForm(ModelForm):
         fields=['name']
 
 class UserStoryForm(ModelForm):
+    def __init__(self, project, *args, **kwargs):
+        from apps.administracion.models import UserStoryType
+        super(UserStoryForm, self).__init__(*args, **kwargs)
+        self.choices = []
+        for typeUs in UserStoryType.objects.filter(project=project):
+            self.choices.append((typeUs.id, typeUs.name))
+        self.choices = tuple(self.choices)
+        self.fields['us_type_'] = forms.ChoiceField(
+            label='Tipo de User Story',
+            widget=forms.RadioSelect,
+            choices=self.choices
+        )
+
     class Meta():
         model=UserStory
         fields=[
             'description', 'details', 'acceptance_requirements', 'estimated_time',
             'business_value', 'tecnical_value', 'urgency'    
         ]
+        widgets = {
+            'details': Textarea({'cols':100, 'rows':4}),
+            'acceptance_requirements': Textarea({'cols':100, 'rows':4}),
+            
+        }
         
 class UserStoryCreateForm(forms.Form):
     description = forms.CharField(label='Descripción corta', max_length=140)

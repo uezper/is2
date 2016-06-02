@@ -291,6 +291,7 @@ class UserDeleteView(UserCreateView):
 @login_required()
 def user_story_create(request, project):
     context = {
+        'section_title':'User Story',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
     }
@@ -300,6 +301,7 @@ def user_story_create(request, project):
     x.get_user_permissions_context(context)
     if request.method == 'POST':
         form = UserStoryCreateForm(context['project'], request.POST)
+        form = UserStoryForm(context['project'], request.POST)
         if form.is_valid():
             # TODO Validate project!
             # Create new user story
@@ -312,19 +314,14 @@ def user_story_create(request, project):
             us.us_type = us_type
             us.save()
             # Redirect to the new user story summary page!
-            context = {
-                'URL_NAMES': base_settings.URL_NAMES,
-                'project': us.project,
-                'user_story': us
-            }
-            #return HttpResponseRedirect('administracion/user_story/summary')
-            return render(request, 'administracion/user_story/summary', context)
+            return redirect(base_settings.ADM_US_LIST, project=project)
         else:
             context['form'] = form
     else:
         # TODO Check project id
 
         context['form'] = UserStoryCreateForm(context['project'])
+        context['form'] = UserStoryForm(context['project'])
 
     return render(request, 'administracion/user_story/create', context)
 
@@ -337,6 +334,7 @@ def user_story_summary(request, project, user_story):
     us = UserStory.user_stories.get(pk=user_story)
     us.state = UserStory.states[us.state]
     context = {
+        'section_title':'User Story',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
         'user_story': us
@@ -352,6 +350,7 @@ def user_story_summary(request, project, user_story):
 def user_story_list(request, project):
     project_instance = Project.projects.get(pk=project)
     context = {
+        'section_title':'User Story',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': project_instance,
         'user_stories': UserStory.user_stories.filter(project=project_instance)
@@ -373,6 +372,7 @@ def user_story_delete(request, project, user_story):
 @login_required()
 def user_story_type_create(request, project):
     context = {
+        'section_title':'Tipo de User Story',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
     }
@@ -394,18 +394,14 @@ def user_story_type_create(request, project):
 
     else:
         # TODO Check project
-        p = Project.projects.get(pk=project)
-        context = {
-            'URL_NAMES': base_settings.URL_NAMES,
-            'project': p,
-            'form': UserStoryTypeCreateForm(p)
-        }
-        return render(request, 'administracion/user_story_type/create', context)
+        context['form'] = UserStoryTypeCreateForm(context['project'])
+    return render(request, 'administracion/user_story_type/create', context)
 
 
 @login_required()
 def user_story_type_list(request, project):
     context = {
+        'section_title':'Tipo de User Story',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
         'user_story_types': UserStoryType.types.filter(flows__project=project).distinct().order_by('name')
@@ -426,6 +422,7 @@ def user_story_type_delete(request, project, user_story_type):
 @login_required()
 def flow_create(request, project):
     context = {
+        'section_title':'Tipo de User Story',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
     }
@@ -441,6 +438,7 @@ def flow_create(request, project):
     else:
         # TODO Check project
         context = {
+            'section_title':'Flujo',
             'URL_NAMES': base_settings.URL_NAMES,
             'project': Project.projects.get(pk=project),
             'form': FlowForm()
@@ -451,6 +449,7 @@ def flow_create(request, project):
 def flow_list(request, project):
     # TODO Check project
     context = {
+        'section_title':'Flujo',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
         'flows': Flow.flows.filter(project=project)
@@ -474,6 +473,7 @@ def flow_summary(request, project, flow):
         return redirect(base_settings.ADM_FLW_LIST, project=project)
     else:
         context = {
+            'section_title':'Flujo',
             'URL_NAMES': base_settings.URL_NAMES,
             'project': Project.projects.get(pk=project),
             'form': FlowForm(instance=Flow.flows.get(pk=flow))

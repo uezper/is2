@@ -2,7 +2,7 @@
 
 {% block "working_path" %}
 {{ block.super }}
-<li class='active'>Nuevo User Story</li>
+<li class='active'>Crear User Story</li>
 {% endblock "working_path" %}
 
 {% block "user_story_content" %}

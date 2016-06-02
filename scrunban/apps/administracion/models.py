@@ -29,17 +29,17 @@ class UserStory(models.Model):
     # Public fields mapped to DB columns
     states = ['Pendiente', 'Ejecutando', 'Finalizado']
 
-    description = models.CharField(max_length=140)
-    details = models.TextField()
-    acceptance_requirements = models.TextField()
-    estimated_time = models.IntegerField() # tiempo para su finalizacion en horas
-    business_value = models.FloatField()
-    tecnical_value = models.FloatField()
-    urgency = models.FloatField()
+    description = models.CharField('Descripcion', max_length=140)
+    details = models.TextField('Detalles')
+    acceptance_requirements = models.TextField('Requerimientos de Aceptacion')
+    estimated_time = models.IntegerField('Tiempo Estimado') # tiempo para su finalizacion en horas
+    business_value = models.FloatField('Valor de Negocio')
+    tecnical_value = models.FloatField('Valor Tecnico')
+    urgency = models.FloatField('Urgencia')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     us_type = models.ForeignKey(UserStoryType, on_delete=models.SET_NULL, null=True)
-    state = models.IntegerField(default=0)
-    delay_urgency = models.IntegerField(default=0)
+    state = models.IntegerField('Estado', default=0)
+    delay_urgency = models.IntegerField('Urgencia por Retraso', default=0)
 
     # Public fields for simplicity
     user_stories = models.Manager() # Alias

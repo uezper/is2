@@ -2,11 +2,12 @@
 
 {% block "working_path" %}
 {{ block.super }}
-<li class='active'>Nuevo Tipo de User Story</li>
+<li class='active'>Crear Tipo de User Story</li>
 {% endblock "working_path" %}
 
 {% block "user_story_type_content" %}
-    <h1>Crear Tipo de User Story</h1>
+    <h3>Crear Tipo de User Story</h3>
+    <hr></hr>
     <form class="form-horizontal" action='' method='post' id="form">
       {% csrf_token %}
       <table>
