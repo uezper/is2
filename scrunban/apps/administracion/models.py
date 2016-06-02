@@ -84,25 +84,3 @@ class Note(models.Model):
     # Public fields for simplicity
     notes = models.Manager() # Alias
     objects = models.Manager()
-
-class Flow(models.Model):
-    # Public fields mapped to DB columns
-    name = models.CharField('Nombre', max_length=140)
-    project = models.ForeignKey(Project)
-    
-    # Public fields for simplicity
-    flows = models.Manager() # Alias
-    objects = models.Manager()
-
-    def __str__(self):
-        return "{} of {}".format(self.name, self.project)
-
-class UserStoryType(models.Model):
-    """
-    Modelo que determina a cuales Flujos puede pertenecer un User Story.
-
-    :param name: Nombre del Tipo de User Story
-    """
-    # Public fields mapped to DB columns
-    name = models.TextField('Nombre')
-    flows = models.ManyToManyField(Flow)

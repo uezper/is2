@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import ProjectForm, UserStoryTypeCreateForm, UserStoryForm, FlowForm
-from .forms import UserStoryCreateForm, UserStoryTypeCreateForm, FlowCreateForm
+from .forms import UserStoryCreateForm, UserStoryTypeCreateForm
 from apps.autenticacion.models import User
 from apps.autenticacion.decorators import login_required
 
