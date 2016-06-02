@@ -10,9 +10,30 @@
 <hr> </hr>
 <form class="form-horizontal" action='' method='post' id="form">
   {% csrf_token %}
+  {% comment %}
   <table>
     {{ form.as_table }}
   </table>
+  {% endcomment %}
+
+  {% for field in form %}
+  <div class="form-group">
+    {% if field.errors %}
+    {% for error in field.errors %}
+    <div class="alert alert-warning" role="alert">
+      {{ error|escape }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    <label for="rowName" class="col-sm-2 control-label">{{ field.label }}:</label>
+    <div id="rowName" class="col-md-9 row">
+      {{ field }}
+      <span id="helpBlock1" class="help-block"></span>
+    </div>
+  </div>
+  {% endfor %}
+
+  
   <input type='submit' value='Crear'>
 </form>
 {% endblock "user_story_content" %}

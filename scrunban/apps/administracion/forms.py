@@ -131,8 +131,8 @@ class UserStoryForm(ModelForm):
     def __init__(self, project, *args, **kwargs):
         from apps.administracion.models import UserStoryType
         super(UserStoryForm, self).__init__(*args, **kwargs)
-
         self._project = project
+        # Add Tipo de User Story field
         self.choices = []
         for typeUs in UserStoryType.objects.filter(project=project):
             self.choices.append((typeUs.id, typeUs.name))
@@ -142,6 +142,15 @@ class UserStoryForm(ModelForm):
             widget=forms.RadioSelect,
             choices=self.choices
         )
+        # Personalize fields
+        fields_names = [
+            'description', 'details', 'acceptance_requirements', 'estimated_time',
+            'business_value', 'tecnical_value', 'urgency'    
+        ]
+        for field_name in fields_names:
+            field = self.fields.get(field_name, 'False')
+            if field:
+                field.widget.attrs['class'] = 'form-control'
 
     def clean_description(self):
         cleaned_description = self.cleaned_data.get('description', '')
