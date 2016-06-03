@@ -2,13 +2,12 @@ from django.core.management.base import BaseCommand, CommandError
 
 from apps.administracion.models import UserStory, UserStoryType, Flow
 from apps.autenticacion.models import User
-from apps.proyecto.models import Project
+from apps.proyecto.models import Project, Activity
 
 from apps.autenticacion.apps import AutenticacionConfig
 
 class Command(BaseCommand):
     help = 'Populate database with default data'
-
 
     def handle(self, *args, **options):
 
@@ -32,6 +31,15 @@ class Command(BaseCommand):
                 'Gaona Ruiz Diaz',
                 'cgaona@scrunban.com',
                 '123 456789',
+                'Paraguay',
+            ),
+            (
+                '4653217',
+                'admin',
+                'Uriel',
+                'Pereira',
+                'uriel@scrunban.com',
+                '5484 85478',
                 'Paraguay',
             ),
             (
@@ -82,7 +90,10 @@ class Command(BaseCommand):
         ]
 
         for reg in usuarios:
-            User.users.create(username=reg[0],password=reg[1],first_name=reg[2],last_name=reg[3],email=reg[4],telefono=reg[5],direccion=reg[6])
+            x = User.users.create(username=reg[0],password=reg[1],first_name=reg[2],last_name=reg[3],email=reg[4],telefono=reg[5],direccion=reg[6])
+            if reg[2] == 'Uriel' and x != None:
+                from apps.autenticacion.models import Role as r
+                r.objects.get(group__name='system_admin').add_user(x)
 
     def create_projects(self):
         proyecots = [
@@ -92,6 +103,13 @@ class Command(BaseCommand):
                 '2016-06-05',
                 '1478963',
                 '1478964'
+            ),
+            (
+                'Uriel Project',
+                '2016-05-05',
+                '2016-06-05',
+                '4653217',
+                '1478963',
             ),
             (
                 'Gordarg Project',
@@ -134,20 +152,28 @@ class Command(BaseCommand):
             product_owner = User.users.filter(username=reg[4])[0]
 
             p = Project.projects.create(name=reg[0], date_start=reg[1], date_end=reg[2], scrum_master=scrum_master, product_owner=product_owner)
-            
+
+
+
             default_flow = Flow.flows.create(name='Flujo por defecto', project=p)
-            default_user_story_type = UserStoryType.types.create(name='UST por defecto')
+            activity = Activity.objects.create(name='Actividad 1', sec=1, flow=default_flow)
+            activity = Activity.objects.create(name='Actividad 2', sec=2, flow=default_flow)
+            activity = Activity.objects.create(name='Actividad 3', sec=3, flow=default_flow)
+
+            default_user_story_type = UserStoryType.types.create(name='UST por defecto', project=p)
             default_user_story_type.flows.add(default_flow)
 
             default_empty_flow = Flow.flows.create(name='Flujo vacio', project=p)
+            activity = Activity.objects.create(name='Actividad 1', sec=1, flow=default_empty_flow)
+
 
             # Crea User Stories
             if p != None:
-                self.create_user_story(p)
+                self.create_user_story(p, default_user_story_type)
                 self.stdout.write('Creado projecto {}'.format(p.name))
 
 
-    def create_user_story(self, project):
+    def create_user_story(self, project, default_user_story):
         user_stories = [
             (
                 'Creacion de login',
@@ -157,8 +183,6 @@ class Command(BaseCommand):
                 '2.3',
                 '3.2',
                 '5',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de Proyecto',
@@ -168,8 +192,6 @@ class Command(BaseCommand):
                 '2.3',
                 '5.2',
                 '2',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de Sprint',
@@ -179,8 +201,6 @@ class Command(BaseCommand):
                 '3.3',
                 '9.2',
                 '2',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de Roles',
@@ -190,8 +210,6 @@ class Command(BaseCommand):
                 '2.3',
                 '7.2',
                 '8',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de vista de asignacion de roles',
@@ -201,8 +219,6 @@ class Command(BaseCommand):
                 '4.3',
                 '3.2',
                 '2',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de vista de eliminacion de usuario',
@@ -212,8 +228,6 @@ class Command(BaseCommand):
                 '7.3',
                 '4.2',
                 '2',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
             (
                 'Creacion de usuario',
@@ -223,8 +237,6 @@ class Command(BaseCommand):
                 '4.3',
                 '5.2',
                 '3',
-                'FOR ALL PROJECTS',
-                'DONT KNOW WHAT THIS IS'
             ),
 
 
@@ -240,5 +252,6 @@ class Command(BaseCommand):
            us.tecnical_value = reg[5]
            us.urgency = reg[6]
            us.project = project
+           us.us_type = default_user_story
 
            us.save()

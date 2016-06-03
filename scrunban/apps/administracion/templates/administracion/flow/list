@@ -3,7 +3,7 @@
 {% block "flow_content" %}
 <div class="row">
   <div class="col-md-12">
-    <h3>Lista de Flujos de {{ project.name }}</h3>
+    <h3>Lista de Flujos</h3>
     <hr></hr>
     <table class="table table-striped">
       <thead>
@@ -19,7 +19,7 @@
       <tbody>
 	{% for flow in flows %}
 	<tr>
-	  <td><a href="">{{ flow.name }}</a></td>
+	  <td><a href="{% url URL_NAMES.ADM_FLW_SUMMARY project.pk flow.pk %}">{{ flow.name }}</a></td>
 	  <td class="text-right">
 	    <a href="{% url URL_NAMES.ADM_FLW_DELETE project.pk flow.pk %}">
 	      <button type="button" class="btn btn-default btn-sm">

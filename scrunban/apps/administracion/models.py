@@ -1,23 +1,45 @@
 from django.db import models
 from django.dispatch import receiver
 from apps.autenticacion.models import User, Role
-from apps.proyecto.models import Sprint, Project, Team
+from apps.proyecto.models import Sprint, Project, Team, Flow, Activity
 from django.utils import timezone
+
+class UserStoryType(models.Model):
+    """
+    Modelo que determina a cuales Flujos puede pertenecer un User Story.
+
+    :param name: Nombre del Tipo de User Story
+    """
+    # Public fields mapped to DB columns
+    project = models.ForeignKey(Project)
+    name = models.CharField('Nombre', max_length=140)
+    flows = models.ManyToManyField(Flow)
+
+    # Public fields for simplicity
+    types = models.Manager() # Alias
+    objects = models.Manager()
+
+    def __str__(self):
+        return "{}".format(self.name)
 
 class UserStory(models.Model):
     """
     Modelo donde se almacena la información sobre cada actividad a realizar dentro del projecto.
     """
     # Public fields mapped to DB columns
-    description = models.CharField(max_length=140) # Twetter..?? XD
-    details = models.TextField()
-    acceptance_requirements = models.TextField()
-    estimated_time = models.IntegerField() # tiempo para su finalizacion en horas
-    business_value = models.FloatField()
-    tecnical_value = models.FloatField()
-    urgency = models.FloatField()
+    states = ['Pendiente', 'Ejecutando', 'Finalizado']
+
+    description = models.CharField('Descripcion', max_length=140)
+    details = models.TextField('Detalles')
+    acceptance_requirements = models.TextField('Requerimientos de Aceptacion')
+    estimated_time = models.IntegerField('Tiempo Estimado') # tiempo para su finalizacion en horas
+    business_value = models.FloatField('Valor de Negocio')
+    tecnical_value = models.FloatField('Valor Tecnico')
+    urgency = models.FloatField('Urgencia')
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
-    allowed_developers = models.ManyToManyField(User)
+    us_type = models.ForeignKey(UserStoryType, on_delete=models.SET_NULL, null=True)
+    state = models.IntegerField('Estado', default=0)
+    delay_urgency = models.IntegerField('Urgencia por Retraso', default=0)
 
     # Public fields for simplicity
     user_stories = models.Manager() # Alias
@@ -27,7 +49,7 @@ class UserStory(models.Model):
         return Note.notes.filter(user_story=self)
 
     def get_weight(self):
-        return (self.business_value + self.urgency + 2 * self.tecnical_value)/4
+        return (self.business_value + self.urgency + 2 * self.tecnical_value)/4 + self.delay_urgency
     
     def __str__(self):
         return "{}".format(self.description)
@@ -37,9 +59,10 @@ class Grained(models.Model):
     # Public fields mapped to DB columns
     user_story = models.ForeignKey(UserStory)
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE)
-    # TODO activity = ...
-    # TODO state = ...
+    activity = models.ForeignKey(Activity, on_delete=models.SET_NULL, null=True)
+    state = models.IntegerField(default=1)
     developers = models.ManyToManyField(Team)
+    flow = models.ForeignKey(Flow, default=None, null=True, on_delete=models.SET_NULL)
 
     # Public fields for simplicity
     graineds = models.Manager() # Alias
@@ -61,32 +84,3 @@ class Note(models.Model):
     # Public fields for simplicity
     notes = models.Manager() # Alias
     objects = models.Manager()
-
-class Flow(models.Model):
-    # Public fields mapped to DB columns
-    name = models.TextField()
-    project = models.ForeignKey(Project)
-    
-    # Public fields for simplicity
-    flows = models.Manager() # Alias
-    objects = models.Manager()
-
-    def __str__(self):
-        return "{} of {}".format(self.name, self.project)
-
-class UserStoryType(models.Model):
-    """
-    Modelo que determina a cuales Flujos puede pertenecer un User Story.
-
-    :param name: Nombre del Tipo de User Story
-    """
-    # Public fields mapped to DB columns
-    name = models.TextField()
-    flows = models.ManyToManyField(Flow)
-
-    # Public fields for simplicity
-    types = models.Manager() # Alias
-    objects = models.Manager()
-
-    def __str__(self):
-        return "{}".format(self.name)

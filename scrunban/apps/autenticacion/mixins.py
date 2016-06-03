@@ -4,7 +4,44 @@ from scrunban.settings.base import LOGIN_NAME, PERFIL_NAME
 from django.http.response import HttpResponseRedirect
 
 
-class UserPermissionContextMixin(object):
+class UserPermissionListMixin(object):
+    """
+        Mixin que se encarga de crear una lista de todos los permisos de usuario (de proyecto y sistema)
+    """
+
+    def get_project(self):
+        if hasattr(self, 'project'):
+            return self.project
+        return None
+
+    def get_user_permissions_list(self):
+        from apps.autenticacion.models import Role
+        from apps.autenticacion.settings import DEF_ROLE_ADMIN
+
+
+
+        r = Role.objects.get(group__name=DEF_ROLE_ADMIN[0])
+
+
+        result = []
+
+        # Permisos de un proyecto especifico
+        project = self.get_project()
+
+        if (project != None):
+            for perm in project.get_user_perms(self.request.user.user):
+                result.append(perm)
+
+        # Permisos globales (rol administrativo)
+        if self.request.user.user in r.get_users():
+            for perm in r.get_perms():
+                result.append(perm)
+
+
+        return result
+
+
+class UserPermissionContextMixin(UserPermissionListMixin):
     """
 
         Mixin utilizado para agregar la lista de permisos del usuarios al context
@@ -13,10 +50,16 @@ class UserPermissionContextMixin(object):
     """
     user_permission_context_name = 'user_permissions'
 
-    def get_user_permissions(self, context):
+
+    def get_user_permissions_context(self, context):
+
+
         context[self.user_permission_context_name] = {}
-        for perm in self.request.user.user.get_all_permissions():
-            context[self.user_permission_context_name][perm] = True
+
+        for perm in self.get_user_permissions_list():
+            context[self.user_permission_context_name][perm.codename] = True
+
+
 
 class UserIsAuthenticatedMixin(LoginRequiredMixin):
     login_url = reverse_lazy(LOGIN_NAME)
@@ -30,14 +73,55 @@ class ValidateTestMixin(object):
 
     """
 
-    def get_redirect_url(self, request, *args, **kwargs):
+
+    def validate_tests(self, request, *args, **kwargs):
+        return None
+
+    def dispatch(self, request, *args, **kwargs):
+
+        x = self.validate_tests(request, *args, **kwargs)
+        if x != None:
+            return HttpResponseRedirect(x)
+
+        return super(ValidateTestMixin, self).dispatch(request, *args, **kwargs)
+
+
+class ValidateHasPermission(ValidateTestMixin, UserPermissionListMixin):
+    """
+
+    Mixin que permite verificar si un usuario tiene un determinado permiso para entrar en una vista
+
+    """
+
+    def get_required_permissions(self):
+        return []
+
+    def get_fail_permission_url(self, request, *args, **kwargs):
         return reverse_lazy(PERFIL_NAME, args=[request.user.user.id])
 
     def validate_tests(self, request, *args, **kwargs):
-        return True
+        from django.contrib.auth.models import Permission
+        sup = super(ValidateHasPermission, self).validate_tests(request, *args, **kwargs)
 
-    def dispatch(self, request, *args, **kwargs):
-        if not self.validate_tests(request, *args, **kwargs):
-            return HttpResponseRedirect(self.get_redirect_url(request, *args, **kwargs))
+        user_perms = self.get_user_permissions_list()
 
-        return super(ValidateTestMixin, self).dispatch(request, *args, **kwargs)
+        required = self.get_required_permissions()
+        required = [Permission.objects.get(codename=p[0]) for p in required]
+
+        if len(required) == 0:
+            return sup
+
+        for perm in required:
+            if not(perm in user_perms):
+                return self.get_fail_permission_url(request, *args, **kwargs)
+
+        return sup
+
+
+
+
+
+
+
+
+

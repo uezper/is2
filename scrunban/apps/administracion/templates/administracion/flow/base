@@ -3,7 +3,7 @@
 {% block "working_path" %}
 {{ block.super }}
 <li>
-  <a href="{% url URL_NAMES.PROJECT_INDEX project.pk %}">{{ project.name }}</a>
+  <a href="{% url URL_NAMES.PROJECT_INDEX project.pk %}">{{ project.name }}!</a>
 </li>
 {% endblock "working_path" %}
 

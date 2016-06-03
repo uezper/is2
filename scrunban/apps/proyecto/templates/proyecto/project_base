@@ -11,31 +11,44 @@ Proyecto
 
 
 {% block "left_menu_options" %}
+{% if user_permissions.project_rol_management %}
 <li {% if left_active == 'Roles' %} class="active" {% endif %}>
   <a href="{% url URL_NAMES.PROJECT_ROLE_LIST project.id %}">Roles</a>
 </li>
+{% endif %}
+{% if user_permissions.project_dev_management %}
 <li {% if left_active == 'Equipo de Desarrollo' %} class="active" {% endif %}>
   <a href="{% url URL_NAMES.PROJECT_DEV_LIST project.id %}">Equipo de Desarrollo</a>
 </li>
-<li {% if left_active == 'Sprints' %} class="active" {% endif %}>
-  <a href="{% url URL_NAMES.PROJECT_SPRINT_LIST project.id %}">Sprints</a>
+{% endif %}
+{% if user_permissions.project_flujo_management %}
+<li {% if left_active == 'Flujos' %} class="active" {% endif %}>
+  <a href="{% url URL_NAMES.PROJECT_FLOW_LIST project.pk %}">Flujos</a>
 </li>
-<li>
-  <a href="{% url URL_NAMES.ADM_FLW_LIST project.pk %}">Flujos</a>
-</li>
+{% endif %}
+{% if user_permissions.project_tus_management %}
 <li>
   <a href="{% url URL_NAMES.ADM_UST_LIST project.pk %}">Tipos de User Story</a>
 </li>
+{% endif %}
+
+{% if user_permissions.project_sprint_management or user_permissions.project_us_management or user_permissions.project_us_develop or user_permissions.project_pb_watch or user_permissions.project_us_aprove %}
 <li>
   <a href="{% url URL_NAMES.ADM_US_LIST project.pk %}">User Stories</a>
 </li>
+{% endif %}
+{% if user_permissions.project_sprint_management or user_permissions.project_kanban_watch or user_permissions.project_us_aprove or user_permissions.project_us_develop %}
+<li {% if left_active == 'Sprints' %} class="active" {% endif %}>
+  <a href="{% url URL_NAMES.PROJECT_SPRINT_LIST project.id %}">Sprints</a>
+</li>
+{% endif %}
 {% endblock %}
 
 
 {% block "working_path" %}
 <li></li>
 <li>
-  <a href="{% url URL_NAMES.PERFIL_NAME user.user.id %}">Mis Proyectos</a>
+  <a href="{% url URL_NAMES.PERFIL_PROJECTS %}">Mis Proyectos</a>
 </li>
 <li>
   <a href="{% url URL_NAMES.PROJECT_INDEX project.id %}" >{{ project.name }}</a>

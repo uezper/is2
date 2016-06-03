@@ -1,14 +1,25 @@
 {% extends "administracion/user_story_type/base" %}
 
+{% block "include" %}
+<script type="text/javascript">
+  function modalPreparation(caller){
+  var deleteUrl = $(caller).attr("data-url");
+  var usName = $(caller).attr("data-name");
+  $("#modalLink").attr("href", deleteUrl);
+  $("#modalName").text(usName);
+  }
+</script>
+{% endblock "include" %}
+
 {% block "user_story_type_content" %}
 <div class="row">
   <div class="col-md-12">
-    <h3>Lista de Tipos de User Stories de {{ project.name }}</h3>
+    <h3>Lista de Tipos de User Stories</h3>
     <hr></hr>
     <table class="table table-striped">
       <thead>
-	<td><strong>Descripción</strong></td>
-	<td><strong>Detalles</strong></td>
+	<td><strong>Nombre</strong></td>
+	<td><strong>Flujos compatibles</strong></td>
 	<td class="text-right">
 	  <a href="{% url URL_NAMES.ADM_UST_CREATE project.pk %}">
 	    <button type="button" class="btn btn-default btn-sm">
@@ -21,24 +32,25 @@
 	{% for user_story_type in user_story_types %}
 	<tr>
 	  <td>
-	    <a href="">{{ user_story_type.name }}</a>
+	    {{ user_story_type.name }}
 	  </td>
 	  <td>
 	    <ul>
 	      {% for flow in user_story_type.flows.get_queryset %}
 	      <li>
-		<a href="">{{flow.name}}</a>
+		<a href="{% url URL_NAMES.PROJECT_FLOW_EDIT project.pk flow.pk %}">{{flow.name}}</a>
 	      </li>
 	      {% endfor %}
 	    </ul>
 	  </td>
 	  
 	  <td class="text-right">
-	    <a href="{% url URL_NAMES.ADM_UST_DELETE project.pk user_story_type.pk %}">
-	      <button type="button" class="btn btn-default btn-sm">
+	    <button type="button" class="btn btn-default btn-sm"
+		    data-url="{% url URL_NAMES.ADM_UST_DELETE project.pk user_story_type.pk %}"
+		    data-name="{{ user_story_type.name }}"
+		    onclick="modalPreparation(this);" data-toggle="modal" data-target="#myModal">
 		<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 	      </button>
-	    </a>
 	  </td>
 	</tr>
 	{% empty %}
@@ -50,4 +62,30 @@
     </table>
   </div>
 </div>
+
+{% comment %}
+Modal
+{% endcomment %}
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Confirmacion de Eliminacion</h4>
+      </div>
+      <div class="modal-body">
+        <p>¿Realmente desea eliminar el Tipo de User Story <strong id="modalName"></strong>?</p>
+      </div>
+      <div class="modal-footer">
+	<a href="" id="modalLink">
+	  <button type="button" class="btn btn-danger">Eliminar</button>
+	</a>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 {% endblock "user_story_type_content" %}

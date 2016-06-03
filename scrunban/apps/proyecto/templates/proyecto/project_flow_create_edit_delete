@@ -1,0 +1,289 @@
+{% extends "proyecto/project_base" %}
+
+{% block "include" %}
+<script>
+
+
+    $(document).ready(function(){
+
+        {% if no_editable %}
+        no_edit = true;
+        {% else %}
+        no_edit = false;
+        {% endif %}
+
+        cargar_datos();
+        check_create();
+
+        if ($("#errors").children().length > 0)
+        {
+            $("#errors").show();
+        }
+        else
+        {
+            $("#errors").hide();
+        }
+
+
+        $("#name").keyup(function () {
+           check_create();
+        });
+
+        function cargar_datos()
+        {
+
+
+            fields = [ 'name' ];
+            elementos = [];
+
+            for (var i in fields) {
+                elementos[i] = $("#id_" + fields[i]).val();
+
+                if (elementos[i] != undefined) {
+                    $("#" + fields[i]).val(elementos[i]);
+                }
+            }
+
+            acts = $("#id_activities").val();
+            acts = acts.split(',');
+            $.each(acts, function(index, element)
+            {
+                create_activity(element);
+            });
+
+
+        }
+
+        function check_create()
+        {
+
+
+            if ($("#name").val() != '' && $("#name").val() != undefined && $("#tableActivities").find("tbody").children().length != 0)
+
+            {
+                $("#create").prop("disabled", false);
+
+               $("#tableActivities").find("tbody").children().each(function(index, element){
+                   e_ = $(element).find("input").first();
+                   if (e_ == undefined || e_.val() == '')
+                   {
+                        $("#create").prop("disabled", true);
+                        $(element).addClass("danger");
+                   }
+
+               })
+            }
+            else
+            {
+                $("#create").prop("disabled", true);
+            }
+
+
+
+        }
+
+        $("#tableActivities > tbody").on("change", "input", function () {
+            if ($(this).val() == '' || $(this).val() == undefined)
+            {
+                $(this).parent().parent().addClass('danger');
+            }
+            else
+            {
+                $(this).parent().parent().removeClass('danger');
+            }
+            check_create();
+
+        });
+        $("#tableActivities").on("click", ".moveUp", function(){
+           rows = $("#tableActivities").find("tbody").children();
+
+           actual = $(this).parent().parent();
+
+           index_ = $(rows).index($(actual));
+           if (index_ != 0)
+           {
+               $(actual).insertBefore($(rows[index_-1]));
+           }
+       });
+
+       $("#tableActivities").on("click", ".moveDown", function(){
+           rows = $("#tableActivities").find("tbody").children();
+
+           actual = $(this).parent().parent();
+
+           index_ = $(rows).index($(actual));
+           if (index_ != (rows.length - 1))
+           {
+               $(actual).insertAfter($(rows[index_+1]));
+           }
+       });
+
+       $("#tableActivities").on("click", ".removeAct", function(e){
+           $(this).parent().parent().remove();
+           check_create();
+       });
+
+
+        function create_activity(value)
+        {
+            if (no_edit) {
+                act_html = "<tr>" +
+                        "<td><input type=\"text\" class=\"form-control\" placeholder=\"Nombre de Actividad\" readonly></td>" +
+                        "<td class=\"text-right\">" +
+                        "</td>" +
+                        "</tr>";
+            }
+            else {
+                act_html = "<tr>" +
+                        "<td><input type=\"text\" class=\"form-control\" placeholder=\"Nombre de Actividad\"></td>" +
+                        "<td class=\"text-right\">" +
+                        "<button type=\"button\" class=\"btn btn-default btn-sm moveUp\">" +
+                        "<span class=\"glyphicon glyphicon-arrow-up\" aria-hidden=\"true\"></span>" +
+                        "</button>" +
+                        "<button type=\"button\" class=\"btn btn-default btn-sm moveDown\">" +
+                        "<span class=\"glyphicon glyphicon-arrow-down\" aria-hidden=\"true\"></span>" +
+                        "</button>" +
+                        "<button type=\"button\" class=\"btn btn-default btn-sm removeAct\">" +
+                        "<span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>" +
+                        "</button>" +
+                        "</td>" +
+                        "</tr>";
+            }
+
+            $("#tableActivities > tbody").append(act_html);
+            if (value != undefined)
+            {
+                $("#tableActivities > tbody").children().last().find("input").last().val(value);
+            }
+            check_create();
+        }
+        $("#addActivity").click(function(){
+
+            create_activity();
+
+        });
+
+
+
+        $("#form").submit(function(event){
+
+
+            fields = [ 'name' ];
+            elementos = [];
+
+            for (var i in fields) {
+                elementos[i] = $("#" + fields[i]).val();
+                if (elementos[i] != undefined) {
+                    $("#id_" + fields[i]).val(elementos[i]);
+                }
+            }
+
+            activities = [];
+            $("#tableActivities > tbody").children().each(function(index, element){
+                activities.push($(element).find("input").first().val());
+            });
+
+            $("#id_activities").val(activities.join(','));
+
+
+        });
+
+
+    });
+</script>
+
+{% endblock %}
+
+
+{% block "working_path" %}
+	{{ block.super }}
+	<li><a href="{% url URL_NAMES.PROJECT_FLOW_LIST project.id %}">Flujos</a></li>
+	<li class="active">{{ section_title }}</li>
+{% endblock %}
+
+{% block "content" %}
+ <div class="panel panel-default">
+   <div class="panel-body">
+     <div class="row">
+       <div class="col-md-12">
+         <h3>{{ section_title }}</h3>
+         <hr />
+
+         <div class="alert alert-danger" role="alert" id="errors">
+           {% if delete_form %}
+           <p class="warning"> Estas seguro de que quieres borrar?</p>
+           {% endif %}
+         </div>
+
+	 <form class="form-horizontal" method="post" action="#" id="form">
+           {% csrf_token %}
+
+
+           {{ form.name }}
+           {{ form.activities }}
+
+           <div class="form-group {% if form.name.errors|length > 0 %} has-error {% endif %}">
+             <label for="rowName" class="col-sm-2 control-label">Nombre:</label>
+             <div class="row" id="rowName">
+               <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                 <input type="text" class="form-control" id="name" placeholder="Nombre del Flujo" aria-describedby="helpBlock1" {% if no_editable %} readonly {% endif %}>
+                 <span id="helpBlock1" class="help-block">{{form.name.errors}}</span>
+               </div>
+             </div>
+           </div>
+
+
+            <div class="form-group {% if form.activities.errors|length > 0 %} has-error {% endif %}">
+                <label for="tableActivities" class="col-sm-2 control-label">Actividades:</label>
+            <div class="row" id="rowActivities">
+                <div class="col-md-4">
+                <span id="helpBlock2" class="help-block">{{form.activities.errors}}</span>
+                <table class="table " id="tableActivities">
+                    <thead>
+                    <tr> <th>Actividad</th>
+                        <th class="text-right">
+                            {% if no_editable %}
+                            {% else %}
+							<button type="button" id="addActivity" class="btn btn-default btn-sm">
+								<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+							</button>
+                            {% endif %}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            </div>
+
+
+                  <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        {% if delete_form %}
+                        <button type="submit" class="btn btn-danger" id="delete">Borrar</button>
+                        <a href="{% url URL_NAMES.PROJECT_FLOW_LIST project.id %}">
+                        <button type="button" class="btn btn-default" id="delete">Cancelar</button>
+                        </a>
+                        {% elif edit_form %}
+                        <button type="submit" class="btn btn-default" id="delete">Guardar</button>
+                        <a href="{% url URL_NAMES.PROJECT_FLOW_DELETE project.id flow.id %}">
+                        <button type="button" class="btn btn-default" id="delete">Borrar</button>
+                        </a>
+                        {% else %}
+                        <button type="submit" class="btn btn-default" id="create">Crear</button>
+                        {% endif %}
+                    </div>
+                  </div>
+                </form>
+
+
+                </div>
+            </div>
+
+		</div>
+	</div>
+
+
+{% endblock %}
