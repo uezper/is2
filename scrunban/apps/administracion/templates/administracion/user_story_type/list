@@ -3,11 +3,10 @@
 {% block "include" %}
 <script type="text/javascript">
   function modalPreparation(caller){
-  console.log("Hi! I was clicked!");
   var deleteUrl = $(caller).attr("data-url");
   var usName = $(caller).attr("data-name");
-  $("#modalDeleteLink").attr("href", deleteUrl);
-  $("#modalUSName").text(usName);
+  $("#modalLink").attr("href", deleteUrl);
+  $("#modalName").text(usName);
   }
 </script>
 {% endblock "include" %}
@@ -66,7 +65,6 @@
 
 {% comment %}
 Modal
-<!--<a href="{% url URL_NAMES.ADM_UST_DELETE project.pk user_story_type.pk %}">-->
 {% endcomment %}
 <div id="myModal" class="modal fade" role="dialog">
   <div class="modal-dialog">
@@ -77,10 +75,10 @@ Modal
         <h4 class="modal-title">Confirmacion de Eliminacion</h4>
       </div>
       <div class="modal-body">
-        <p>¿Realmente desea eliminar el User Story <strong id="modalUSName"></strong>?</p>
+        <p>¿Realmente desea eliminar el Tipo de User Story <strong id="modalName"></strong>?</p>
       </div>
       <div class="modal-footer">
-	<a href="" id="modalDeleteLink">
+	<a href="" id="modalLink">
 	  <button type="button" class="btn btn-danger">Eliminar</button>
 	</a>
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
