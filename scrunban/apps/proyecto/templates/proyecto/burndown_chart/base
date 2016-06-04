@@ -1,0 +1,23 @@
+{% extends "proyecto/project_base" %}
+{% load staticfiles %}
+
+{% block "working_path" %}
+{{ block.super }}
+	<li class="active">{{ section_title }}</li>
+{% endblock "working_path" %}
+
+{% block "content" %}
+<div class='panel panel-default'>
+  <div class='panel-body'>
+
+    <h3>Progreso del proyecto</h3>
+    <hr></hr>
+    <p>Vamos que esto se tiene que generar por llamada. Lo siguiente es solo un placeholder. ^_^U</p>
+    <p>Tambien hay que arreglar la columna derecha... permisos..??</p>
+    <div style="text-align: center">
+      <img alt="Burndown Chart" src="{% static 'burndownchart.png' %}" width="800" height="600">
+    </div>
+
+  </div>
+</div>
+{% endblock "content" %}

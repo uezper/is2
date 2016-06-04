@@ -42,6 +42,10 @@ Proyecto
   <a href="{% url URL_NAMES.PROJECT_SPRINT_LIST project.id %}">Sprints</a>
 </li>
 {% endif %}
+
+<li {% if left_active == 'Burndown' %} class="active" {% endif %}>
+  <a href="{% url URL_NAMES.PROJECT_BDC project.id %}">Burndown Chart</a>
+</li>
 {% endblock %}
 
 
@@ -51,6 +55,6 @@ Proyecto
   <a href="{% url URL_NAMES.PERFIL_PROJECTS %}">Mis Proyectos</a>
 </li>
 <li>
-  <a href="{% url URL_NAMES.PROJECT_INDEX project.id %}" >{{ project.name }}</a>
+  <a href="{% url URL_NAMES.PROJECT_INDEX project.id %}">{{ project.name }}</a>
 </li>
 {% endblock %}
