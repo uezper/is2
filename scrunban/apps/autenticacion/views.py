@@ -1,10 +1,9 @@
-import json
+import json, logging
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.auth import authenticate as djAuthenticate
 from django.contrib.auth import login as djLogin
 from django.contrib.auth import logout as djLogout
-
 
 from django.core.urlresolvers import reverse
 from django.views.generic.edit import FormView
@@ -16,6 +15,12 @@ from apps.proyecto.mixins import UrlNamesContextMixin, ValidateSprintState
 from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin
 from scrunban.settings import base as base_settings
 
+# Define loggers
+stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
+
+# Define log entries formatters
+def formatter(action, actor):
+    return '{} has {}'.format(actor, action)
 
 def login(request):
     """
@@ -76,6 +81,14 @@ def authenticate_user(request):
                     djLogin(request, user)
                     data['message'] = 'Bienvenido! Redireccionandote...'
                     data['STATUS'] = 'OK'
+
+                    # Log event
+                    kwargs = {
+                        'action': 'log in',
+                        'actor': request.user.get_full_name()
+                    }
+                    stdlogger.info(formatter(**kwargs))
+                    
                     return JsonResponse(data)
 
                 else:
@@ -103,6 +116,12 @@ def deauthenticate_user(request):
     :returns: Un *HttpResponseRedirect* a la página de logeo.
     """
     #TODO On logout, redirect to login?
+    # Log event
+    kwargs = {
+        'action': 'log out',
+        'actor': request.user.get_full_name()
+    }
+    stdlogger.info(formatter(**kwargs))
     djLogout(request)
     return HttpResponseRedirect(reverse(base_settings.LOGIN_NAME))
 

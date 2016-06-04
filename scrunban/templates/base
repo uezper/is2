@@ -46,7 +46,7 @@
 	<!-- Notificaciones -->
 	<li class="dropdown">
 	  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-	    Notificaciones[!] <span class="caret"></span>
+	    Notificaciones[!] <span class="label">69! More text</span><span class="caret"></span>
 	  </a>
 	  <ul class="dropdown-menu notification-container">
 	    <li class="dropdown-header">Desde el proyecto 1 (al cual pertenesco, claro)</li>
