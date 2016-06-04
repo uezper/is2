@@ -47,3 +47,17 @@
 	bottom: 0px;
 	left: 0px;
 }
+
+.notification-container {
+    width: 350px;
+}
+
+.notification a p {
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.notification .detail {
+    color: #777;
+    padding-left: 15px;
+}
