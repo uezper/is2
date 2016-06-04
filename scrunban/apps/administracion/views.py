@@ -19,7 +19,7 @@ from scrunban.settings import base as base_settings
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 # Define loggers
-stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['proyecto'])
+stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
 
 # Define log entries formatters
 def formatter(entity, project, action, actor):

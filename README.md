@@ -160,3 +160,35 @@ Ejecutar
 ```
 python manager.py populatedb              # Para poblar la base de datos (permisos, usuarios, proyectos)
 ```
+
+### Sobre agregar loggers
+
+Definimos esto:
+```python
+# Define loggers
+stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
+
+# Define log entries formatters
+def formatter(entity, project, action, actor):
+    return '{} of {} has been {} by {}'.format(entity, project, action, actor)
+```
+donde ```administracion``` además pueder ser ```proyecto``` o ```autenticacion``` (ver mas detalles en ```settings/base.py```).
+
+Luego agregamos las lineas que generan la entrada en el log:
+```python
+ # Log event
+kwargs = {
+    'entity': 'User Story Type',
+    'project': Project.projects.get(pk=project).name,
+    'action': 'deleted',
+    'actor': request.user.get_full_name()
+}
+stdlogger.info(formatter(**kwargs))
+```
+donde agregamos los parametros adecuadamente.
+
+Las salidas son en la linea de comandos (en formato simple) y en el archivo logs/info.log (en formato verboso). Se puede agregar al .gitignore como no, la verdad no termina interesando demaciado (personalmente me gusta que se vaya cargando...)
+
+Son libres de agregar otro formatter o no utilizarlo, lo importante es el mensaje que se pasa a ```stdlogger.info```.
+
+Creo que el nivel info es suficiente para nuestros propósitos.
