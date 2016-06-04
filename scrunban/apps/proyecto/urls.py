@@ -43,5 +43,7 @@ urlpatterns = [
     url(r'^(?P<project_id>[0-9]+)/userstory/addwork/(?P<user_story_id>[0-9]+)/$',
         user_story.UserStoryAddWorkload.as_view(),
         name=base_settings.PROJECT_US_ADDWORK),
+    url(r'^(?P<project_id>[0-9]+)/burndown/$', views.burndown_chart,
+        name=base_settings.PROJECT_BDC),
 ]
 
