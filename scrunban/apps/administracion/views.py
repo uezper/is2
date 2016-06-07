@@ -23,7 +23,7 @@ stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
 
 # Define log entries formatters
 def formatter(entity, project, action, actor):
-    return '{} de {} ha sido {} por {}'.format(entity, project, action, actor)
+    return '{} de {} ha sido {}'.format(entity, project, action)
 
 class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, UserPermissionContextMixin):
     model = Project
@@ -382,7 +382,7 @@ def user_story_delete(request, project, user_story):
     kwargs = {
         'entity': 'User Story {}'.format(us.description),
         'project': Project.projects.get(pk=project).name,
-        'action': 'deleted',
+        'action': 'eliminado',
         'actor': request.user.get_full_name()
     }
     stdlogger.info(formatter(**kwargs))        

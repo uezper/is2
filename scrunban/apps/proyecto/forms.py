@@ -15,7 +15,7 @@ stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
 
 # Define log entries formatters
 def formatter(entity, project, action, actor):
-    return '{} de {} ha sido {} por {}'.format(entity, project, action, actor)
+    return '{} de {} ha sido {}'.format(entity, project, action)
 
 
 class CreateRolForm(forms.Form):
@@ -650,7 +650,7 @@ class CreateFlowForm(forms.Form):
 
         # Log event
         kwargs = {
-            'entity': 'Flow {}'.format(flow_data['name']),
+            'entity': 'Flujo {}'.format(flow_data['name']),
             'project': flow_data['project'].name,
             'action': 'creado',
             'actor': ''
@@ -715,7 +715,7 @@ class DeleteFlowForm(EditFlowForm):
 
         # Log event
         kwargs = {
-            'entity': 'Flow {}'.format(f.name),
+            'entity': 'Flujo {}'.format(f.name),
             'project': f.project.name,
             'action': 'eliminado',
             'actor': ''
