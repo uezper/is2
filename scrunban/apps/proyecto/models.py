@@ -60,9 +60,7 @@ class ProjectManager(models.Manager):
                     rol.add_user(data['scrum_master'])
                 elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
                     rol.add_user(data['product_owner'])
-
-
-
+            
             return p
         else:
             return None

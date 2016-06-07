@@ -46,29 +46,66 @@
 	<!-- Notificaciones -->
 	<li class="dropdown">
 	  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-	    Notificaciones[!] <span class="label">69! More text</span><span class="caret"></span>
+	    Notificaciones
+	    <span class="label">
+	      {{ pending_notes|length }}
+	    </span>
+	    <span class="caret"></span>
 	  </a>
 	  <ul class="dropdown-menu notification-container">
-	    <li class="dropdown-header">Desde el proyecto 1 (al cual pertenesco, claro)</li>
+	    <li class="dropdown-header">Notas pendientes de aprobacion</li>
+	    
+	    <!-- Notas pendientes -->
+	    {% for note in pending_notes %}
 	    
 	    <li class="notification">
-	      <a href="#">
-		<p>Soy una notificacion</p>  
-		<p class="detail">Y estos son mis detalles</p>
+	      <a href="{% url URL_NAMES.PROJECT_US_DETAIL note.grained.user_story.project.id note.grained.user_story.id %}">
+		<p>{{ note.grained.user_story.description }}</p>
+		<p class="detail">De {{ note.user.get_first_name }} hace {{ note.date|timesince }}</p>
 	      </a>
 	    </li>
 	    
+	    {% empty %}
+	    
 	    <li class="notification">
 	      <a href="#">
-		<p>Y yo soy otra... NOTIFICACION! Muy pero muy muyyyyyyy largaaaaaaaaa! Lorem ipsumm!</p>
+		<p>Ninguna nota pendiente</p>
+		<p class="detail">Felicidades!</p>
 	      </a>
 	    </li>
+	    
+	    {% endfor %}
 	    
 	    <li role="separator" class="divider"></li>
+
+	    <!-- User Stories en proceso -->
+	    <li class="dropdown-header">User Stories asignados</li>
+
+	    {% for assignment in assignments %}
 	    
-	    <li class="dropdown-header">Ya no tienes mas proyectos molestandote!</li>
+	    <li class="notificaction">
+	      <a href="#">
+		<p>{{ assignment.title }}</p>
+		<p class="detail">{{ assignment.detail }}</p>
+	      </a>
+	    </li>
+	    
+	    {% empty %}
+	    
+	    <li class="notification">
+	      <a href="#">
+		<p>Ninguna asignacion pendiente</p>
+		<p class="detail">Felicidades!</p>
+	      </a>
+	    </li>
+	    
+	    {% endfor %}
+	    <div class="notification-botton">
+	      <a href="#"><p>Todas las notificaciones</p></a>
+	    </div>
 	  </ul>
 	</li>
+	
 	<!-- Fin Notificaciones -->
 
 	<!-- Perfil -->

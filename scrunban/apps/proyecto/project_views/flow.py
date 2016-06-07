@@ -1,10 +1,19 @@
+import logging
+from scrunban.settings import base as base_settings
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect
 from django.views.generic import ListView, FormView
 from apps.proyecto.mixins import ProjectViwMixin, DefaultFormDataMixin
 from apps.proyecto import forms
-from apps.proyecto.models import Flow
+from apps.proyecto.models import Flow, Project
+
+# Define loggers
+stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['proyecto'])
+
+# Define log entries formatters
+def formatter(entity, project, action, actor):
+    return '{} de {} ha sido {} por {}'.format(entity, project, action, actor)
 
 class FlowListView(ProjectViwMixin, ListView):
 
@@ -131,6 +140,7 @@ class FlowCreateView(ProjectViwMixin, DefaultFormDataMixin, FormView):
 
         :return: Url
         """
+        
         project = self.get_project()
 
         from scrunban.settings.base import PROJECT_FLOW_LIST
@@ -172,8 +182,7 @@ class FlowCreateView(ProjectViwMixin, DefaultFormDataMixin, FormView):
 
         print(form)
         return super(FlowCreateView, self).render_to_response(self.get_context_data(**context))
-
-
+        
 class FlowEditView(FlowCreateView):
     """
     Clase correspondiente a la vista que permite editar un Flujo dentro de un proyecto
