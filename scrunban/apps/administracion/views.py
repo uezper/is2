@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
-from .forms import UserStoryCreateForm, UserStoryTypeCreateForm, FlowCreateForm
+import logging
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
+from .forms import ProjectForm, UserStoryForm, FlowForm, UserStoryTypeForm
 from apps.autenticacion.models import User
 from apps.autenticacion.decorators import login_required
 
@@ -9,7 +10,6 @@ from django.views.generic.edit import FormView
 from apps.proyecto.models import Project
 from apps.administracion.models import UserStory, UserStoryType, Flow
 from apps.administracion import forms
-from django.shortcuts import get_object_or_404, HttpResponseRedirect
 
 from apps.proyecto.mixins import UrlNamesContextMixin
 from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin
@@ -17,6 +17,13 @@ from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenti
 from scrunban.settings import base as base_settings
 
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+
+# Define loggers
+stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
+
+# Define log entries formatters
+def formatter(entity, project, action, actor):
+    return '{} of {} has been {} by {}'.format(entity, project, action, actor)
 
 class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, UserPermissionContextMixin):
     model = Project
@@ -32,8 +39,6 @@ class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, 
         context['section_title'] = 'Proyectos'
         context['left_active'] = 'Proyectos'
         return context
-
-
 
 class ProjectCreateViewTest(UserIsAuthenticatedMixin, CreateView, UrlNamesContextMixin, UserPermissionContextMixin):
     template_name = 'administracion/project_new.html'
@@ -290,6 +295,7 @@ class UserDeleteView(UserCreateView):
 @login_required()
 def user_story_create(request, project):
     context = {
+        'section_title':'User Story',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
     }
@@ -298,7 +304,7 @@ def user_story_create(request, project):
     x.request = request
     x.get_user_permissions_context(context)
     if request.method == 'POST':
-        form = UserStoryCreateForm(context['project'], request.POST)
+        form = UserStoryForm(context['project'], request.POST)
         if form.is_valid():
             # TODO Validate project!
             # Create new user story
@@ -310,20 +316,23 @@ def user_story_create(request, project):
             us = UserStory.user_stories.create(**data)
             us.us_type = us_type
             us.save()
-            # Redirect to the new user story summary page!
-            context = {
-                'URL_NAMES': base_settings.URL_NAMES,
-                'project': us.project,
-                'user_story': us
+
+            # Log event
+            kwargs = {
+                'entity': 'User Story',
+                'project': context['project'].name,
+                'action': 'created',
+                'actor': request.user.get_full_name()
             }
-            #return HttpResponseRedirect('administracion/user_story/summary')
-            return render(request, 'administracion/user_story/summary', context)
+            stdlogger.info(formatter(**kwargs))
+            
+            # Redirect to the new user story summary page!
+            return redirect(base_settings.ADM_US_LIST, project=project)
         else:
             context['form'] = form
     else:
         # TODO Check project id
-
-        context['form'] = UserStoryCreateForm(context['project'])
+        context['form'] = UserStoryForm(context['project'])
 
     return render(request, 'administracion/user_story/create', context)
 
@@ -336,6 +345,7 @@ def user_story_summary(request, project, user_story):
     us = UserStory.user_stories.get(pk=user_story)
     us.state = UserStory.states[us.state]
     context = {
+        'section_title':'User Story',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
         'user_story': us
@@ -351,6 +361,7 @@ def user_story_summary(request, project, user_story):
 def user_story_list(request, project):
     project_instance = Project.projects.get(pk=project)
     context = {
+        'section_title':'User Story',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': project_instance,
         'user_stories': UserStory.user_stories.filter(project=project_instance)
@@ -366,12 +377,24 @@ def user_story_delete(request, project, user_story):
     # TODO Check permissions
     # TODO Check project and us
     us = UserStory.user_stories.get(pk=user_story)
+
+    # Log event
+    kwargs = {
+        'entity': 'User Story',
+        'project': Project.projects.get(pk=project).name,
+        'action': 'deleted',
+        'actor': request.user.get_full_name()
+    }
+    stdlogger.info(formatter(**kwargs))        
+    
     us.delete()
     return redirect(base_settings.ADM_US_LIST, project=project)
 
 @login_required()
 def user_story_type_create(request, project):
+    # TODO Check project
     context = {
+        'section_title':'Tipo de User Story',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
     }
@@ -380,27 +403,35 @@ def user_story_type_create(request, project):
     x.request = request
     x.get_user_permissions_context(context)
     if request.method == 'POST':
-        # TODO Check project and flow (if belongs to project)
-        p = Project.projects.get(pk=project)
-        form = UserStoryTypeCreateForm(p, request.POST)
+        # TODO Flow (if belongs to project)
+        form = UserStoryTypeForm(context['project'], request.POST)
         if form.is_valid():
             ust = UserStoryType.types.create(name=form.cleaned_data['name'], project=context['project'])
             for flow in form.cleaned_data['flows']:
                 ust.flows.add(Flow.flows.get(pk=flow))
+
+            # Log event
+            kwargs = {
+                'entity': 'User Story Type',
+                'project': context['project'].name,
+                'action': 'created',
+                'actor': request.user.get_full_name()
+            }
+            stdlogger.info(formatter(**kwargs))
+            
             return redirect(base_settings.ADM_UST_LIST, project=project)
         else:
             context['form'] = form
 
     else:
-        # TODO Check project
-        p = Project.projects.get(pk=project)
-        context['form'] = UserStoryTypeCreateForm(p)
-
+        context['form'] = UserStoryTypeForm(context['project'])
     return render(request, 'administracion/user_story_type/create', context)
+
 
 @login_required()
 def user_story_type_list(request, project):
     context = {
+        'section_title':'Tipo de User Story',
         'URL_NAMES': base_settings.URL_NAMES,
         'project': Project.projects.get(pk=project),
         'user_story_types': UserStoryType.types.filter(flows__project=project).distinct().order_by('name')
@@ -415,5 +446,76 @@ def user_story_type_list(request, project):
 def user_story_type_delete(request, project, user_story_type):
     # TODO Check project, permissions and ust
     ust = UserStoryType.types.get(pk=user_story_type)
+
+    # Log event
+    kwargs = {
+        'entity': 'User Story Type',
+        'project': Project.projects.get(pk=project).name,
+        'action': 'deleted',
+        'actor': request.user.get_full_name()
+    }
+    stdlogger.info(formatter(**kwargs))
+    
     ust.delete()
     return redirect(base_settings.ADM_UST_LIST, project=project)
+
+@login_required()
+def flow_create(request, project):
+    context = {
+        'section_title':'Tipo de User Story',
+        'URL_NAMES': base_settings.URL_NAMES,
+        'project': Project.projects.get(pk=project),
+    }
+    if request.method == 'POST':
+        form = FlowForm(request.POST)
+        if form.is_valid():
+            # TODO Check project
+            Flow.flows.create(
+                name=form.cleaned_data['name'],
+                project=Project.projects.get(pk=project)
+            )
+        return redirect(base_settings.ADM_FLW_LIST, project=project)
+    else:
+        # TODO Check project
+        context = {
+            'section_title':'Flujo',
+            'URL_NAMES': base_settings.URL_NAMES,
+            'project': Project.projects.get(pk=project),
+            'form': FlowForm()
+        }
+        return render(request, 'administracion/flow/create', context)
+
+@login_required()
+def flow_list(request, project):
+    # TODO Check project
+    context = {
+        'section_title':'Flujo',
+        'URL_NAMES': base_settings.URL_NAMES,
+        'project': Project.projects.get(pk=project),
+        'flows': Flow.flows.filter(project=project)
+    }
+    return render(request, 'administracion/flow/list', context)
+
+@login_required()
+def flow_delete(request, project, flow):
+    # TODO Check everything!!
+    flow = Flow.flows.get(pk=flow)
+    flow.delete()
+    return redirect(base_settings.ADM_FLW_LIST, project=project)
+
+@login_required()
+def flow_summary(request, project, flow):
+    if request.method == 'POST':
+        flow = Flow.flows.get(pk=flow)
+        form = FlowForm(request.POST, instance=flow)
+        if form.is_valid():
+            form.save()
+        return redirect(base_settings.ADM_FLW_LIST, project=project)
+    else:
+        context = {
+            'section_title':'Flujo',
+            'URL_NAMES': base_settings.URL_NAMES,
+            'project': Project.projects.get(pk=project),
+            'form': FlowForm(instance=Flow.flows.get(pk=flow))
+        }
+        return render(request, 'administracion/flow/summary', context)

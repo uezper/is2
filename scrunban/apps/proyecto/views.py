@@ -29,3 +29,12 @@ def index(request, project_id):
     return render(request, 'proyecto/project_index', context)
 
 
+#@login_required()
+def burndown_chart(request, project_id):
+    context = {
+        'URL_NAMES': base_settings.URL_NAMES,
+        'project': get_object_or_404(Project, id=project_id),
+        'section_title':'Burndown Chart',
+        'left_active':'Burndown'
+    }
+    return render(request, 'proyecto/burndown_chart/base', context)

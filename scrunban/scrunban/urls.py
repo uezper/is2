@@ -18,7 +18,7 @@ from django.contrib import admin
 
 #TODO Fix to a nicer url pattern
 urlpatterns = [
-    url(r'^auth/', include('apps.autenticacion.urls')),
+    url(r'^', include('apps.autenticacion.urls')),
     url(r'^adm/', include('apps.administracion.urls')),
     url(r'^project/', include('apps.proyecto.urls')),
     url(r'^siteadmin/', admin.site.urls),

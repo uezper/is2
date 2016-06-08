@@ -1,6 +1,7 @@
 from django import forms
+from django.forms import ModelForm, Textarea
 from django.core.exceptions import ValidationError
-from apps.administracion.models import Flow, Project
+from apps.administracion.models import Flow, UserStory, UserStoryType, Project
 from apps.autenticacion.models import User
 from django.forms import ModelForm
 
@@ -8,8 +9,6 @@ class ProjectForm(ModelForm):
     class Meta:
         model = Project
         fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
-
-
 
 class UserForm(forms.Form):
     id = forms.CharField(max_length=4,widget=forms.HiddenInput, required=False)
@@ -123,19 +122,17 @@ class UserDeleteForm(UserForm):
         u = User.objects.filter(id=self.cleaned_data['id'])[0]
         u.delete()
 
-class UserStoryCreateForm(forms.Form):
-    description = forms.CharField(label='Descripción corta', max_length=140)
-    details = forms.CharField(label='Detalles de implementación')
-    acceptance_requirements = forms.CharField(label='Requisitos para aceptación')
-    estimated_time = forms.IntegerField(label='Tiempo estimado')
-    business_value = forms.FloatField(label='Valor de negocio')
-    tecnical_value = forms.FloatField(label='Valor técnico')
-    urgency = forms.FloatField(label='Urgencia')
-    #allowed_developers
+class FlowForm(ModelForm):
+    class Meta():
+        model=Flow
+        fields=['name']
 
+class UserStoryForm(ModelForm):
     def __init__(self, project, *args, **kwargs):
         from apps.administracion.models import UserStoryType
-        super(UserStoryCreateForm, self).__init__(*args, **kwargs)
+        super(UserStoryForm, self).__init__(*args, **kwargs)
+        self._project = project
+        # Add Tipo de User Story field
         self.choices = []
         for typeUs in UserStoryType.objects.filter(project=project):
             self.choices.append((typeUs.id, typeUs.name))
@@ -145,24 +142,66 @@ class UserStoryCreateForm(forms.Form):
             widget=forms.RadioSelect,
             choices=self.choices
         )
+        # Personalize fields
+        fields_names = [
+            'description', 'details', 'acceptance_requirements', 'estimated_time',
+            'business_value', 'tecnical_value', 'urgency'    
+        ]
+        for field_name in fields_names:
+            field = self.fields.get(field_name, 'False')
+            if field:
+                field.widget.attrs['class'] = 'form-control'
 
-    
-class UserStoryTypeCreateForm(forms.Form):
-    def __init__(self, project, *args, **kwargs):
-        import pdb
-        super(UserStoryTypeCreateForm, self).__init__(*args, **kwargs)
+    def clean_description(self):
+        cleaned_description = self.cleaned_data.get('description', '')
+        descriptions = [us.description for us in UserStory.user_stories.filter(project=self._project)]
+
+        if cleaned_description in descriptions:
+            raise ValidationError('Descripcion ya existente en el proyecto.')
         
+        return cleaned_description
+        
+    class Meta():
+        model=UserStory
+        fields=[
+            'description', 'details', 'acceptance_requirements', 'estimated_time',
+            'business_value', 'tecnical_value', 'urgency'    
+        ]
+        widgets = {
+            'details': Textarea({'cols':100, 'rows':4}),
+            'acceptance_requirements': Textarea({'cols':100, 'rows':4}),
+            
+        }
+
+class UserStoryTypeForm(ModelForm):
+    def __init__(self, project, *args, **kwargs):
+        super(UserStoryTypeForm, self).__init__(*args, **kwargs)
+        self._project = project
+        # Add Flujos field
         self.choices = []
         for flow in Flow.flows.filter(project=project):
             self.choices.append( (flow.pk, flow.name) )
         self.choices = tuple( self.choices )
 
-        self.fields['name'] = forms.CharField(label='Nombre', max_length=140)
         self.fields['flows'] = forms.MultipleChoiceField(
             label='Flujos',
             widget=forms.CheckboxSelectMultiple,
             choices=self.choices
         )
+        # Personalize fields
+        name_field = self.fields.get('name', False)
+        if name_field:
+            name_field.widget.attrs['class'] = 'form-control'
 
-class FlowCreateForm(forms.Form):
-    name = forms.CharField(label='Nombre del Flujo', max_length=140)
+    def clean_name(self):
+        cleaned_name = self.cleaned_data.get('name', '')
+        names = [ust.name for ust in UserStoryType.types.filter(project=self._project)]
+
+        if cleaned_name in names:
+            raise ValidationError('Nombre ya existente en el proyecto.')
+
+        return cleaned_name
+        
+    class Meta:
+        model = UserStoryType
+        fields = ['name']

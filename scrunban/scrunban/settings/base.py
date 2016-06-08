@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
-import os
+import os, logging
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -120,6 +120,57 @@ STATICFILES_DIRS = [
     os.path.abspath(os.path.join(BASE_DIR, "../static/"))
 ]
 
+# Logging configuration
+LOGGERS_NAME = {
+    'proyecto': 'logger_proyecto',
+    'administracion': 'logger_administracion',
+    'autenticacion': 'logger_autenticacion'
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, '../logs/info.log'),
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        LOGGERS_NAME['proyecto']: {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        LOGGERS_NAME['administracion']: {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        LOGGERS_NAME['autenticacion']: {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        
+    },
+}
+
 # CONFIGURACIÓN DE LOGIN!!
 URL_NAME_FORMAT = '{}_{}'
 
@@ -156,8 +207,7 @@ PROJECT_FLOW_LIST = URL_NAME_FORMAT.format( APP_NAME_PROJECT, 'flow_list')
 PROJECT_FLOW_DELETE = URL_NAME_FORMAT.format( APP_NAME_PROJECT, 'flow_delete')
 PROJECT_US_DETAIL = URL_NAME_FORMAT.format( APP_NAME_PROJECT, 'us_detail')
 PROJECT_US_ADDWORK = URL_NAME_FORMAT.format( APP_NAME_PROJECT, 'us_addwork')
-
-
+PROJECT_BDC = URL_NAME_FORMAT.format( APP_NAME_PROJECT, 'burndown' )
 
 ADM_PROJECT_LIST = URL_NAME_FORMAT.format( APP_NAME_ADM, 'project_list')
 ADM_PROJECT_CREATE = URL_NAME_FORMAT.format( APP_NAME_ADM, 'project_create')
@@ -173,6 +223,10 @@ ADM_UST_LIST = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstorytype_list')
 ADM_UST_CREATE = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstorytype_create')
 ADM_UST_DELETE = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstorytype_delete')
 ADM_UST_SUMMARY = URL_NAME_FORMAT.format( APP_NAME_ADM, 'userstorytype_summary')
+ADM_FLW_LIST = URL_NAME_FORMAT.format( APP_NAME_ADM, 'flow_list' )
+ADM_FLW_CREATE = URL_NAME_FORMAT.format( APP_NAME_ADM, 'flow_create' )
+ADM_FLW_DELETE = URL_NAME_FORMAT.format( APP_NAME_ADM, 'flow_delete' )
+ADM_FLW_SUMMARY = URL_NAME_FORMAT.format( APP_NAME_ADM, 'flow_summary' )
 
 URL_NAMES = {
     'LOGIN_NAME': LOGIN_NAME,
@@ -201,6 +255,7 @@ URL_NAMES = {
     'PROJECT_FLOW_LIST': PROJECT_FLOW_LIST,
     'PROJECT_US_DETAIL': PROJECT_US_DETAIL,
     'PROJECT_US_ADDWORK': PROJECT_US_ADDWORK,
+    'PROJECT_BDC': PROJECT_BDC,
     'ADM_USER_LIST': ADM_USER_LIST,
     'ADM_USER_CREATE': ADM_USER_CREATE,
     'ADM_USER_DELETE': ADM_USER_DELETE,
@@ -215,6 +270,11 @@ URL_NAMES = {
     'ADM_UST_CREATE': ADM_UST_CREATE,
     'ADM_UST_DELETE': ADM_UST_DELETE,
     'ADM_UST_SUMMARY': ADM_UST_SUMMARY,
+    'ADM_FLW_LIST': ADM_FLW_LIST,
+    'ADM_FLW_CREATE': ADM_FLW_CREATE,
+    'ADM_FLW_DELETE': ADM_FLW_DELETE,
+    'ADM_FLW_SUMMARY': ADM_FLW_SUMMARY,
+    
 }
 
 

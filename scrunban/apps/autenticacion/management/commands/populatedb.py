@@ -9,7 +9,6 @@ from apps.autenticacion.apps import AutenticacionConfig
 class Command(BaseCommand):
     help = 'Populate database with default data'
 
-
     def handle(self, *args, **options):
 
         # Carga permisos por defectos en caso de no existir

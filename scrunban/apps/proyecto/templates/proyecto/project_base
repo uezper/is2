@@ -21,11 +21,6 @@ Proyecto
   <a href="{% url URL_NAMES.PROJECT_DEV_LIST project.id %}">Equipo de Desarrollo</a>
 </li>
 {% endif %}
-{% if user_permissions.project_sprint_management or user_permissions.project_kanban_watch or user_permissions.project_us_aprove or user_permissions.project_us_develop %}
-<li {% if left_active == 'Sprints' %} class="active" {% endif %}>
-  <a href="{% url URL_NAMES.PROJECT_SPRINT_LIST project.id %}">Sprints</a>
-</li>
-{% endif %}
 {% if user_permissions.project_flujo_management %}
 <li {% if left_active == 'Flujos' %} class="active" {% endif %}>
   <a href="{% url URL_NAMES.PROJECT_FLOW_LIST project.pk %}">Flujos</a>
@@ -42,6 +37,15 @@ Proyecto
   <a href="{% url URL_NAMES.ADM_US_LIST project.pk %}">User Stories</a>
 </li>
 {% endif %}
+{% if user_permissions.project_sprint_management or user_permissions.project_kanban_watch or user_permissions.project_us_aprove or user_permissions.project_us_develop %}
+<li {% if left_active == 'Sprints' %} class="active" {% endif %}>
+  <a href="{% url URL_NAMES.PROJECT_SPRINT_LIST project.id %}">Sprints</a>
+</li>
+{% endif %}
+
+<li {% if left_active == 'Burndown' %} class="active" {% endif %}>
+  <a href="{% url URL_NAMES.PROJECT_BDC project.id %}">Burndown Chart</a>
+</li>
 {% endblock %}
 
 
@@ -51,6 +55,6 @@ Proyecto
   <a href="{% url URL_NAMES.PERFIL_PROJECTS %}">Mis Proyectos</a>
 </li>
 <li>
-  <a href="{% url URL_NAMES.PROJECT_INDEX project.id %}" >{{ project.name }}</a>
+  <a href="{% url URL_NAMES.PROJECT_INDEX project.id %}">{{ project.name }}</a>
 </li>
 {% endblock %}

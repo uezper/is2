@@ -2,11 +2,10 @@
 
 {% block "working_path" %}
 {{ block.super }}
-	<li class="active">{{ section_title }}</li>
+	<li class="active">
+	<a href="{% url URL_NAMES.ADM_US_LIST project.pk %}">{{ section_title }}</a>
+	</li>
 {% endblock "working_path" %}
-
-
-
 
 {% block "content" %}
 <div class='panel panel-default'>

@@ -2,16 +2,52 @@
 
 {% block "working_path" %}
 {{ block.super }}
-<li class='active'>Nuevo Tipo de User Story</li>
+<li class='active'>Crear Tipo de User Story</li>
 {% endblock "working_path" %}
 
 {% block "user_story_type_content" %}
-    <h1>Crear Tipo de User Story</h1>
+    <h3>Crear Tipo de User Story</h3>
+    <hr></hr>
     <form class="form-horizontal" action='' method='post' id="form">
       {% csrf_token %}
+      {% comment %}
       <table>
 	{{ form.as_table }}
       </table>
+      {% endcomment %}
+
+      <div class="form-group">
+	{% if form.name.errors %}
+	{% for error in form.name.errors %}
+	<div class="alert alert-warning" role="alert">
+	  {{ error|escape }}
+	</div>
+	{% endfor %}
+	{% endif %}
+	<label for="rowName" class="col-sm-2 control-label">{{ form.name.label }}:</label>
+	<div id="rowName" class="col-md-9 row">
+	  {{ form.name }}
+	  <span id="helpBlock1" class="help-block"></span>
+	</div>
+	
+      </div>
+
+      <div class="form-group">
+	{% if form.flows.errors %}
+	{% for error in form.flows.errors %}
+	<div class="alert alert-warning" role="alert">
+	  {{ error|escape }}
+	</div>
+	{% endfor %}
+	{% endif %}
+	<label for="rowName" class="col-sm-2 control-label">{{ form.flows.label }}:</label>
+	<div id="rowName" class="col-md-9 row">
+	  {{ form.flows }}
+	  <span id="helpBlock1" class="help-block"></span>
+	</div>
+	
+      </div>
+      
       <input type='submit' value='Crear'>
     </form>
 {% endblock "user_story_type_content" %}

@@ -1,0 +1,40 @@
+{% extends "administracion/flow/base" %}
+
+{% block "flow_content" %}
+<div class="row">
+  <div class="col-md-12">
+    <h3>Lista de Flujos</h3>
+    <hr></hr>
+    <table class="table table-striped">
+      <thead>
+	<td><strong>Nombre</strong></td>
+	<td class="text-right">
+	  <a href="{% url URL_NAMES.ADM_FLW_CREATE project.pk %}">
+	    <button type="button" class="btn btn-default btn-sm">
+	      <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+	    </button>
+	  </a>
+	</td>
+      </thead>
+      <tbody>
+	{% for flow in flows %}
+	<tr>
+	  <td><a href="{% url URL_NAMES.ADM_FLW_SUMMARY project.pk flow.pk %}">{{ flow.name }}</a></td>
+	  <td class="text-right">
+	    <a href="{% url URL_NAMES.ADM_FLW_DELETE project.pk flow.pk %}">
+	      <button type="button" class="btn btn-default btn-sm">
+		<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+	      </button>
+	    </a>
+	  </td>
+	</tr>
+	{% empty %}
+	<tr class="danger">
+	  <td colspan="3">Actualmente no hay Flujos </td>
+	</tr>
+	{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock "flow_content" %}
