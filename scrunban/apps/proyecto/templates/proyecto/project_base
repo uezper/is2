@@ -43,9 +43,11 @@ Proyecto
 </li>
 {% endif %}
 
+<!--
 <li {% if left_active == 'Burndown' %} class="active" {% endif %}>
   <a href="{% url URL_NAMES.PROJECT_BDC project.id %}">Burndown Chart</a>
 </li>
+-->
 {% endblock %}
 
 
