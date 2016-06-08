@@ -288,6 +288,7 @@ class UserDeleteView(UserCreateView):
 
         for p in self.user.get_projects():
             names = [r.desc_larga for r in p[1]]
+            p[0].state = 'Pendiente'
             context['user_projects'].append((p[0], ', '.join(names)))
 
         return context
@@ -436,6 +437,21 @@ def user_story_type_list(request, project):
         'project': Project.projects.get(pk=project),
         'user_story_types': UserStoryType.types.filter(flows__project=project).distinct().order_by('name')
     }
+
+    tus_list = []
+    from apps.administracion.models import Grained
+    from apps.proyecto.models import Sprint
+
+    for s in Sprint.objects.filter(project=context['project']):
+        for g in Grained.objects.filter(sprint=s):
+            if not(g.user_story.us_type in tus_list):
+                tus_list.append(g.user_story.us_type)
+
+    for tus in context['user_story_types']:
+        tus.removable = True
+        if tus in tus_list:
+            tus.removable = False
+
     x = UserPermissionContextMixin()
     x.project = context['project']
     x.request = request

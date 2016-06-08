@@ -45,12 +45,14 @@
 	  </td>
 	  
 	  <td class="text-right">
+	  {% if user_permissions.project_tus_management and user_story_type.removable %}
 	    <button type="button" class="btn btn-default btn-sm"
 		    data-url="{% url URL_NAMES.ADM_UST_DELETE project.pk user_story_type.pk %}"
 		    data-name="{{ user_story_type.name }}"
 		    onclick="modalPreparation(this);" data-toggle="modal" data-target="#myModal">
 		<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
 	      </button>
+	  {% endif %}
 	  </td>
 	</tr>
 	{% empty %}

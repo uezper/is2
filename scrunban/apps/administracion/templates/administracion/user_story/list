@@ -36,7 +36,7 @@
 	  <td><a href="{% url URL_NAMES.PROJECT_US_DETAIL project.pk user_story.pk %}">{{ user_story.description }}</a></td>
 	  <td>{{ user_story.details }}</td>
 	  <td class="text-right">
-	  {% if user_permissions.project_us_management %}
+	  {% if user_permissions.project_us_management and user_story.state == 0 %}
 	  <button type="button" class="btn btn-default btn-sm"
 		  data-name="{{ user_story.description }}"
 		  data-url="{% url URL_NAMES.ADM_US_DELETE project.pk user_story.pk %}"
