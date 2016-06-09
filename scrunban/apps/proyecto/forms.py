@@ -1,3 +1,4 @@
+import logging
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Permission
@@ -6,6 +7,15 @@ from django.template.defaulttags import widthratio
 from apps.autenticacion.models import User
 from apps.administracion.models import Project
 from apps.proyecto.fields import PermissionListField, UserListField, SprintBacklogField, ActivitiesField
+
+from scrunban.settings import base as base_settings
+
+# Define loggers
+stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
+
+# Define log entries formatters
+def formatter(entity, project, action, actor):
+    return '{} de {} ha sido {}'.format(entity, project, action)
 
 
 class CreateRolForm(forms.Form):
@@ -83,6 +93,15 @@ class CreateRolForm(forms.Form):
 
             for u in users:
                 rol.add_user(u)
+
+                # Log event
+                kwargs = {
+                    'entity': 'Rol {}'.format(rol_name),
+                    'project': project.name,
+                    'action': 'creado',
+                    'actor': ''
+                }
+                stdlogger.info(formatter(**kwargs))
 
 
 class EditRolForm(CreateRolForm):
@@ -185,8 +204,15 @@ class EditRolForm(CreateRolForm):
                         x.hs_homre = 1
                     x.save()
 
-
-
+                
+            # Log event
+            kwargs = {
+                'entity': 'Rol {}'.format(rol.desc_larga),
+                'project': project.name,
+                'action': 'modificado',
+                'actor': ''
+            }
+            stdlogger.info(formatter(**kwargs))
 
 class DeleteRolForm(EditRolForm):
     """
@@ -225,8 +251,15 @@ class DeleteRolForm(EditRolForm):
             project = Project.objects.filter(id=project_id)[0]
 
             project.remove_rol(short_name=rol.get_name())
-
-
+            
+            # Log event
+            kwargs = {
+                'entity': 'Rol {}'.format(rol.desc_larga),
+                'project': project.name,
+                'action': 'eliminado',
+                'actor': ''
+            }
+            stdlogger.info(formatter(**kwargs))
 
 class EditDevForm(forms.Form):
     """
@@ -399,6 +432,16 @@ class CreateSprintForm(forms.Form):
                 grain.developers.add(dev)
             grain.save()
 
+        
+        # Log event
+        kwargs = {
+            'entity': 'Sprint {}'.format(sprint.get_name()),
+            'project': sprint.project.name,
+            'action': 'creado',
+            'actor': ''
+        }
+        stdlogger.info(formatter(**kwargs))
+
 
 
 class EditSprintForm(CreateSprintForm):
@@ -516,6 +559,15 @@ class EditSprintForm(CreateSprintForm):
 
             grain.save()
 
+        # Log event
+        kwargs = {
+            'entity': 'Sprint {}'.format(sprint_.get_name()),
+            'project': sprint_.project.name,
+            'action': 'modificado',
+            'actor': ''
+        }
+        stdlogger.info(formatter(**kwargs))
+
 class DeleteSprintForm(EditSprintForm):
     """
     Formulario que se encarga de manejar la eliminacion de un Sprint dentro del proyecto
@@ -532,6 +584,15 @@ class DeleteSprintForm(EditSprintForm):
         from apps.proyecto.models import Sprint
         sprint_ = Sprint.objects.get(id=self.cleaned_data['id'])
 
+        
+        # Log event
+        kwargs = {
+            'entity': 'Sprint {}'.format(sprint_.get_name()),
+            'project': sprint_.project.name,
+            'action': 'eliminado',
+            'actor': ''
+        }
+        stdlogger.info(formatter(**kwargs))
 
         sprint_.delete()
 
@@ -584,6 +645,19 @@ class CreateFlowForm(forms.Form):
 
         f = Flow.objects.create(**flow_data)
 
+        import pdb
+        pdb.set_trace()
+
+        # Log event
+        kwargs = {
+            'entity': 'Flujo {}'.format(flow_data['name']),
+            'project': flow_data['project'].name,
+            'action': 'creado',
+            'actor': ''
+        }
+        stdlogger.info(formatter(**kwargs))
+
+
         for ac in self.cleaned_data['activities']:
             ac.flow = f
             ac.save()
@@ -610,6 +684,15 @@ class EditFlowForm(CreateFlowForm):
             ac.flow = f
             ac.save()
 
+        # Log event
+        kwargs = {
+            'entity': 'Flujo {}'.format(f.name),
+            'project': f.project.name,
+            'action': 'modificado',
+            'actor': ''
+        }
+        stdlogger.info(formatter(**kwargs))
+
 class DeleteFlowForm(EditFlowForm):
     project = forms.IntegerField(required=True, widget=forms.HiddenInput)
     flow = forms.IntegerField(required=True, widget=forms.HiddenInput)
@@ -629,6 +712,16 @@ class DeleteFlowForm(EditFlowForm):
 
     def save(self):
         f = self.cleaned_data['flow']
+
+        # Log event
+        kwargs = {
+            'entity': 'Flujo {}'.format(f.name),
+            'project': f.project.name,
+            'action': 'eliminado',
+            'actor': ''
+        }
+        stdlogger.info(formatter(**kwargs))
+
         f.delete()
 
 
@@ -841,4 +934,3 @@ class AddWorkLoad(forms.Form):
         n.grained = self.cleaned_data['grained']
         n.date = datetime.utcnow()
         n.save()
-

@@ -8,9 +8,6 @@ from apps.proyecto.mixins import ProjectViwMixin, DefaultFormDataMixin
 from apps.proyecto import forms
 from apps.proyecto.models import Sprint
 
-
-
-
 class SprintListView(ProjectViwMixin, ListView):
     """
        Clase correspondiente a la vista que lista los sprints de un proyecto
