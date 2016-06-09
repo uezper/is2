@@ -53,17 +53,17 @@
 	<td><strong>Prioridad</strong></td>
       </thead>
       <tbody>
-	{% for assignment in assignments %}
+	{% for user_story in assignments %}
 	
 	<tr>
-	  <td><a href="">
-	      Something
+	  <td><a href="{% url URL_NAMES.PROJECT_US_DETAIL user_story.project.id user_story.id %}">
+	      {{ user_story.description }}
+	  </a></td>
+	  <td><a href="{% url URL_NAMES.PROJECT_INDEX user_story.project.id %}">
+	    {{ user_story.project.name }}
 	  </a></td>
 	  <td>
-	    Something else
-	  </td>
-	  <td>
-	    A number!
+	    {{ user_story.get_weight }}
 	  </td>
 	</tr>
 	

@@ -48,7 +48,7 @@
 	  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 	    Notificaciones
 	    <span class="label">
-	      {{ pending_notes|length }}
+	      {{ notifications_count }}
 	    </span>
 	    <span class="caret"></span>
 	  </a>
@@ -81,12 +81,12 @@
 	    <!-- User Stories en proceso -->
 	    <li class="dropdown-header">User Stories asignados</li>
 
-	    {% for assignment in assignments %}
+	    {% for user_story in assignments %}
 	    
-	    <li class="notificaction">
-	      <a href="#">
-		<p>{{ assignment.title }}</p>
-		<p class="detail">{{ assignment.detail }}</p>
+	    <li class="notification">
+	      <a href="{% url URL_NAMES.PROJECT_US_DETAIL user_story.project.id user_story.id %}">
+		<p>{{ user_story.description }}</p>
+		<p class="detail"> En {{ user_story.project.name }}</p>
 	      </a>
 	    </li>
 	    
