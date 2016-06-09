@@ -540,3 +540,12 @@ def flow_summary(request, project, flow):
             'form': FlowForm(instance=Flow.flows.get(pk=flow))
         }
         return render(request, 'administracion/flow/summary', context)
+
+@login_required()
+def notification_list(request):
+    context = {
+        'URL_NAMES': base_settings.URL_NAMES
+    }
+    
+    return render(request, 'administracion/notification/list', context)
+    

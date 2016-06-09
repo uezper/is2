@@ -1,0 +1,19 @@
+{% extends "autenticacion/profile_base" %}
+
+{% block "working_path" %}
+{{ block.super }}
+
+   <li> Notificaciones </li>
+
+{% endblock "working_path" %}
+
+{% block "content" %}
+<div class='panel panel-default'>
+  <div class='panel-body'>
+
+  {% block "notification_content" %}
+  {% endblock %}
+
+  </div>
+</div>
+{% endblock "content" %}

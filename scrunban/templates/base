@@ -101,7 +101,7 @@
 	    
 	    {% endfor %}
 	    <div class="notification-botton">
-	      <a href="#"><p>Todas las notificaciones</p></a>
+	      <a href="{% url URL_NAMES.ADM_NOT_LIST %}"><p>Todas las notificaciones</p></a>
 	    </div>
 	  </ul>
 	</li>
