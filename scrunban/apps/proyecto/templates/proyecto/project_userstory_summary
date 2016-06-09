@@ -148,6 +148,29 @@
                     </div>
                   </div>
                 </div>
+
+
+                <nav class="text-center">
+                              <ul class="pagination">
+                                  {% if user_story_data.note_list.has_previous %}
+                                <li><a href="?notes_page={{ user_story_data.note_list.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                  </a></li>
+                                  {% else %}
+                                  <li class="disabled"><span aria-hidden="true">&laquo;</span></li>
+                                  {% endif %}
+
+                                <li class="active"><a href="#">{{ user_story_data.note_list.number }} / {{ user_story_data.note_list.paginator.num_pages }}</a></li>
+                                  {% if user_story_data.note_list.has_next %}
+                                <li><a href="?notes_page={{ user_story_data.note_list.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                  </a></li>
+                                  {% else %}
+                                  <li class="disabled"><span aria-hidden="true">&raquo;</span></li>
+                                  {% endif %}
+                              </ul>
+                            </nav>
+
                 {% endif %}
 
 
