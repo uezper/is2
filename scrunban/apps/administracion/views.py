@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+import logging
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
 from .forms import ProjectForm, UserStoryForm, FlowForm, UserStoryTypeForm
 from apps.autenticacion.models import User
 from apps.autenticacion.decorators import login_required
@@ -9,7 +10,6 @@ from django.views.generic.edit import FormView
 from apps.proyecto.models import Project
 from apps.administracion.models import UserStory, UserStoryType, Flow
 from apps.administracion import forms
-from django.shortcuts import get_object_or_404, HttpResponseRedirect
 
 from apps.proyecto.mixins import UrlNamesContextMixin
 from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenticatedMixin
@@ -17,6 +17,13 @@ from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenti
 from scrunban.settings import base as base_settings
 
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+
+# Define loggers
+stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
+
+# Define log entries formatters
+def formatter(entity, project, action, actor):
+    return '{} of {} has been {} by {}'.format(entity, project, action, actor)
 
 class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, UserPermissionContextMixin):
     model = Project
@@ -32,8 +39,6 @@ class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, 
         context['section_title'] = 'Proyectos'
         context['left_active'] = 'Proyectos'
         return context
-
-
 
 class ProjectCreateViewTest(UserIsAuthenticatedMixin, CreateView, UrlNamesContextMixin, UserPermissionContextMixin):
     template_name = 'administracion/project_new.html'
@@ -283,6 +288,7 @@ class UserDeleteView(UserCreateView):
 
         for p in self.user.get_projects():
             names = [r.desc_larga for r in p[1]]
+            p[0].state = 'Pendiente'
             context['user_projects'].append((p[0], ', '.join(names)))
 
         return context
@@ -311,6 +317,16 @@ def user_story_create(request, project):
             us = UserStory.user_stories.create(**data)
             us.us_type = us_type
             us.save()
+
+            # Log event
+            kwargs = {
+                'entity': 'User Story',
+                'project': context['project'].name,
+                'action': 'created',
+                'actor': request.user.get_full_name()
+            }
+            stdlogger.info(formatter(**kwargs))
+            
             # Redirect to the new user story summary page!
             return redirect(base_settings.ADM_US_LIST, project=project)
         else:
@@ -362,6 +378,16 @@ def user_story_delete(request, project, user_story):
     # TODO Check permissions
     # TODO Check project and us
     us = UserStory.user_stories.get(pk=user_story)
+
+    # Log event
+    kwargs = {
+        'entity': 'User Story',
+        'project': Project.projects.get(pk=project).name,
+        'action': 'deleted',
+        'actor': request.user.get_full_name()
+    }
+    stdlogger.info(formatter(**kwargs))        
+    
     us.delete()
     return redirect(base_settings.ADM_US_LIST, project=project)
 
@@ -384,6 +410,16 @@ def user_story_type_create(request, project):
             ust = UserStoryType.types.create(name=form.cleaned_data['name'], project=context['project'])
             for flow in form.cleaned_data['flows']:
                 ust.flows.add(Flow.flows.get(pk=flow))
+
+            # Log event
+            kwargs = {
+                'entity': 'User Story Type',
+                'project': context['project'].name,
+                'action': 'created',
+                'actor': request.user.get_full_name()
+            }
+            stdlogger.info(formatter(**kwargs))
+            
             return redirect(base_settings.ADM_UST_LIST, project=project)
         else:
             context['form'] = form
@@ -401,6 +437,21 @@ def user_story_type_list(request, project):
         'project': Project.projects.get(pk=project),
         'user_story_types': UserStoryType.types.filter(flows__project=project).distinct().order_by('name')
     }
+
+    tus_list = []
+    from apps.administracion.models import Grained
+    from apps.proyecto.models import Sprint
+
+    for s in Sprint.objects.filter(project=context['project']):
+        for g in Grained.objects.filter(sprint=s):
+            if not(g.user_story.us_type in tus_list):
+                tus_list.append(g.user_story.us_type)
+
+    for tus in context['user_story_types']:
+        tus.removable = True
+        if tus in tus_list:
+            tus.removable = False
+
     x = UserPermissionContextMixin()
     x.project = context['project']
     x.request = request
@@ -411,6 +462,16 @@ def user_story_type_list(request, project):
 def user_story_type_delete(request, project, user_story_type):
     # TODO Check project, permissions and ust
     ust = UserStoryType.types.get(pk=user_story_type)
+
+    # Log event
+    kwargs = {
+        'entity': 'User Story Type',
+        'project': Project.projects.get(pk=project).name,
+        'action': 'deleted',
+        'actor': request.user.get_full_name()
+    }
+    stdlogger.info(formatter(**kwargs))
+    
     ust.delete()
     return redirect(base_settings.ADM_UST_LIST, project=project)
 

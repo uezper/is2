@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
-import os
+import os, logging
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -119,6 +119,57 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.abspath(os.path.join(BASE_DIR, "../static/"))
 ]
+
+# Logging configuration
+LOGGERS_NAME = {
+    'proyecto': 'logger_proyecto',
+    'administracion': 'logger_administracion',
+    'autenticacion': 'logger_autenticacion'
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, '../logs/info.log'),
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        LOGGERS_NAME['proyecto']: {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        LOGGERS_NAME['administracion']: {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        LOGGERS_NAME['autenticacion']: {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        
+    },
+}
 
 # CONFIGURACIÓN DE LOGIN!!
 URL_NAME_FORMAT = '{}_{}'
