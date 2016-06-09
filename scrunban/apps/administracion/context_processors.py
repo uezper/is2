@@ -22,24 +22,31 @@ def pending_notes_context(request):
         return {}
 
 def assignments_context(request):
-    from apps.administracion.models import Grained
-    from apps.proyecto.models import Team
+    try:
+        user = request.user.user
+        from apps.administracion.models import Grained
+        from apps.proyecto.models import Team
 
-    teams = Team.teams.filter(user=request.user.user)
-    user_stories = []
-    for team in teams:
-        graineds = Grained.graineds.filter(developers=team)
-        for grained in graineds:
-            user_story = grained.user_story
-            user_stories.append(user_story)
+        teams = Team.teams.filter(user=user)
+        user_stories = []
+        for team in teams:
+            graineds = Grained.graineds.filter(developers=team)
+            for grained in graineds:
+                user_story = grained.user_story
+                user_stories.append(user_story)
 
-    user_stories.sort(key=lambda x: x.get_weight(), reverse=True)
-    
-    context = {
-        'assignments': user_stories
-    }
+        user_stories.sort(key=lambda x: x.get_weight(), reverse=True)
 
-    return context
+        context = {
+            'assignments': user_stories
+        }
+
+        return context
+
+    except AttributeError:
+        return {}
+
+
 
 def notifications_count_context(request):
     pending_notes_length = len( pending_notes_context(request).get('pending_notes', []) )
