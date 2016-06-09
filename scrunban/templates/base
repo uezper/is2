@@ -53,10 +53,37 @@
 	    <span class="caret"></span>
 	  </a>
 	  <ul class="dropdown-menu notification-container">
+
+		<!-- User Stories pendientes -->
+	    <li class="dropdown-header">User Stories pendientes de aprobacion</li>
+
+	    {% for us in pending_user_stories|slice:":2" %}
+
+	    <li class="notification">
+	      <a href="{% url URL_NAMES.PROJECT_SPRINT_KANBAN us.grain.sprint.project.id us.grain.sprint.id %}">
+		<p>{{ us.description }}</p>
+		<p class="detail">En {{us.grain.sprint.project}}</p>
+	      </a>
+	    </li>
+
+	    {% empty %}
+
+	    <li class="notification">
+	      <a href="#">
+		<p>Ningun User Story pendiente</p>
+		<p class="detail">Felicidades!</p>
+	      </a>
+	    </li>
+
+	    {% endfor %}
+
+	    <li role="separator" class="divider"></li>
+
+		<!-- Notas pendientes -->
 	    <li class="dropdown-header">Notas pendientes de aprobacion</li>
 	    
-	    <!-- Notas pendientes -->
-	    {% for note in pending_notes %}
+
+	    {% for note in pending_notes|slice:":2" %}
 	    
 	    <li class="notification">
 	      <a href="{% url URL_NAMES.PROJECT_US_DETAIL note.grained.user_story.project.id note.grained.user_story.id %}">
@@ -81,7 +108,7 @@
 	    <!-- User Stories en proceso -->
 	    <li class="dropdown-header">User Stories asignados</li>
 
-	    {% for user_story in assignments %}
+	    {% for user_story in assignments|slice:":2" %}
 	    
 	    <li class="notification">
 	      <a href="{% url URL_NAMES.PROJECT_US_DETAIL user_story.project.id user_story.id %}">

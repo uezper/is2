@@ -25,7 +25,7 @@ class UserStorySummaryView(ProjectViwMixin, DefaultFormDataMixin, FormView):
         Esta clase hereda de `ProjectViewMixin`, `DefaultFormDataMixin` y de `FormView`
         """
 
-    form_class = forms.AproveUSForm
+    form_class = forms.AproveNoteForm
     template_name = 'proyecto/project_userstory_summary'
     pk_url_kwarg = 'project_id'
     us_url_kwarg = 'user_story_id'

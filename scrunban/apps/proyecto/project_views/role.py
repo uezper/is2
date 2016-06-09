@@ -1,3 +1,6 @@
+import logging
+from scrunban.settings import base as base_settings
+
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect
@@ -5,6 +8,15 @@ from django.views.generic import ListView, FormView
 from apps.proyecto.mixins import ProjectViwMixin, UserListMixin, PermissionListMixin
 from apps.proyecto import forms
 from apps.proyecto.models import Role
+
+
+# Define loggers
+stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['proyecto'])
+
+# Define log entries formatters
+def formatter(entity, project, action, actor):
+    return '{} de {} ha sido {} por {}'.format(entity, project, action, actor)
+
 
 class RoleListView(ProjectViwMixin, ListView):
 
@@ -168,6 +180,21 @@ class RoleCreateView(ProjectViwMixin, FormView, UserListMixin, PermissionListMix
             :param form: Formulario que ha sido ya comprobado y es valido
             :return: HttpResponse
             """
+
+        from apps.proyecto.models import Project
+        rol_name = form.cleaned_data['inputNombre']
+        project = Project.objects.filter(id=form.cleaned_data['projectID'])[0]
+
+        # Log event
+        kwargs = {
+            'entity': 'Rol {}'.format(rol_name),
+            'project': project.name,
+            'action': 'creado',
+            'actor': self.request.user.get_full_name()
+        }
+        stdlogger.info(formatter(**kwargs))
+
+
         form.save()
         return HttpResponseRedirect(self.get_success_url())
 
@@ -255,6 +282,35 @@ class RoleEditView(RoleCreateView):
 
         return context
 
+    def form_valid(self, form):
+        """
+            Metodo que es llamado cuando un formulario enviado por el usuario es valido.
+
+            :param form: Formulario que ha sido ya comprobado y es valido
+            :return: HttpResponse
+            """
+
+        from apps.proyecto.models import Project
+        project = Project.objects.filter(id=form.cleaned_data['projectID'])[0]
+
+        rol = None
+        for r in project.get_roles():
+            if r.get_desc() == form.cleaned_data['inputOldNombre']:
+                rol = r
+
+        # Log event
+        kwargs = {
+            'entity': 'Rol {}'.format(rol.desc_larga),
+            'project': project.name,
+            'action': 'modificado',
+            'actor': self.request.user.get_full_name()
+        }
+        stdlogger.info(formatter(**kwargs))
+
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+
 class RoleDeleteView(RoleEditView):
     """
     Clase correspondiente a la vista que permite eliminar un rol dentro de un proyecto
@@ -314,3 +370,29 @@ class RoleDeleteView(RoleEditView):
         context['delete_form'] = True
 
         return context
+
+    def form_valid(self, form):
+        """
+            Metodo que es llamado cuando un formulario enviado por el usuario es valido.
+
+            :param form: Formulario que ha sido ya comprobado y es valido
+            :return: HttpResponse
+            """
+
+        from apps.proyecto.models import Project
+
+        rol = form.cleaned_data['inputID']
+        project_id = form.cleaned_data['projectID']
+        project = Project.objects.filter(id=project_id)[0]
+
+        # Log event
+        kwargs = {
+            'entity': 'Rol {}'.format(rol.desc_larga),
+            'project': project.name,
+            'action': 'eliminado',
+            'actor': self.request.user.get_full_name()
+        }
+        stdlogger.info(formatter(**kwargs))
+
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())

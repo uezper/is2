@@ -1,3 +1,6 @@
+import logging
+from scrunban.settings import base as base_settings
+
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, FormView
 from django.core.urlresolvers import reverse
@@ -7,6 +10,16 @@ from django.http.response import HttpResponseRedirect
 from apps.proyecto.mixins import ProjectViwMixin, DefaultFormDataMixin
 from apps.proyecto import forms
 from apps.proyecto.models import Sprint
+
+
+
+# Define loggers
+stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['proyecto'])
+
+# Define log entries formatters
+def formatter(entity, project, action, actor):
+    return '{} de {} ha sido {} por {}'.format(entity, project, action, actor)
+
 
 class SprintListView(ProjectViwMixin, ListView):
     """
@@ -199,6 +212,16 @@ class SprintCreateView(ProjectViwMixin, DefaultFormDataMixin, FormView):
             :return: HttpResponse
             """
 
+        # Log event
+        kwargs = {
+            'entity': 'Sprint {}'.format(form.cleaned_data['sec']),
+            'project': self.get_project().name,
+            'action': 'creado',
+            'actor': self.request.user.get_full_name()
+        }
+        stdlogger.info(formatter(**kwargs))
+
+
         form.save()
         return HttpResponseRedirect(self.get_success_url())
 
@@ -326,6 +349,26 @@ class SprintEditView(ValidateSprintState, SprintCreateView):
 
         return initial
 
+    def form_valid(self, form):
+        """
+            Metodo que es llamado cuando un formulario enviado por el usuario es valido.
+
+            :param form: Formulario que ha sido ya comprobado y es valido
+            :return: HttpResponse
+            """
+
+        sprint_ = Sprint.objects.get(id=form.cleaned_data['id'])
+
+        # Log event
+        kwargs = {
+            'entity': 'Sprint {}'.format(sprint_.get_name()),
+            'project': sprint_.project.name,
+            'action': 'modificado',
+            'actor': self.request.user.get_full_name()
+        }
+        stdlogger.info(formatter(**kwargs))
+
+
 class SprintDeleteView(SprintEditView):
     """
         Clase correspondiente a la vista que permite eliminar un sprint dentro de un proyecto
@@ -355,6 +398,26 @@ class SprintDeleteView(SprintEditView):
 
         return context
 
+    def form_valid(self, form):
+        """
+            Metodo que es llamado cuando un formulario enviado por el usuario es valido.
+
+            :param form: Formulario que ha sido ya comprobado y es valido
+            :return: HttpResponse
+            """
+        sprint_ = Sprint.objects.get(id=form.cleaned_data['id'])
+
+        # Log event
+        kwargs = {
+            'entity': 'Sprint {}'.format(sprint_.get_name()),
+            'project': sprint_.project.name,
+            'action': 'eliminado',
+            'actor': self.request.user.get_full_name()
+        }
+        stdlogger.info(formatter(**kwargs))
+
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class SprintDetailView(ProjectViwMixin, FormView):
@@ -539,18 +602,39 @@ class SprintDetailView(ProjectViwMixin, FormView):
                     x.state = 1
                     x.save()
 
-                sprint.start_date = datetime.now()
+                sprint.start_date = datetime.utcnow()
                 sprint.state = 'Ejecucion'
                 sprint.save()
                 context['message'] = 'El Sprint ha iniciado su ejecucion'
+
+
+                # Log event
+                kwargs = {
+                    'entity': 'Sprint {}'.format(sprint.get_name()),
+                    'project': sprint.project.name,
+                    'action': 'iniciado',
+                    'actor': self.request.user.get_full_name()
+                }
+                stdlogger.info(formatter(**kwargs))
+
+
         elif (form.cleaned_data['operation'] == 'cancelar' and sprint.state == 'Ejecucion'):
             from datetime import datetime
 
             sprint.state = 'Cancelado'
-            sprint.cancel_date = datetime.now()
+            sprint.cancel_date = datetime.utcnow()
             sprint.save()
 
             context['message'] = 'El Sprint ha sido cancelado'
+
+            # Log event
+            kwargs = {
+                'entity': 'Sprint {}'.format(sprint.get_name()),
+                'project': sprint.project.name,
+                'action': 'cancelado',
+                'actor': self.request.user.get_full_name()
+            }
+            stdlogger.info(formatter(**kwargs))
 
         return super(SprintDetailView, self).render_to_response(self.get_context_data(**context))
 

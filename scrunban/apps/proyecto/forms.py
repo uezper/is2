@@ -1,21 +1,21 @@
 import logging
+from scrunban.settings import base as base_settings
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Permission
-from django.template.defaulttags import widthratio
 
 from apps.autenticacion.models import User
 from apps.administracion.models import Project
 from apps.proyecto.fields import PermissionListField, UserListField, SprintBacklogField, ActivitiesField
 
-from scrunban.settings import base as base_settings
 
 # Define loggers
-stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
+stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['proyecto'])
 
 # Define log entries formatters
 def formatter(entity, project, action, actor):
-    return '{} de {} ha sido {}'.format(entity, project, action)
+    return '{} de {} ha sido {} por {}'.format(entity, project, action, actor)
 
 
 class CreateRolForm(forms.Form):
@@ -94,14 +94,7 @@ class CreateRolForm(forms.Form):
             for u in users:
                 rol.add_user(u)
 
-                # Log event
-                kwargs = {
-                    'entity': 'Rol {}'.format(rol_name),
-                    'project': project.name,
-                    'action': 'creado',
-                    'actor': ''
-                }
-                stdlogger.info(formatter(**kwargs))
+
 
 
 class EditRolForm(CreateRolForm):
@@ -169,6 +162,7 @@ class EditRolForm(CreateRolForm):
                     rol = r
 
             rol.set_desc(self.cleaned_data['inputNombre'])
+            rol.save()
 
             from apps.autenticacion.models import Role
             from django.contrib.auth.models import Permission
@@ -205,14 +199,7 @@ class EditRolForm(CreateRolForm):
                     x.save()
 
                 
-            # Log event
-            kwargs = {
-                'entity': 'Rol {}'.format(rol.desc_larga),
-                'project': project.name,
-                'action': 'modificado',
-                'actor': ''
-            }
-            stdlogger.info(formatter(**kwargs))
+
 
 class DeleteRolForm(EditRolForm):
     """
@@ -251,15 +238,7 @@ class DeleteRolForm(EditRolForm):
             project = Project.objects.filter(id=project_id)[0]
 
             project.remove_rol(short_name=rol.get_name())
-            
-            # Log event
-            kwargs = {
-                'entity': 'Rol {}'.format(rol.desc_larga),
-                'project': project.name,
-                'action': 'eliminado',
-                'actor': ''
-            }
-            stdlogger.info(formatter(**kwargs))
+
 
 class EditDevForm(forms.Form):
     """
@@ -433,14 +412,7 @@ class CreateSprintForm(forms.Form):
             grain.save()
 
         
-        # Log event
-        kwargs = {
-            'entity': 'Sprint {}'.format(sprint.get_name()),
-            'project': sprint.project.name,
-            'action': 'creado',
-            'actor': ''
-        }
-        stdlogger.info(formatter(**kwargs))
+
 
 
 
@@ -532,6 +504,7 @@ class EditSprintForm(CreateSprintForm):
         sprint_ = Sprint.objects.get(id=self.cleaned_data['id'])
         sprint_.set_estimated_time(self.cleaned_data['estimated_time'])
 
+
         if sprint_.state == 'Pendiente':
             for grain in Grained.objects.filter(sprint=sprint_):
                 grain.delete()
@@ -559,14 +532,7 @@ class EditSprintForm(CreateSprintForm):
 
             grain.save()
 
-        # Log event
-        kwargs = {
-            'entity': 'Sprint {}'.format(sprint_.get_name()),
-            'project': sprint_.project.name,
-            'action': 'modificado',
-            'actor': ''
-        }
-        stdlogger.info(formatter(**kwargs))
+
 
 class DeleteSprintForm(EditSprintForm):
     """
@@ -584,15 +550,7 @@ class DeleteSprintForm(EditSprintForm):
         from apps.proyecto.models import Sprint
         sprint_ = Sprint.objects.get(id=self.cleaned_data['id'])
 
-        
-        # Log event
-        kwargs = {
-            'entity': 'Sprint {}'.format(sprint_.get_name()),
-            'project': sprint_.project.name,
-            'action': 'eliminado',
-            'actor': ''
-        }
-        stdlogger.info(formatter(**kwargs))
+
 
         sprint_.delete()
 
@@ -645,18 +603,6 @@ class CreateFlowForm(forms.Form):
 
         f = Flow.objects.create(**flow_data)
 
-        import pdb
-        pdb.set_trace()
-
-        # Log event
-        kwargs = {
-            'entity': 'Flujo {}'.format(flow_data['name']),
-            'project': flow_data['project'].name,
-            'action': 'creado',
-            'actor': ''
-        }
-        stdlogger.info(formatter(**kwargs))
-
 
         for ac in self.cleaned_data['activities']:
             ac.flow = f
@@ -684,14 +630,9 @@ class EditFlowForm(CreateFlowForm):
             ac.flow = f
             ac.save()
 
-        # Log event
-        kwargs = {
-            'entity': 'Flujo {}'.format(f.name),
-            'project': f.project.name,
-            'action': 'modificado',
-            'actor': ''
-        }
-        stdlogger.info(formatter(**kwargs))
+        f.save()
+
+
 
 class DeleteFlowForm(EditFlowForm):
     project = forms.IntegerField(required=True, widget=forms.HiddenInput)
@@ -712,16 +653,6 @@ class DeleteFlowForm(EditFlowForm):
 
     def save(self):
         f = self.cleaned_data['flow']
-
-        # Log event
-        kwargs = {
-            'entity': 'Flujo {}'.format(f.name),
-            'project': f.project.name,
-            'action': 'eliminado',
-            'actor': ''
-        }
-        stdlogger.info(formatter(**kwargs))
-
         f.delete()
 
 
@@ -855,8 +786,17 @@ class KanbanOperation(forms.Form):
             n.work_load = 0
             n.save()
 
+            # Log event
+            kwargs = {
+                'entity': 'User Story {}'.format(x.description),
+                'project': grain.sprint.project.name,
+                'action': 'aprovado',
+                'actor': self.cleaned_data['user'].user.get_full_name()
+            }
+            stdlogger.info(formatter(**kwargs))
 
-class AproveUSForm(forms.Form):
+
+class AproveNoteForm(forms.Form):
     project_id = forms.CharField(required=True, widget=forms.HiddenInput)
     user_id = forms.CharField(required=True, widget=forms.HiddenInput)
     note_id = forms.CharField(required=True, widget=forms.HiddenInput)
@@ -899,6 +839,16 @@ class AproveUSForm(forms.Form):
         note.aproved = True
         note.save()
 
+        # Log event
+        kwargs = {
+            'entity': 'Nota del User Story {}'.format(note.grained.user_story.description),
+            'project': note.grained.sprint.project.name,
+            'action': 'aprovado',
+            'actor': self.cleaned_data['user_id'].user.get_full_name()
+        }
+        stdlogger.info(formatter(**kwargs))
+
+
 
 class AddWorkLoad(forms.Form):
     note = forms.CharField(required=True, widget=forms.HiddenInput)
@@ -934,3 +884,13 @@ class AddWorkLoad(forms.Form):
         n.grained = self.cleaned_data['grained']
         n.date = datetime.utcnow()
         n.save()
+
+        # Log event
+        kwargs = {
+            'entity': 'Nota del User Story {}'.format(n.grained.user_story.description),
+            'project': n.grained.sprint.project.name,
+            'action': 'creado',
+            'actor': self.cleaned_data['user'].user.get_full_name()
+        }
+        stdlogger.info(formatter(**kwargs))
+
