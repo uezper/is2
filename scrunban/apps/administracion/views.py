@@ -23,7 +23,7 @@ stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
 
 # Define log entries formatters
 def formatter(entity, project, action, actor):
-    return '{} of {} has been {} by {}'.format(entity, project, action, actor)
+    return '{} de {} ha sido {}'.format(entity, project, action)
 
 class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, UserPermissionContextMixin):
     model = Project
@@ -320,9 +320,9 @@ def user_story_create(request, project):
 
             # Log event
             kwargs = {
-                'entity': 'User Story',
+                'entity': 'User Story {}'.format(us.description),
                 'project': context['project'].name,
-                'action': 'created',
+                'action': 'creado',
                 'actor': request.user.get_full_name()
             }
             stdlogger.info(formatter(**kwargs))
@@ -381,9 +381,9 @@ def user_story_delete(request, project, user_story):
 
     # Log event
     kwargs = {
-        'entity': 'User Story',
+        'entity': 'User Story {}'.format(us.description),
         'project': Project.projects.get(pk=project).name,
-        'action': 'deleted',
+        'action': 'eliminado',
         'actor': request.user.get_full_name()
     }
     stdlogger.info(formatter(**kwargs))        
@@ -413,9 +413,9 @@ def user_story_type_create(request, project):
 
             # Log event
             kwargs = {
-                'entity': 'User Story Type',
+                'entity': 'Tipo de User Story {}'.format(ust.name),
                 'project': context['project'].name,
-                'action': 'created',
+                'action': 'creado',
                 'actor': request.user.get_full_name()
             }
             stdlogger.info(formatter(**kwargs))
@@ -465,15 +465,16 @@ def user_story_type_delete(request, project, user_story_type):
 
     # Log event
     kwargs = {
-        'entity': 'User Story Type',
+        'entity': 'Tipo de User Story {}'.format(ust.name),
         'project': Project.projects.get(pk=project).name,
-        'action': 'deleted',
+        'action': 'eliminado',
         'actor': request.user.get_full_name()
     }
     stdlogger.info(formatter(**kwargs))
     
     ust.delete()
     return redirect(base_settings.ADM_UST_LIST, project=project)
+
 
 @login_required()
 def flow_create(request, project):
@@ -490,6 +491,16 @@ def flow_create(request, project):
                 name=form.cleaned_data['name'],
                 project=Project.projects.get(pk=project)
             )
+
+            # Log event
+            kwargs = {
+                'entity': 'Flujo',
+                'project': context['project'].name,
+                'action': 'eliminado',
+                'actor': request.user.get_full_name()
+            }
+            stdlogger.info(formatter(**kwargs))
+            
         return redirect(base_settings.ADM_FLW_LIST, project=project)
     else:
         # TODO Check project
@@ -516,6 +527,16 @@ def flow_list(request, project):
 def flow_delete(request, project, flow):
     # TODO Check everything!!
     flow = Flow.flows.get(pk=flow)
+
+    # Log event
+    kwargs = {
+        'entity': 'Flujo',
+        'project': Project.projects.get(pk=project).name,
+        'action': 'eliminado',
+        'actor': request.user.get_full_name()
+    }
+    stdlogger.info(formatter(**kwargs))
+    
     flow.delete()
     return redirect(base_settings.ADM_FLW_LIST, project=project)
 
@@ -535,3 +556,8 @@ def flow_summary(request, project, flow):
             'form': FlowForm(instance=Flow.flows.get(pk=flow))
         }
         return render(request, 'administracion/flow/summary', context)
+
+@login_required()
+def notification_list(request):
+    return render(request, 'administracion/notification/list')
+    

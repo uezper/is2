@@ -64,6 +64,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.administracion.context_processors.pending_notes_context',
+                'apps.administracion.context_processors.url_names_context',
             ],
         },
     },
@@ -228,6 +230,8 @@ ADM_FLW_CREATE = URL_NAME_FORMAT.format( APP_NAME_ADM, 'flow_create' )
 ADM_FLW_DELETE = URL_NAME_FORMAT.format( APP_NAME_ADM, 'flow_delete' )
 ADM_FLW_SUMMARY = URL_NAME_FORMAT.format( APP_NAME_ADM, 'flow_summary' )
 
+ADM_NOT_LIST = URL_NAME_FORMAT.format( APP_NAME_ADM, 'notification_list' )
+
 URL_NAMES = {
     'LOGIN_NAME': LOGIN_NAME,
     'AUTH_NAME': AUTH_NAME,
@@ -274,7 +278,7 @@ URL_NAMES = {
     'ADM_FLW_CREATE': ADM_FLW_CREATE,
     'ADM_FLW_DELETE': ADM_FLW_DELETE,
     'ADM_FLW_SUMMARY': ADM_FLW_SUMMARY,
-    
+    'ADM_NOT_LIST': ADM_NOT_LIST,
 }
 
 

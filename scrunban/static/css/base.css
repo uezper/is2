@@ -50,6 +50,8 @@
 
 .notification-container {
     width: 350px;
+    max-height: 400px;
+    padding-bottom: 0px;
 }
 
 .notification a p {
@@ -60,4 +62,23 @@
 .notification .detail {
     color: #777;
     padding-left: 15px;
+}
+
+.notification-botton {
+    text-align: center;
+    background-color: #E6E6E6;
+}
+
+.notification-botton a p {
+    margin: 0;
+    padding: 10px 0;
+}
+
+.label {
+    font-size: 8px;
+    position: absolute;
+    line-height: 10px;
+    top: 4px;
+    right: 4px;
+    background: #e66454;
 }

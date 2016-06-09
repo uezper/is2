@@ -1,0 +1,76 @@
+{% extends "administracion/notification/base" %}
+
+{% block "working_path" %}
+{{ block.super }}
+{% endblock "working_path" %}
+
+{% block "notification_content" %}
+<h3>Notificaciones</h3>
+<hr> </hr>
+
+<h4>Notas</h4>
+
+{% if pending_notes|length == 0 %}
+
+<div class="alert alert-success" role="alert">No tienes notificaciones!</div>
+
+{% else %}
+    <table class="table table-striped">
+      <thead>
+	<td><strong>User Story</strong></td>
+	<td><strong>Detalles</strong></td>
+      </thead>
+      <tbody>
+	{% for note in pending_notes %}
+	
+	<tr>
+	  <td><a href="{% url URL_NAMES.PROJECT_US_DETAIL note.grained.user_story.project.id note.grained.user_story.id %}">
+	      {{ note.grained.user_story.description }}
+	  </a></td>
+	  <td>
+	    De {{ note.user.get_first_name }} hace {{ note.date|timesince }}
+	  </td>
+	</tr>
+	
+	{% endfor %}
+      </tbody>
+    </table>
+{% endif %}
+
+<hr></hr>
+<h4>Asignaciones</h4>
+
+{% if assignments|length == 0 %}
+
+<div class="alert alert-success" role="alert">No tienes pendientes!</div>
+
+{% else %}
+
+    <table class="table table-striped">
+      <thead>
+	<td><strong>User Story</strong></td>
+	<td><strong>Proyecto</strong></td>
+	<td><strong>Prioridad</strong></td>
+      </thead>
+      <tbody>
+	{% for assignment in assignments %}
+	
+	<tr>
+	  <td><a href="">
+	      Something
+	  </a></td>
+	  <td>
+	    Something else
+	  </td>
+	  <td>
+	    A number!
+	  </td>
+	</tr>
+	
+	{% endfor %}
+      </tbody>
+    </table>
+
+{% endif %}
+
+{% endblock "notification_content" %}
