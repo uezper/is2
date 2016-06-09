@@ -543,9 +543,5 @@ def flow_summary(request, project, flow):
 
 @login_required()
 def notification_list(request):
-    context = {
-        'URL_NAMES': base_settings.URL_NAMES
-    }
-    
-    return render(request, 'administracion/notification/list', context)
+    return render(request, 'administracion/notification/list')
     

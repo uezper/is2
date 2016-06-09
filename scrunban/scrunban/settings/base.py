@@ -65,6 +65,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'apps.administracion.context_processors.pending_notes_context',
+                'apps.administracion.context_processors.url_names_context',
             ],
         },
     },

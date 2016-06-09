@@ -20,3 +20,8 @@ def pending_notes_context(request):
 
     except AttributeError:
         return {}
+
+        
+def url_names_context(request):
+    from scrunban.settings import base as base_settings
+    return {'URL_NAMES': base_settings.URL_NAMES }
