@@ -6,7 +6,7 @@ from django.http.response import HttpResponseRedirect
 from django.views.generic import ListView, FormView
 from apps.proyecto.mixins import ProjectViwMixin, DefaultFormDataMixin
 from apps.proyecto import forms
-from apps.proyecto.models import Flow, Project
+from apps.proyecto.models import Flow
 
 # Define loggers
 stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['proyecto'])
@@ -165,6 +165,18 @@ class FlowCreateView(ProjectViwMixin, DefaultFormDataMixin, FormView):
         :param form: Formulario que ha sido ya comprobado y es valido
         :return: HttpResponse
         """
+
+
+
+        # Log event
+        kwargs = {
+            'entity': 'Flujo {}'.format(form.cleaned_data['name']),
+            'project': form.cleaned_data['project'].name,
+            'action': 'creado',
+            'actor': self.request.user.get_full_name()
+        }
+        stdlogger.info(formatter(**kwargs))
+
         form.save()
         return HttpResponseRedirect(self.get_success_url())
 
@@ -249,6 +261,24 @@ class FlowEditView(FlowCreateView):
 
         return initial
 
+    def form_valid(self, form):
+
+
+        f = Flow.objects.get(project=form.cleaned_data['project'], name=form.cleaned_data['old_name'])
+
+        # Log event
+        kwargs = {
+            'entity': 'Flujo {}'.format(f.name),
+            'project': f.project.name,
+            'action': 'modificado',
+            'actor': self.request.user.get_full_name()
+        }
+        stdlogger.info(formatter(**kwargs))
+
+        form.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
 class FlowDeleteView(FlowEditView):
     """
     Clase correspondiente a la vista que permite eliminar un Flujo dentro de un proyecto
@@ -293,3 +323,20 @@ class FlowDeleteView(FlowEditView):
         context['no_editable'] = True
 
         return context
+
+
+    def form_valid(self, form):
+
+        f = form.cleaned_data['flow']
+
+        # Log event
+        kwargs = {
+            'entity': 'Flujo {}'.format(f.name),
+            'project': f.project.name,
+            'action': 'eliminado',
+            'actor': self.request.user.get_full_name()
+        }
+        stdlogger.info(formatter(**kwargs))
+
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())

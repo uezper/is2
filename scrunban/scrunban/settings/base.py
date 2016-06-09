@@ -64,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.administracion.context_processors.pending_user_stories_context',
                 'apps.administracion.context_processors.pending_notes_context',
                 'apps.administracion.context_processors.assignments_context',
                 'apps.administracion.context_processors.notifications_count_context',

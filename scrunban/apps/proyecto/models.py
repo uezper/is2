@@ -416,7 +416,7 @@ class Sprint(models.Model):
         Retorna el nombre del Sprint
         :returns: Nombre del Sprint
         """
-        return "Sprint %d" % self.id
+        return "Sprint %d" % self.sec
 
     def get_project(self):
         """
