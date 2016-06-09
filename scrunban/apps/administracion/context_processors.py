@@ -2,15 +2,26 @@ def pending_notes_context(request):
     from apps.proyecto.models import Project
     from apps.administracion.models import Note
     from apps.autenticacion.models import User
-    
-    # TODO Filter notes per permissions
+    from apps.autenticacion.settings import PROJECT_US_APROVE
+
+
+
     try:
         user = request.user.user
-        print(user)
+        user_projects = user.get_projects()
+
+        projects = []
+
+        for project in user_projects:
+            if project[0].has_perm(user, PROJECT_US_APROVE[0]):
+                projects.append(project[0])
+
+
         pending_notes = list(
             Note.notes.filter(
                 aproved=False,
-                grained__user_story__project__scrum_master=user
+                grained__user_story__project__in=projects,
+                grained__sprint__state='Ejecucion'
             )
         )
         context = {
@@ -30,12 +41,15 @@ def assignments_context(request):
         teams = Team.teams.filter(user=user)
         user_stories = []
         for team in teams:
-            graineds = Grained.graineds.filter(developers=team)
+            graineds = Grained.graineds.filter(developers=team, user_story__state__in=[0, 1], sprint__state='Ejecucion')
             for grained in graineds:
                 user_story = grained.user_story
-                user_stories.append(user_story)
+
+                if not(user_story in user_stories):
+                    user_stories.append(user_story)
 
         user_stories.sort(key=lambda x: x.get_weight(), reverse=True)
+        #user_stories.sort(key=lambda x: x.date_sprint, reverse=True)
 
         context = {
             'assignments': user_stories

@@ -539,7 +539,7 @@ class SprintDetailView(ProjectViwMixin, FormView):
                     x.state = 1
                     x.save()
 
-                sprint.start_date = datetime.now()
+                sprint.start_date = datetime.utcnow()
                 sprint.state = 'Ejecucion'
                 sprint.save()
                 context['message'] = 'El Sprint ha iniciado su ejecucion'
@@ -547,7 +547,7 @@ class SprintDetailView(ProjectViwMixin, FormView):
             from datetime import datetime
 
             sprint.state = 'Cancelado'
-            sprint.cancel_date = datetime.now()
+            sprint.cancel_date = datetime.utcnow()
             sprint.save()
 
             context['message'] = 'El Sprint ha sido cancelado'
