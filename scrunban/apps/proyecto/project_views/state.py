@@ -1,6 +1,5 @@
-from django.shortcuts import redirect, get_object_or_404, render
+from django.shortcuts import redirect, get_object_or_404
 from django.views.generic.edit import FormView
-from django.http.response import HttpResponse
 from scrunban.settings import base as base_settings
 from apps.administracion.models import Project
 from apps.proyecto.mixins import ProjectViwMixin, DefaultFormDataMixin
@@ -8,7 +7,7 @@ from apps.proyecto.forms import StateForm
 
 
 class ProjectStateView(ProjectViwMixin, FormView):
-    template_name = "proyecto/project_property"
+    template_name = "proyecto/project_state"
     form_class = StateForm
     pk_url_kwarg = 'project_id'
     section_title = 'Estado'
