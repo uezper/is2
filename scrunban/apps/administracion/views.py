@@ -25,7 +25,11 @@ stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
 def formatter(entity, project, action, actor):
     return '{} de {} ha sido {}'.format(entity, project, action)
 
+
 class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, UserPermissionContextMixin):
+    """
+    Clase correspondiente a la vista que permite listar los proyectos
+    """
     model = Project
     context_object_name = 'project_list'
     template_name = 'administracion/project_list.html'
@@ -40,7 +44,10 @@ class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, 
         context['left_active'] = 'Proyectos'
         return context
 
-class ProjectCreateViewTest(UserIsAuthenticatedMixin, CreateView, UrlNamesContextMixin, UserPermissionContextMixin):
+class ProjectCreateView(UserIsAuthenticatedMixin, CreateView, UrlNamesContextMixin, UserPermissionContextMixin):
+    """
+    Clase correspondiente a la vista que permite crear un proyecto
+    """
     template_name = 'administracion/project_new.html'
     model = Project
     context_object_name = 'project'
@@ -77,10 +84,10 @@ class ProjectCreateViewTest(UserIsAuthenticatedMixin, CreateView, UrlNamesContex
     def dispatch(self, request, *args, **kwargs):
         if request.method == 'POST':
             self.lastForm = forms.ProjectForm(request.POST)
-        return super(ProjectCreateViewTest, self).dispatch(request, *args, **kwargs)
+        return super(ProjectCreateView, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context = super(ProjectCreateViewTest, self).get_context_data(**kwargs)
+        context = super(ProjectCreateView, self).get_context_data(**kwargs)
         self.get_url_context(context)
         self.get_user_permissions_context(context)
         context['form'] = self.lastForm
@@ -91,6 +98,9 @@ class ProjectCreateViewTest(UserIsAuthenticatedMixin, CreateView, UrlNamesContex
 
 
 class ProjectModifyView(UserIsAuthenticatedMixin, UpdateView, UrlNamesContextMixin, UserPermissionContextMixin):
+    """
+    Clase correspondiente a la vista que permite modificar un proyecto
+    """
     template_name = 'administracion/project_modify.html'
     model = Project
     context_object_name = 'project'
@@ -130,10 +140,15 @@ class ProjectModifyView(UserIsAuthenticatedMixin, UpdateView, UrlNamesContextMix
         context['user_list'] = User.objects.all()
         context['section_title'] = 'Modificar Proyecto'
         context['left_active'] = 'Proyectos'
+        p = Project.objects.get(id=self.kwargs['pk'])
+        context['project_state'] = p.get_state
         return context
 
 
 class ProjectDeleteView(UserIsAuthenticatedMixin, DeleteView, UrlNamesContextMixin, UserPermissionContextMixin):
+    """
+    Clase correspondiente a la vista que permite eliminar un proyecto
+    """
     template_name = 'administracion/project_delete.html'
     model = Project
     context_object_name = 'project'
@@ -149,6 +164,8 @@ class ProjectDeleteView(UserIsAuthenticatedMixin, DeleteView, UrlNamesContextMix
         context['user_list'] = User.objects.all()
         context['section_title'] = 'Eliminar Proyecto'
         context['left_active'] = 'Proyectos'
+        p = Project.objects.get(id=self.kwargs['pk'])
+        context['project_state'] = p.get_state
         return context
 
 

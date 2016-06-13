@@ -29,13 +29,7 @@
                                     {% for row in user_projects %}
                                     <tr>
                                     <td><a href="{% url URL_NAMES.PROJECT_INDEX row.0.id %}">{{row.0.name}}</a></td>
-                                    <td>{% if date_now < row.0.date_start %}
-                                            Pendiente
-                                        {% elif row.0.date_start < date_now < row.0.date_end %}
-                                            Ejecutando
-                                        {% elif row.0.date_end < date_now %}
-                                            Finalizado
-                                        {% endif %}</td>
+                                    <td>{{ row.0.get_state }}</td>
                                     <td>{{row.1}}</td>
                                     </tr>
                                     {% endfor %}

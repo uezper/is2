@@ -18,7 +18,7 @@ def formatter(entity, project, action, actor):
 
 class ProjectStateView(ProjectViwMixin, FormView):
     """
-    Clase correspondiente a la vista que permite crear un sprint dentro de un proyecto
+    Clase correspondiente a la vista que permite modificar el estado de un proyecto
 
     :param template_name: Nombre del template que sera utilizado
     :param form_class: Formulario que se encarga de la validacion de los datos ingresados por usuarios

@@ -8,7 +8,7 @@ from django.forms import ModelForm
 class ProjectForm(ModelForm):
     class Meta:
         model = Project
-        fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
+        fields = ['name', 'scrum_master', 'product_owner']
 
 class UserForm(forms.Form):
     id = forms.CharField(max_length=4,widget=forms.HiddenInput, required=False)
