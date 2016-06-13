@@ -91,12 +91,38 @@ class Project(models.Model):
     # Public fields mapped to DB columns
     id = models.AutoField(primary_key=True)
     name = models.TextField('Project name', unique=True)
-    date_start = models.DateField()
-    date_end = models.DateField()
+    date_start = models.DateField(null=True)
+    date_end = models.DateField(null=True)
     scrum_master = models.ForeignKey(User, null=True, related_name='fk_project_scrum_master')
     product_owner = models.ForeignKey(User, null=True, related_name='fk_project_product_owner')
     development_team = models.ManyToManyField(User, related_name='mm_project_development_team')
     capacity = models.IntegerField(default=0)
+    cancel = models.BooleanField(default=False)
+
+    def get_state(self):
+        """
+        Obtiene el estado del proyecto. Hay en total 4 posibles estados:
+            - "Cancelado" : El proyecto se encuentra en el estado cancelado cuando el atributo cancel del proyecto se
+                            encuentra con el valor True.
+            - "Pendiente" : El proyecto se encuentra en el estado Pendiente cuando la fecha de inicio no se encuentra
+                            determinado.
+            - "Ejecucion" : El proyecto se encuentra en el estado Ejecucion cuando la fecha actual del sistema operativo
+                            se encuentra entre la fecha de inicio y la fecha de finalizacion inclusive.
+            - "Finalizado" : El proyecto se encuentra en el estado Ejecucion cuando la fecha actual del sistema
+                            operativo es mayor que la fecha de finalizacion.
+
+        :returns: Un string que indica el estado del proyecto
+        """
+        import datetime
+        now = datetime.datetime.now().date()
+        if self.cancel:
+            return 'Cancelado'
+        elif self.date_start == None:
+            return 'Pendiente'
+        elif self.date_start <= now <= self.date_end:
+            return 'Ejecucion'
+        elif self.date_end < now:
+            return 'Finalizado'
 
     # Public fields for simplicity
     objects = models.Manager()
