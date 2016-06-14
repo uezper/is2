@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from scrunban.settings import base as base_settings
 from . import views
-from .project_views import flow, sprint, role, team, user_story
+from .project_views import flow, sprint, role, team, user_story, state
 
 urlpatterns = [
     url(r'^(?P<project_id>[0-9]+)/$', views.index,
@@ -45,5 +45,7 @@ urlpatterns = [
         name=base_settings.PROJECT_US_ADDWORK),
     url(r'^(?P<project_id>[0-9]+)/burndown/$', views.burndown_chart,
         name=base_settings.PROJECT_BDC),
+    url(r'^(?P<project_id>[0-9]+)/state/$', state.ProjectStateView.as_view(),
+        name=base_settings.PROJECT_STATE),
 ]
 

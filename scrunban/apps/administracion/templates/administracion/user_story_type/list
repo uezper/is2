@@ -21,11 +21,13 @@
 	<td><strong>Nombre</strong></td>
 	<td><strong>Flujos compatibles</strong></td>
 	<td class="text-right">
-	  <a href="{% url URL_NAMES.ADM_UST_CREATE project.pk %}">
-	    <button type="button" class="btn btn-default btn-sm">
-	      <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
-	    </button>
-	  </a>
+	  {% if projec.get_state == 'Pendiente' or projec.get_state == 'Ejecucion' %}
+  	    <a href="{% url URL_NAMES.ADM_UST_CREATE project.pk %}">
+	      <button type="button" class="btn btn-default btn-sm">
+	        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+	      </button>
+	    </a>
+	  {% endif %}
 	</td>
       </thead>
       <tbody>
@@ -38,7 +40,11 @@
 	    <ul>
 	      {% for flow in user_story_type.flows.get_queryset %}
 	      <li>
-		<a href="{% url URL_NAMES.PROJECT_FLOW_EDIT project.pk flow.pk %}">{{flow.name}}</a>
+      {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
+		    <a href="{% url URL_NAMES.PROJECT_FLOW_EDIT project.pk flow.pk %}">{{flow.name}}</a>
+		  {% else %}
+		    <a href="{% url URL_NAMES.PROJECT_FLOW_LIST project.pk %}">{{flow.name}}</a>
+		  {% endif %}
 	      </li>
 	      {% endfor %}
 	    </ul>
@@ -46,12 +52,14 @@
 	  
 	  <td class="text-right">
 	  {% if user_permissions.project_tus_management and user_story_type.removable %}
-	    <button type="button" class="btn btn-default btn-sm"
-		    data-url="{% url URL_NAMES.ADM_UST_DELETE project.pk user_story_type.pk %}"
-		    data-name="{{ user_story_type.name }}"
-		    onclick="modalPreparation(this);" data-toggle="modal" data-target="#myModal">
-		<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-	      </button>
+	    {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
+	      <button type="button" class="btn btn-default btn-sm"
+		      data-url="{% url URL_NAMES.ADM_UST_DELETE project.pk user_story_type.pk %}"
+		      data-name="{{ user_story_type.name }}"
+		      onclick="modalPreparation(this);" data-toggle="modal" data-target="#myModal">
+		  <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+	        </button>
+	    {% endif %}
 	  {% endif %}
 	  </td>
 	</tr>

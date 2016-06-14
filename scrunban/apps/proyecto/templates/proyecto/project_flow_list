@@ -20,10 +20,12 @@
 				<thead>
 					<tr>  <th>Flujo</th>
                         <th class="text-right">
+                            {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
                             <a href="{% url URL_NAMES.PROJECT_FLOW_CREATE project.id %}">
 							<button type="button" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
 							</button></a>
+							{% endif %}
                         </th>
                     </tr>
 				</thead>
@@ -37,6 +39,7 @@
 					<tr>
 						<td><a href="{% url URL_NAMES.PROJECT_FLOW_EDIT project.id flow.id %}">{{flow.name}}</a></td>
 						<td class="text-right">
+    						{% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
 							{% if flow.can_delete %}
 							<a href="{% url URL_NAMES.PROJECT_FLOW_DELETE project.id flow.id %}">
 							<button type="button" class="btn btn-default btn-sm">
@@ -50,7 +53,7 @@
 							</button>
 							</a>
 							{% endif %}
-
+							{% endif %}
 
 						</td>
 					</tr>

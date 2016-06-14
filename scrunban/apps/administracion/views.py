@@ -17,6 +17,8 @@ from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenti
 from scrunban.settings import base as base_settings
 
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
+from django.contrib.auth.models import Permission
 
 # Define loggers
 stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
@@ -25,7 +27,11 @@ stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
 def formatter(entity, project, action, actor):
     return '{} de {} ha sido {}'.format(entity, project, action)
 
+
 class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, UserPermissionContextMixin):
+    """
+    Clase correspondiente a la vista que permite listar los proyectos
+    """
     model = Project
     context_object_name = 'project_list'
     template_name = 'administracion/project_list.html'
@@ -40,11 +46,14 @@ class ProjectListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, 
         context['left_active'] = 'Proyectos'
         return context
 
-class ProjectCreateViewTest(UserIsAuthenticatedMixin, CreateView, UrlNamesContextMixin, UserPermissionContextMixin):
+class ProjectCreateView(UserIsAuthenticatedMixin, CreateView, UrlNamesContextMixin, UserPermissionContextMixin):
+    """
+    Clase correspondiente a la vista que permite crear un proyecto
+    """
     template_name = 'administracion/project_new.html'
     model = Project
     context_object_name = 'project'
-    fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
+    fields = ['name', 'scrum_master', 'product_owner']
 
     lastForm = forms.ProjectForm()
 
@@ -54,8 +63,6 @@ class ProjectCreateViewTest(UserIsAuthenticatedMixin, CreateView, UrlNamesContex
     def form_valid(self, form):
         p = form.save()
         # Crea roles por defecto
-        from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
-        from django.contrib.auth.models import Permission
         for rol in DEFAULT_PROJECT_ROLES:
             role_data = {
                 'name': rol[0],
@@ -77,10 +84,10 @@ class ProjectCreateViewTest(UserIsAuthenticatedMixin, CreateView, UrlNamesContex
     def dispatch(self, request, *args, **kwargs):
         if request.method == 'POST':
             self.lastForm = forms.ProjectForm(request.POST)
-        return super(ProjectCreateViewTest, self).dispatch(request, *args, **kwargs)
+        return super(ProjectCreateView, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context = super(ProjectCreateViewTest, self).get_context_data(**kwargs)
+        context = super(ProjectCreateView, self).get_context_data(**kwargs)
         self.get_url_context(context)
         self.get_user_permissions_context(context)
         context['form'] = self.lastForm
@@ -91,37 +98,35 @@ class ProjectCreateViewTest(UserIsAuthenticatedMixin, CreateView, UrlNamesContex
 
 
 class ProjectModifyView(UserIsAuthenticatedMixin, UpdateView, UrlNamesContextMixin, UserPermissionContextMixin):
+    """
+    Clase correspondiente a la vista que permite modificar un proyecto
+    """
     template_name = 'administracion/project_modify.html'
     model = Project
     context_object_name = 'project'
-    fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
+    fields = ['name', 'scrum_master', 'product_owner']
 
     def get_success_url(self):
         return reverse(base_settings.ADM_PROJECT_LIST)
 
     def form_valid(self, form):
-        p = form.save()
-        # Crea roles por defecto
-        from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
-        from django.contrib.auth.models import Permission
-        for rol in DEFAULT_PROJECT_ROLES:
-            role_data = {
-                'name': rol[0],
-                'desc_larga':  rol[1]
-            }
-            new_rol = p.add_rol(**role_data)
-            for perm_ in rol[2]:
-                (perm_[0])
-                perm = Permission.objects.get(codename=perm_[0])
-                new_rol.add_perm(perm)
+        p = Project.objects.get(name=form.cleaned_data['name'])
         p_id = p.id
+        # Quita el rol al usuario anterior
+        for rol in p.get_roles():
+            if rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[0][0]:
+                rol.remove_user(p.scrum_master)
+            elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
+                rol.remove_user(p.product_owner)
+        # Guarda los cambios
+        p = form.save()
+        # Asigna el rol al nuevo usuario
         for rol in p.get_roles():
             if rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[0][0]:
                 rol.add_user(form.cleaned_data['scrum_master'])
             elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
                 rol.add_user(form.cleaned_data['product_owner'])
         return HttpResponseRedirect(self.get_success_url())
-
 
     def get_context_data(self, **kwargs):
         context = super(ProjectModifyView, self).get_context_data(**kwargs)
@@ -130,13 +135,30 @@ class ProjectModifyView(UserIsAuthenticatedMixin, UpdateView, UrlNamesContextMix
         context['user_list'] = User.objects.all()
         context['section_title'] = 'Modificar Proyecto'
         context['left_active'] = 'Proyectos'
+        p = Project.objects.get(id=self.kwargs['pk'])
+        context['project_state'] = p.get_state
         return context
 
 
 class ProjectDeleteView(UserIsAuthenticatedMixin, DeleteView, UrlNamesContextMixin, UserPermissionContextMixin):
+    """
+    Clase correspondiente a la vista que permite eliminar un proyecto
+    """
     template_name = 'administracion/project_delete.html'
     model = Project
     context_object_name = 'project'
+
+    def delete(self, *args, **kwargs):
+        p = Project.objects.get(id=self.kwargs['pk'])
+        p_id = p.id
+        # Quita el rol al usuario
+        for rol in p.get_roles():
+            if rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[0][0]:
+                rol.remove_user(p.scrum_master)
+            elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
+                rol.remove_user(p.product_owner)
+
+        return super(ProjectDeleteView, self).delete(*args, **kwargs)
 
     def get_success_url(self):
         return reverse(base_settings.ADM_PROJECT_LIST)
@@ -149,6 +171,8 @@ class ProjectDeleteView(UserIsAuthenticatedMixin, DeleteView, UrlNamesContextMix
         context['user_list'] = User.objects.all()
         context['section_title'] = 'Eliminar Proyecto'
         context['left_active'] = 'Proyectos'
+
+        context['project_state'] = Project.objects.get(id=self.kwargs['pk']).get_state()
         return context
 
 

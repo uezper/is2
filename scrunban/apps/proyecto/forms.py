@@ -894,3 +894,17 @@ class AddWorkLoad(forms.Form):
         }
         stdlogger.info(formatter(**kwargs))
 
+
+class DateEnd(forms.DateField):
+    def validate(self, value):
+        super(DateEnd, self).validate(value)
+        import datetime
+        now = datetime.datetime.now().date()
+        if value is None:
+            raise ValidationError('Este campo no puede estar vacio.')
+        elif now > value:
+            raise ValidationError('No se puede introducir fecha pasada.')
+
+
+class StateForm(forms.Form):
+    date_end = DateEnd(required=False)

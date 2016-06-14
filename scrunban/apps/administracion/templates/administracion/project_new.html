@@ -43,26 +43,6 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="row_{{ form.date_start.auto_id }}" class="col-sm-2 control-label">Fecha de inicio:</label>
-                            <div class="row" id="row_{{ form.date_start.auto_id }}">
-                                <div class="col-md-9">
-                                    <input type="text" class="form-control" id="{{ form.date_start.auto_id }}" placeholder="AAAA-MM-DD" aria-describedby="helpBlock-{{ form.date_start.auto_id }}" name="{{ form.date_start.name }}" value="{% if form.date_start.value %}{{ form.date_start.value }}{% endif %}">
-                                    <span id="helpBlock-{{ form.date_start.auto_id }}" class="help-block">{{form.date_start.errors}}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="row_{{ form.date_end.auto_id }}" class="col-sm-2 control-label">Fecha de finalizacion:</label>
-                            <div class="row" id="row_{{ form.date_end.auto_id }}">
-                                <div class="col-md-9">
-                                    <input type="text" class="form-control" id="{{ form.date_end.auto_id }}" placeholder="AAAA-MM-DD" aria-describedby="helpBlock-{{ form.date_end.auto_id }}" name="{{ form.date_end.name }}" value="{% if form.date_end.value %}{{ form.date_end.value }}{% endif %}">
-                                    <span id="helpBlock-{{ form.date_end.auto_id }}" class="help-block">{{form.date_end.errors}}</span>
-                                </div>
-                            </div>
-                        </div>
-
                         <input type="text" hidden="True" id="{{ form.scrum_master.auto_id }}" name="{{ form.scrum_master.name }}" value="{% if form.scrum_master.value %}{{ form.scrum_master.value }}{% endif %}">
                         <div class="form-group">
                             <label for="row_{{ form.scrum_master.auto_id }}-friendly" class="col-sm-2 control-label">Scrum Master:</label>

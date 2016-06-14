@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
     url(r'^project/$', views.ProjectListView.as_view(), name=base_settings.ADM_PROJECT_LIST),
-    url(r'^project/new/$', views.ProjectCreateViewTest.as_view(), name=base_settings.ADM_PROJECT_CREATE),
+    url(r'^project/new/$', views.ProjectCreateView.as_view(), name=base_settings.ADM_PROJECT_CREATE),
     url(r'^project/edit/(?P<pk>[0-9]+)/$', views.ProjectModifyView.as_view(), name=base_settings.ADM_PROJECT_MODIFY),
     url(r'^project/delete/(?P<pk>[0-9]+)/$', views.ProjectDeleteView.as_view(), name=base_settings.ADM_PROJECT_DELETE),
 

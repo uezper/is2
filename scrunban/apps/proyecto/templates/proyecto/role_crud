@@ -210,7 +210,11 @@
 
                             <div class="row" id="rowNombre">
                                 <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
+                                    {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
                                     <input type="text" class="form-control" id="rolNombre" placeholder="Nombre del Rol" {% if no_editable %} readonly {% endif %}>
+                                    {% else %}
+                                    <input disabled type="text" class="form-control" id="rolNombre" placeholder="Nombre del Rol" {% if no_editable %} readonly {% endif %}>
+                                    {% endif %}
                                 </div>
                             </div>
 
@@ -248,6 +252,7 @@
                         <div class="form-group {% if form.inputUsers.errors|length > 0 %} has-error {% endif %}">
                             <label for="rowUsuarios" class="col-sm-2 control-label">Usuarios:</label>
                             <div class="row" id="rowUsuarios">
+                                {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
                                 <div class="col-md-4" {% if no_editable %} style="display: none" {% endif %}>
                                    <!-- <input type="text" class="form-control" placeholder="Buscar usuario" id="BuscarUser1">-->
                                     <select multiple class="form-control" id="comboUsers">
@@ -269,12 +274,27 @@
                                     <select multiple class="form-control" id="addedUsers" {% if no_editable %} readonly {% endif %}>
                                     </select>
                                 </div>
+                                {% else %}
+                                <div class="col-md-4" style="display: none" >
+                                   <!-- <input type="text" class="form-control" placeholder="Buscar usuario" id="BuscarUser1">-->
+                                    <select multiple class="form-control" id="comboUsers">
+                                        {% for u in user_list %}
+                                            <option value="{{u.id}}">{{u.user.first_name}} {{u.user.last_name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                   <!-- <input type="text" class="form-control" placeholder="Buscar usuario">-->
+                                    <select readonly multiple class="form-control" id="addedUsers" {% if no_editable %} readonly {% endif %}>
+                                    </select>
+                                </div>
+                                {% endif %}
                             </div>
 
 
                         </div>
 
-
+                      {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
                       <div class="form-group">
                         <div class="col-sm-offset-2 col-sm-10">
                             {% if delete_form %}
@@ -295,6 +315,7 @@
                             {% endif %}
                         </div>
                       </div>
+                      {% endif %}
                     </form>
 
                 </div>

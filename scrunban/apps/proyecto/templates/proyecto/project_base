@@ -48,6 +48,11 @@ Proyecto
   <a href="{% url URL_NAMES.PROJECT_BDC project.id %}">Burndown Chart</a>
 </li>
 -->
+
+
+<li {% if left_active == 'Estado' %} class="active" {% endif %}>
+  <a href="{% url URL_NAMES.PROJECT_STATE project.id %}">Estado</a>
+</li>
 {% endblock %}
 
 
