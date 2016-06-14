@@ -115,9 +115,9 @@ class ProjectModifyView(UserIsAuthenticatedMixin, UpdateView, UrlNamesContextMix
         # Quita el rol al usuario anterior
         for rol in p.get_roles():
             if rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[0][0]:
-                rol.remove_user(form.cleaned_data['scrum_master'])
+                rol.remove_user(p.scrum_master)
             elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
-                rol.remove_user(form.cleaned_data['product_owner'])
+                rol.remove_user(p.product_owner)
         # Guarda los cambios
         p = form.save()
         # Asigna el rol al nuevo usuario
@@ -157,7 +157,8 @@ class ProjectDeleteView(UserIsAuthenticatedMixin, DeleteView, UrlNamesContextMix
                 rol.remove_user(p.scrum_master)
             elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
                 rol.remove_user(p.product_owner)
-        super(ProjectDeleteView, self).delete(*args, **kwargs)
+
+        return super(ProjectDeleteView, self).delete(*args, **kwargs)
 
     def get_success_url(self):
         return reverse(base_settings.ADM_PROJECT_LIST)
