@@ -22,11 +22,13 @@
 	<td><strong>Detalles</strong></td>
 	<td class="text-right">
 	{% if user_permissions.project_us_management %}
-	  <a href="{% url URL_NAMES.ADM_US_CREATE project.pk %}">
-	    <button type="button" class="btn btn-default btn-sm">
-	      <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
-	    </button>
-	  </a>
+      {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
+          <a href="{% url URL_NAMES.ADM_US_CREATE project.pk %}">
+            <button type="button" class="btn btn-default btn-sm">
+              <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+            </button>
+          </a>
+  	  {% endif %}
 	{% endif %}
 	</td>
       </thead>
@@ -37,12 +39,14 @@
 	  <td>{{ user_story.details }}</td>
 	  <td class="text-right">
 	  {% if user_permissions.project_us_management and user_story.state == 0 %}
-	  <button type="button" class="btn btn-default btn-sm"
-		  data-name="{{ user_story.description }}"
-		  data-url="{% url URL_NAMES.ADM_US_DELETE project.pk user_story.pk %}"
-		  onclick="modalPreparation(this);" data-toggle="modal" data-target="#myModal">
-		<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-	      </button>
+         {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
+         <button type="button" class="btn btn-default btn-sm"
+             data-name="{{ user_story.description }}"
+             data-url="{% url URL_NAMES.ADM_US_DELETE project.pk user_story.pk %}"
+             onclick="modalPreparation(this);" data-toggle="modal" data-target="#myModal">
+           <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+             </button>
+         {% endif %}
 	   {% endif %}
 	  </td>
 	</tr>

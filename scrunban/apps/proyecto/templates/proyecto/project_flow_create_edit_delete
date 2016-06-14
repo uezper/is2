@@ -135,6 +135,7 @@
             }
             else {
                 act_html = "<tr>" +
+                        {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
                         "<td><input type=\"text\" class=\"form-control\" placeholder=\"Nombre de Actividad\"></td>" +
                         "<td class=\"text-right\">" +
                         "<button type=\"button\" class=\"btn btn-default btn-sm moveUp\">" +
@@ -147,6 +148,11 @@
                         "<span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>" +
                         "</button>" +
                         "</td>" +
+                        {% else %}
+                        "<td><input disabled type=\"text\" class=\"form-control\" placeholder=\"Nombre de Actividad\"></td>" +
+                        "<td class=\"text-right\">" +
+                        "</td>" +
+                        {% endif %}
                         "</tr>";
             }
 
@@ -226,7 +232,11 @@
              <label for="rowName" class="col-sm-2 control-label">Nombre:</label>
              <div class="row" id="rowName">
                <div {% if no_editable %} class="col-md-4" {% else %} class="col-md-9" {% endif %}>
-                 <input type="text" class="form-control" id="name" placeholder="Nombre del Flujo" aria-describedby="helpBlock1" {% if no_editable %} readonly {% endif %}>
+                 {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
+                    <input type="text" class="form-control" id="name" placeholder="Nombre del Flujo" aria-describedby="helpBlock1" {% if no_editable %} readonly {% endif %}>
+                 {% else %}
+                     <input disabled type="text" class="form-control" id="name" placeholder="Nombre del Flujo" aria-describedby="helpBlock1" {% if no_editable %} readonly {% endif %}>
+                 {% endif %}
                  <span id="helpBlock1" class="help-block">{{form.name.errors}}</span>
                </div>
              </div>
@@ -242,11 +252,13 @@
                     <thead>
                     <tr> <th>Actividad</th>
                         <th class="text-right">
+                            {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
                             {% if no_editable %}
                             {% else %}
 							<button type="button" id="addActivity" class="btn btn-default btn-sm">
 								<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
 							</button>
+                            {% endif %}
                             {% endif %}
                         </th>
                     </tr>
@@ -258,7 +270,7 @@
             </div>
             </div>
 
-
+                  {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
                   <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
                         {% if delete_form %}
@@ -276,6 +288,7 @@
                         {% endif %}
                     </div>
                   </div>
+                  {% endif %}
                 </form>
 
 

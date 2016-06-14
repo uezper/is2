@@ -10,7 +10,9 @@ def index(request, project_id):
 
     context = {
         'URL_NAMES': base_settings.URL_NAMES,
-        'project' : get_object_or_404(Project, id=project_id)
+        'project': get_object_or_404(Project, id=project_id),
+        'section_title': 'Estado',
+        'left_active': 'Estado'
     }
     context['project_state'] = context['project'].get_state()
     x = UserPermissionContextMixin()
@@ -18,7 +20,7 @@ def index(request, project_id):
     x.request = request
     x.get_user_permissions_context(context)
 
-    return render(request, 'proyecto/project_index', context)
+    return render(request, 'proyecto/project_state', context)
 
 
 #@login_required()

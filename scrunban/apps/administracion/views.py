@@ -17,6 +17,8 @@ from apps.autenticacion.mixins import UserPermissionContextMixin, UserIsAuthenti
 from scrunban.settings import base as base_settings
 
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
+from django.contrib.auth.models import Permission
 
 # Define loggers
 stdlogger = logging.getLogger(base_settings.LOGGERS_NAME['administracion'])
@@ -51,7 +53,7 @@ class ProjectCreateView(UserIsAuthenticatedMixin, CreateView, UrlNamesContextMix
     template_name = 'administracion/project_new.html'
     model = Project
     context_object_name = 'project'
-    fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
+    fields = ['name', 'scrum_master', 'product_owner']
 
     lastForm = forms.ProjectForm()
 
@@ -61,8 +63,6 @@ class ProjectCreateView(UserIsAuthenticatedMixin, CreateView, UrlNamesContextMix
     def form_valid(self, form):
         p = form.save()
         # Crea roles por defecto
-        from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
-        from django.contrib.auth.models import Permission
         for rol in DEFAULT_PROJECT_ROLES:
             role_data = {
                 'name': rol[0],
@@ -104,34 +104,29 @@ class ProjectModifyView(UserIsAuthenticatedMixin, UpdateView, UrlNamesContextMix
     template_name = 'administracion/project_modify.html'
     model = Project
     context_object_name = 'project'
-    fields = ['name', 'date_start', 'date_end', 'scrum_master', 'product_owner']
+    fields = ['name', 'scrum_master', 'product_owner']
 
     def get_success_url(self):
         return reverse(base_settings.ADM_PROJECT_LIST)
 
     def form_valid(self, form):
-        p = form.save()
-        # Crea roles por defecto
-        from apps.autenticacion.settings import DEFAULT_PROJECT_ROLES
-        from django.contrib.auth.models import Permission
-        for rol in DEFAULT_PROJECT_ROLES:
-            role_data = {
-                'name': rol[0],
-                'desc_larga':  rol[1]
-            }
-            new_rol = p.add_rol(**role_data)
-            for perm_ in rol[2]:
-                (perm_[0])
-                perm = Permission.objects.get(codename=perm_[0])
-                new_rol.add_perm(perm)
+        p = Project.objects.get(name=form.cleaned_data['name'])
         p_id = p.id
+        # Quita el rol al usuario anterior
+        for rol in p.get_roles():
+            if rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[0][0]:
+                rol.remove_user(form.cleaned_data['scrum_master'])
+            elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
+                rol.remove_user(form.cleaned_data['product_owner'])
+        # Guarda los cambios
+        p = form.save()
+        # Asigna el rol al nuevo usuario
         for rol in p.get_roles():
             if rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[0][0]:
                 rol.add_user(form.cleaned_data['scrum_master'])
             elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
                 rol.add_user(form.cleaned_data['product_owner'])
         return HttpResponseRedirect(self.get_success_url())
-
 
     def get_context_data(self, **kwargs):
         context = super(ProjectModifyView, self).get_context_data(**kwargs)
@@ -153,6 +148,17 @@ class ProjectDeleteView(UserIsAuthenticatedMixin, DeleteView, UrlNamesContextMix
     model = Project
     context_object_name = 'project'
 
+    def delete(self, *args, **kwargs):
+        p = Project.objects.get(id=self.kwargs['pk'])
+        p_id = p.id
+        # Quita el rol al usuario
+        for rol in p.get_roles():
+            if rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[0][0]:
+                rol.remove_user(p.scrum_master)
+            elif rol.get_name() == str(p_id) + '_' + DEFAULT_PROJECT_ROLES[1][0]:
+                rol.remove_user(p.product_owner)
+        super(ProjectDeleteView, self).delete(*args, **kwargs)
+
     def get_success_url(self):
         return reverse(base_settings.ADM_PROJECT_LIST)
 
@@ -164,8 +170,8 @@ class ProjectDeleteView(UserIsAuthenticatedMixin, DeleteView, UrlNamesContextMix
         context['user_list'] = User.objects.all()
         context['section_title'] = 'Eliminar Proyecto'
         context['left_active'] = 'Proyectos'
-        p = Project.objects.get(id=self.kwargs['pk'])
-        context['project_state'] = p.get_state
+
+        context['project_state'] = Project.objects.get(id=self.kwargs['pk']).get_state()
         return context
 
 
