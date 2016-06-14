@@ -24,6 +24,12 @@
          {% else %}
          <h3>Perfil</h3>
          {% endif %}
+
+         {% if profile_user.user.is_active %}
+         {% else %}
+           <span class='text-danger'>(Desactivado)</span>
+         {% endif %}
+
 	 <hr />
        </div>
      </div>
@@ -44,7 +50,9 @@
        <div class="col-md-10">
          {% if user.id == profile_user.user.id %}
 	 <h3>Mis Proyectos</h3>
-         {% else %}
+         {% elif user_permissions.admin_manage_user %}
+         <h3>Todos sus proyectos</h3>
+          {% else %}
          <h3>Proyectos en comun</h3>
          {% endif %}
 	 <hr />
@@ -61,6 +69,8 @@
            <tbody>
              {% if user.id == profile_user.user.id %}
              <tr class="alert">  <td colspan="3">No estas relacionado a ningun proyecto</td> </tr>
+             {% elif user_permissions.admin_manage_user %}
+             <tr class="alert">  <td colspan="3">El usuario no esta relacionado a ningun proyecto</td> </tr>
              {% else %}
              <tr class="alert">  <td colspan="3">No tienen proyectos en comun</td> </tr>
              {% endif %}

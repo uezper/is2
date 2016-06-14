@@ -64,7 +64,14 @@ class UserListMixin(object):
 
             :returns: Queryset
         """
-        return User.objects.all()
+
+        res = []
+
+        for u in User.objects.all():
+            if u.user.is_active:
+                res.append(u)
+
+        return res
 
 class ValidateSprintState(ValidateTestMixin):
     """

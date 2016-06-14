@@ -15,16 +15,14 @@
             <div class="col-md-12">
                 <h3>{{ section_title }}</h3>
                 <hr />
-                {% if project.get_state == 'Pendiente' %}
-                    El proyecto debe estar en el estado de Ejecucion para poder crear nuevos sprints
-                {% elif project.get_state == 'Ejecucion' or project.get_state == 'Finalizado' or project.get_state == 'Cancelado' %}
+
 
                 <table class="table table-striped">
                     <thead>
                         <tr>  <th>Sprint</th> <th class="text-center">Estado</th>
                             <th class="text-right">
+                                {% if project.get_state == 'Ejecucion' or project.get_state == 'Pendiente' %}
                                 {% if user_permissions.project_sprint_management %}
-                                {% if project.get_state == 'Ejecucion' %}
                                 <a href="{% url URL_NAMES.PROJECT_SPRINT_CREATE project.id %}">
                                 <button type="button" class="btn btn-default btn-sm">
                                     <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
@@ -45,7 +43,7 @@
                             <td><a href="{% url URL_NAMES.PROJECT_SPRINT_DETAIL project.id sprint.id %}">{{sprint}}</a></td>
                             <td class="text-center">{{sprint.state}}</td>
                             <td class="text-right">
-                                {% if project.get_state == 'Ejecucion' %}
+                                {% if project.get_state == 'Ejecucion' or project.get_state == 'Pendiente' %}
                                 {% if sprint.state == 'Pendiente' and user_permissions.project_sprint_management %}
                                 <a href="{% url URL_NAMES.PROJECT_SPRINT_DELETE project.id sprint.id %}">
                                 <button type="button" class="btn btn-default btn-sm">
@@ -93,7 +91,7 @@
 
                 </div>
 
-                {% endif %}
+
 
 		    </div>
 

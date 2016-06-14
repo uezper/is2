@@ -141,8 +141,14 @@ def perfil(request, user_id):
 
     from django.shortcuts import get_object_or_404
     from apps.autenticacion.models import User
+    from apps.autenticacion.settings import ADMIN_USER_MANAGEMENT
+    from apps.autenticacion.mixins import UserPermissionListMixin
 
     profile_user = get_object_or_404(User, id=user_id)
+
+    pml = UserPermissionListMixin()
+    pml.request = request
+    permissions = [p.codename for p in pml.get_user_permissions_list()]
 
 
     context = {
@@ -153,7 +159,7 @@ def perfil(request, user_id):
     }
 
     for p in profile_user.get_projects():
-        if request.user.user.id != user_id:
+        if request.user.user.id != user_id and not(ADMIN_USER_MANAGEMENT[0] in permissions):
             active_user_perms = p[0].get_user_perms(request.user.user)
             if len(active_user_perms) == 0:
                 continue

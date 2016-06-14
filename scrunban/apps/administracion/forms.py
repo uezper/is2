@@ -120,7 +120,11 @@ class UserDeleteForm(UserForm):
 
     def save(self):
         u = User.objects.filter(id=self.cleaned_data['id'])[0]
-        u.delete()
+        #u.delete()
+        x = u.user
+        x.is_active = False
+        x.save()
+
 
 class FlowForm(ModelForm):
     class Meta():

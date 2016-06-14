@@ -91,7 +91,12 @@ class ProjectCreateView(UserIsAuthenticatedMixin, CreateView, UrlNamesContextMix
         self.get_url_context(context)
         self.get_user_permissions_context(context)
         context['form'] = self.lastForm
-        context['user_list'] = User.objects.all()
+
+        context['user_list'] = []
+        for u in User.objects.all():
+            if u.user.is_active:
+                context['user_list'].append(u)
+
         context['section_title'] = 'Crear Proyecto'
         context['left_active'] = 'Proyectos'
         return context
@@ -132,7 +137,10 @@ class ProjectModifyView(UserIsAuthenticatedMixin, UpdateView, UrlNamesContextMix
         context = super(ProjectModifyView, self).get_context_data(**kwargs)
         self.get_url_context(context)
         self.get_user_permissions_context(context)
-        context['user_list'] = User.objects.all()
+        context['user_list'] = []
+        for u in User.objects.all():
+            if u.user.is_active:
+                context['user_list'].append(u)
         context['section_title'] = 'Modificar Proyecto'
         context['left_active'] = 'Proyectos'
         p = Project.objects.get(id=self.kwargs['pk'])
@@ -237,7 +245,26 @@ class UserListView(UserIsAuthenticatedMixin, ListView, UrlNamesContextMixin, Use
     paginate_by = 10
 
     def get_queryset(self):
-        return User.objects.all()
+
+        users = []
+
+        for u in User.objects.all():
+
+            # No lista los usuarios que estan desactivados
+            if not u.user.is_active:
+                continue
+
+            u.can_delete = True
+            # Verifica que los proyectos esten en estado pendiente, cancelado o finalizado para poder eliminar
+            for p in u.get_projects():
+                if p[0].get_state() == 'Ejecucion':
+                    u.can_delete = False
+                    break
+
+            users.append(u)
+
+
+        return users
 
     def get_context_data(self, **kwargs):
         context = super(UserListView, self).get_context_data(**kwargs)
@@ -312,7 +339,7 @@ class UserDeleteView(UserCreateView):
 
         for p in self.user.get_projects():
             names = [r.desc_larga for r in p[1]]
-            p[0].state = 'Pendiente'
+            p[0].state = p[0].get_state()
             context['user_projects'].append((p[0], ', '.join(names)))
 
         return context

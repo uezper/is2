@@ -42,10 +42,10 @@
 		    {% for us in user_list %}
 		    <tr>
 		      <td>{{us.user.username}}</td>
-		      <td>{{us.user.first_name}} {{us.user.last_name}}</td>
+		      <td><a href="{% url URL_NAMES.PERFIL_NAME us.id %}">{{us.user.first_name}} {{us.user.last_name}}</a></td>
 		      <td class="text-right">
 			
-			{% if us.user.id != user.id %}
+			{% if us.user.id != user.id and us.can_delete %}
 			<a href="{% url URL_NAMES.ADM_USER_DELETE us.id %}">
 			  <button type="button" class="btn btn-default btn-sm">
 			    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>

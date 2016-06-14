@@ -297,11 +297,13 @@ class CreateSprintForm(forms.Form):
             from datetime import date, timedelta
 
             project_date_end = Project.objects.get(id=self.data['project']).date_end
-            today = date.today()
-            sprint_end = today + timedelta(days=self.cleaned_data['estimated_time'])
 
-            if (project_date_end - sprint_end).days < 0:
-                raise ValidationError('El Sprint finalizaria pasada la fecha de finalizacion del proyecto: {}/{}/{}'.format(project_date_end.day, project_date_end.month, project_date_end.year))
+            if project_date_end != None:
+                today = date.today()
+                sprint_end = today + timedelta(days=self.cleaned_data['estimated_time'])
+
+                if (project_date_end - sprint_end).days < 0:
+                    raise ValidationError('El Sprint finalizaria pasada la fecha de finalizacion del proyecto: {}/{}/{}'.format(project_date_end.day, project_date_end.month, project_date_end.year))
 
             return self.cleaned_data['estimated_time']
         else:

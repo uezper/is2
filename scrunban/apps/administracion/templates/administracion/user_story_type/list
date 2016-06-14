@@ -21,7 +21,7 @@
 	<td><strong>Nombre</strong></td>
 	<td><strong>Flujos compatibles</strong></td>
 	<td class="text-right">
-	  {% if projec.get_state == 'Pendiente' or projec.get_state == 'Ejecucion' %}
+	  {% if project.get_state == 'Pendiente' or project.get_state == 'Ejecucion' %}
   	    <a href="{% url URL_NAMES.ADM_UST_CREATE project.pk %}">
 	      <button type="button" class="btn btn-default btn-sm">
 	        <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>

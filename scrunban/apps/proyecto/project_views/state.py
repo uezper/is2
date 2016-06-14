@@ -3,7 +3,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.views.generic.edit import FormView
 from scrunban.settings import base as base_settings
 from apps.administracion.models import Project
-from apps.proyecto.mixins import ProjectViwMixin, DefaultFormDataMixin
+from apps.proyecto.mixins import ProjectViwMixin
 from apps.proyecto.forms import StateForm
 
 
@@ -41,6 +41,8 @@ class ProjectStateView(ProjectViwMixin, FormView):
         :param form: Formulario que ha sido ya comprobado y es valido
         :return: HttpResponse
         """
+
+
         p = Project.objects.get(id=self.kwargs['project_id'])
         if p.get_state() == 'Pendiente':
             import datetime
